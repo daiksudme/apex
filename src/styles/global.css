@@ -1,0 +1,47 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #202b33;
+  background: #faf9f6;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 0 clamp(1.25rem, 5vw, 3rem);
+}
+
+header {
+  padding-block: 1.5rem;
+  border-bottom: 1px solid #d7dcd9;
+}
+
+a {
+  color: #24604d;
+  text-underline-offset: 0.25em;
+}
+
+a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 0.3rem;
+}
+
+main {
+  padding-block: clamp(3rem, 10vw, 6rem);
+}
+
+h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+p {
+  margin: 0;
+}

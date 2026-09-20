@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.cache/
+.env
+.env.*
+!.env.example
+playwright-report/
+test-results/
+*.log
+.DS_Store
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json

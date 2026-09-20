@@ -1,0 +1,21 @@
+{
+  "name": "apex",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.19.0",
+  "engines": { "node": "24.21.0", "npm": "11.19.0" },
+  "scripts": {
+    "dev": "astro dev",
+    "check": "astro check",
+    "build": "astro build",
+    "test": "npm run build && playwright test",
+    "preview": "astro preview"
+  },
+  "dependencies": { "astro": "7.3.3" },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@playwright/test": "1.63.0",
+    "typescript": "6.0.3"
+  }
+}
