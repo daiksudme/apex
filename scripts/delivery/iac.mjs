@@ -5,7 +5,7 @@ import { assertDelivery } from './control.mjs';
 import { assertPlan } from './plan.mjs';
 import { backupState, applyWithBackups } from '../../foundation-tools/lib/state.mjs';
 import { stateClient, bucketFor } from '../../foundation-tools/lib/config.mjs';
-import { checkBackend } from '../../foundation-tools/lib/backend.mjs';
+import { checkBackend, checkTerraformEnvironment } from '../../foundation-tools/lib/backend.mjs';
 const root = 'terraform/apex';
 const bootstrap = process.env.OPERATION === 'bootstrap';
 const verify = process.env.OPERATION === 'verify';
@@ -26,6 +26,7 @@ async function gate() {
 }
 try {
   if (!['bootstrap', 'apply', 'verify'].includes(process.env.OPERATION) || process.env.GITHUB_REF !== 'refs/heads/main') throw new Error('Invalid IaC operation');
+  checkTerraformEnvironment();
   const policies = (await github('environments/apex-operations/deployment-branch-policies')).branch_policies;
   if (policies.length !== 1 || policies[0].name !== 'main' || policies[0].type !== 'branch') throw new Error('Expected main-only environment');
   process.env.TF_VAR_protected_policy_id = String(policies[0].id);

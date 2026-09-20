@@ -31,6 +31,9 @@ test('配信物の内容・パス・追加ファイルの差分を検出する',
   const changed = digest(directory);
   renameSync(`${directory}/index.html`, `${directory}/other.html`);
   assert.notEqual(digest(directory), changed);
+  const renamed = digest(directory);
+  writeFileSync(`${directory}/extra.txt`, 'added');
+  assert.notEqual(digest(directory), renamed);
 });
 
 test('HTTPエラーや別の配信物を成功記録にしない', async () => {
