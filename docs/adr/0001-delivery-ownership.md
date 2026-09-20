@@ -41,7 +41,7 @@ sources:
 | Wrangler | 4.135.0。検証済みAssetsの配信とWorker Version／Deployment |
 | GitHub Actions | PR検証、配信、IaC、保護されたリリース操作を分離 |
 
-後続実装でTerraformのrequired_version、provider制約・lockfile、Wranglerの完全版・npm lockfileを保存する。
+後続実装でTerraformのrequired_version、provider制約・lockfile、Wranglerの完全版・pnpm lockfileを保存する。
 Actionsも完全SHAに固定する。既存GitHub設定はimportしてから管理し、リポジトリを作り直さない。
 Workers Buildsとの併用は採用しない。同じWorkerへ別経路から自動配信される競合を避けるためである。
 
