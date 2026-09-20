@@ -4,3 +4,5 @@ saveExact: true
 allowBuilds:
   esbuild@0.28.2: true
   fsevents@2.3.3: false
+  esbuild@0.28.1: true
+  workerd@1.20260918.1: true

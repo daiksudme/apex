@@ -112,3 +112,7 @@ IaC・配信・停止制御・接続workflowの実装と実環境検証は後続
 [^mise-setup]: mise公式の導入・プロジェクト設定・execによる実行手順。
 [^pnpm-version-policy]: pnpmのpmOnFail設定。インストール担当はmiseとし、pnpm自身は不一致を拒否する。
 [^mise-path-priority]: mise公式のactivate_aggressive設定。プロジェクト内のツール選択を優先する。
+
+## workers.devへの配信手順
+
+[初回配信と復旧](docs/operations/workers.md)にR2・資格情報・保護された手動workflow・artifact検証をまとめています。初回併用検証の成功後に、別PRで自動配信を有効化します。

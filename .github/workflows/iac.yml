@@ -1,0 +1,48 @@
+name: Worker infrastructure
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        options: [bootstrap, apply, verify]
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: apex-delivery
+  cancel-in-progress: false
+jobs:
+  iac:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: apex-operations
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: daiksudme/.infra
+          ref: 167e17adc912939dde5e99744a07fbd7a5bb17b2
+          path: foundation-tools
+          persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: 2026.9.11
+      - run: pnpm --dir foundation-tools install --frozen-lockfile
+      - name: Verify native R2 state locking
+        run: node foundation-tools/scripts/verify-lock.mjs apex
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      - name: Plan, guard and apply without publishing state or plan
+        run: node scripts/delivery/iac.mjs
+        env:
+          OPERATION: ${{ inputs.operation }}
+          GH_TOKEN: ${{ secrets.IAC_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.IAC_GITHUB_TOKEN }}
+          CONTROL_READ_TOKEN: ${{ secrets.CONTROL_READ_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_IAC_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
