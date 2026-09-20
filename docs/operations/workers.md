@@ -7,6 +7,8 @@ sources:
     resource: https://developers.cloudflare.com/workers/static-assets/headers/
   - id: cf-permissions
     resource: https://developers.cloudflare.com/workers/platform/roles-and-permissions/
+  - id: worker-api
+    resource: https://developers.cloudflare.com/api/resources/workers/subresources/beta/subresources/workers/methods/get/
   - id: gh-variables
     resource: https://docs.github.com/en/rest/actions/variables
 ---
@@ -60,7 +62,7 @@ CloudflareのWorkers Scripts権限はこの運用ではaccount単位であり、
 5. 「Delivery」を`deploy`で実行し、同じVerify run IDを指定します。検証済みartifactをダウンロード・ハッシュ照合して配信し、再ビルドしません。
 6. 「Worker infrastructure」を`verify`で実行します。Wrangler更新後のTerraform planが無差分であること、URL設定・HTTP・配信記録を確認します。ここまで成功してから別PRでmain自動配信を有効化します。
 
-初期化中断・秘密値不足・API失敗を成功と扱いません。初回解除は`bootstrap`専用で、通常リリースの停止・再開には転用しません。PATCH後の読戻し失敗・中断では、未配信・未接続のWorker、artifact、最新SHAを再検証して、既に`open/bootstrap`なら再書込せず完了できます。Workerの未配信・未接続属性が欠けている場合も拒否します。正式接続を伴う停止状態と候補の横断制御は#10へ引き継ぎます。
+初期化中断・秘密値不足・API失敗を成功と扱いません。初回解除は`bootstrap`専用で、通常リリースの停止・再開には転用しません。PATCH後の読戻し失敗・中断では、未配信・未接続のWorker、artifact、最新SHAを再検証して、既に`open/bootstrap`なら再書込せず完了できます。Worker APIの`deployed_on`が明示的にnullであり、`references.domains`が空配列である場合だけ初期解除します。属性欠落も拒否します。[^worker-api]正式接続を伴う停止状態と候補の横断制御は#10へ引き継ぎます。
 
 ## 配信と復旧
 
@@ -87,3 +89,5 @@ Issue #4では初回・通常配信までを扱います。Custom Domain、DNS�
 [^cf-headers]: Cloudflare Static Assetsのホスト条件付きヘッダー。
 [^cf-permissions]: Cloudflare Workersの権限。実際に付与できる範囲とコード上の制約を区別する。
 [^gh-variables]: GitHub Actions Variables APIの読取・書込権限。
+
+[^worker-api]: 新しいWorker APIの未配信時刻と依存Custom Domainの応答契約。
