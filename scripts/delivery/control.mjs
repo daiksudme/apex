@@ -18,3 +18,6 @@ export function restoreTarget(previous, active) {
   if (!target?.verification_run) throw new Error('No previous verified artifact');
   return target;
 }
+export function newestReceiptArtifact(artifacts) {
+  return artifacts.filter((item) => item.name === 'delivery-receipt' && !item.expired).sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at) || b.id - a.id)[0];
+}

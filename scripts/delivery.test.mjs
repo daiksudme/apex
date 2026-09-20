@@ -71,3 +71,11 @@ test('HTTP識別子とホームのnoindexが一致した配信を受け入れる
   const { verifyHttp } = await import('./delivery/http.mjs');
   await assert.doesNotReject(verifyHttp({ sha, run: '12' }, async (url) => url.includes('/.well-known/') ? Response.json({ sha, run: '12' }) : new Response('<title>daiksud.me</title>', { headers: { 'X-Robots-Tag': 'noindex' } })));
 });
+
+test('配信記録はrunの開始順でなく成功artifactの作成順を使う', async () => {
+  const { newestReceiptArtifact } = await import('./delivery/control.mjs');
+  const first = { id: 1, name: 'delivery-receipt', expired: false, created_at: '2026-09-20T00:00:00Z' };
+  const second = { ...first, id: 2, created_at: '2026-09-20T01:00:00Z' };
+  assert.equal(newestReceiptArtifact([first, second]), second);
+  assert.equal(newestReceiptArtifact([{ ...second, expired: true }, first]), first);
+});

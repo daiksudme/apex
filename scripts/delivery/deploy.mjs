@@ -1,27 +1,32 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { github, currentControl, latestMain, cloudflare, required } from './api.mjs';
-import { changeWhenOpen, restoreTarget } from './control.mjs';
+import { changeWhenOpen, restoreTarget, newestReceiptArtifact } from './control.mjs';
 import { candidate, download } from './download.mjs';
 import { worker, deployment } from './worker.mjs';
 import { verifyHttp } from './http.mjs';
 
 async function latestReceipt() {
+  const artifacts = [];
   for (let page = 1; page <= 20; page++) {
-    const result = await github(`actions/workflows/delivery.yml/runs?branch=main&status=success&per_page=100&page=${page}`);
-    for (const run of result.workflow_runs) {
-      if (String(run.id) === process.env.GITHUB_RUN_ID) continue;
-      if (run.event !== 'workflow_dispatch' && run.event !== 'workflow_run') throw new Error('Unexpected delivery history');
-      download(run.id, 'delivery-receipt', '.previous');
-      const receipt = JSON.parse(readFileSync('.previous/receipt.json', 'utf8'));
-      if (String(receipt.delivery_run) !== String(run.id) || receipt.status !== 'verified') throw new Error('Invalid delivery receipt');
-      return receipt;
-    }
-    if (result.workflow_runs.length < 100) return null;
+    const result = await github(`actions/artifacts?name=delivery-receipt&per_page=100&page=${page}`);
+    artifacts.push(...result.artifacts);
+    if (result.artifacts.length < 100) break;
+    if (page === 20) throw new Error('Delivery history could not be established');
   }
-  throw new Error('Delivery history could not be established');
+  const artifact = newestReceiptArtifact(artifacts);
+  if (!artifact) return null;
+  const runId = artifact.workflow_run.id;
+  download(runId, 'delivery-receipt', '.previous');
+  const receipt = JSON.parse(readFileSync('.previous/receipt.json', 'utf8'));
+  if (String(receipt.delivery_run) !== String(runId) || receipt.status !== 'verified' || !/^\d+$/.test(String(receipt.attempt))) throw new Error('Invalid delivery receipt');
+  const attempt = await github(`actions/runs/${runId}/attempts/${receipt.attempt}`);
+  if (attempt.path !== '.github/workflows/delivery.yml' || attempt.head_branch !== 'main' || attempt.status !== 'completed' || attempt.conclusion !== 'success' || !['workflow_dispatch', 'workflow_run'].includes(attempt.event)) throw new Error('Unverified delivery attempt');
+  if (String(runId) === process.env.GITHUB_RUN_ID) throw new Error('Use a new dispatch; this run already has an immutable receipt');
+  return receipt;
 }
 try {
+  if (required('GITHUB_RUN_ATTEMPT') !== '1') throw new Error('Start a new dispatch instead of rerunning a delivery run');
   const operation = process.env.OPERATION;
   if (!['deploy', 'rollback'].includes(operation) || process.env.GITHUB_REF !== 'refs/heads/main') throw new Error('Expected a main delivery operation');
   const currentWorker = await worker();

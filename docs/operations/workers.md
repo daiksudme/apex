@@ -70,6 +70,8 @@ Verifyはmain pushの成功artifactを90日保存します。manifestには完�
 
 成功時は`delivery-receipt` artifactへSHA・ハッシュ・Worker ID・Version／Deployment ID・run／attempt・直前の成功記録を保存します。HTTPの識別ファイルとホーム、noindex、workers.dev有効・プレビュー無効を確認してから成功記録を書きます。
 
+成功記録はrunの起動順でなくartifactの作成順から選び、記録されたattemptの成功を照合します。Deliveryの再試行はrunの再実行でなく、新しい手動実行を開始してください。artifact記録を上書きせず、各実行を独立して照合するためです。
+
 復旧は「Delivery」の`rollback`を手動実行します。現在の配信が最新成功記録と同じなら、その直前の成功artifactを選びます。失敗した新配信が現在有効なら、最後の成功artifactを選びます。現在のmainにある制御コードと停止状態を再確認し、過去の配信物を再ビルドせず配信します。初回配信以前やartifact期限切れでは復旧できないため失敗として止まり、新しい検証候補を用意します。
 
 IaCは`default` workspaceだけを使い、apply前後のstateを30日保護・90日保持の`backups/`へ保存します。apply失敗後も部分stateを保全します。runner強制停止では後処理を保証できないため、再開時に実stateと直前backupを確認します。生のplan・stateとTerraformログはartifactに出さず、runner内の`.private/`へ限定します。
