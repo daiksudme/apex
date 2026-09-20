@@ -9,7 +9,7 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
     // Keep Astro in the foreground so Playwright owns the server lifecycle, even in agent shells.
-    command: 'npm run preview -- --host 127.0.0.1 --port 4321 --ignore-lock',
+    command: 'pnpm run preview --host 127.0.0.1 --port 4321 --ignore-lock',
     url: 'http://127.0.0.1:4321',
     reuseExistingServer: false,
     timeout: 30_000,

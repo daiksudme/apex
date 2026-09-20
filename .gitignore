@@ -15,3 +15,4 @@ test-results/
 *.tfplan
 *.tfvars
 *.tfvars.json
+.pnpm-store/
