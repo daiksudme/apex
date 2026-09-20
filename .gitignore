@@ -16,3 +16,9 @@ test-results/
 *.tfvars
 *.tfvars.json
 .pnpm-store/
+.wrangler/
+.private/
+.delivery/
+.previous/
+foundation-tools/
+manifest.json

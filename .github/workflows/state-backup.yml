@@ -1,0 +1,34 @@
+name: State backup
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: apex-delivery
+  cancel-in-progress: false
+jobs:
+  backup:
+    if: github.ref == 'refs/heads/main' && vars.APEX_WORKER_ID != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: apex-state
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: daiksudme/.infra
+          ref: 70e1d14541cc1861ab513a82a38f2ed52a4a8908
+          path: foundation-tools
+          persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: 2026.9.11
+      - run: pnpm --dir foundation-tools install --frozen-lockfile
+      - run: node foundation-tools/scripts/state.mjs backup apex
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
