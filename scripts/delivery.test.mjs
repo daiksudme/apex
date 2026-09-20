@@ -60,11 +60,11 @@ test('停止状態の取得失敗では変更APIを呼ばない', async () => {
 
 test('成功配信後はその直前、失敗配信後は最後の成功artifactへ戻す', async () => {
   const { restoreTarget } = await import('./delivery/control.mjs');
-  const old = { verification_run: '10', hash: 'old', version: 'v1' };
-  const latest = { verification_run: '20', hash: 'latest', version: 'v2', previous: old };
-  assert.equal(restoreTarget(latest, { version: 'v2' }), old);
+  const old = { verification_run: '10', hash: 'old', version: 'v1', deployment: 'd1' };
+  const latest = { verification_run: '20', hash: 'latest', version: 'v2', deployment: 'd2', previous: old };
+  assert.equal(restoreTarget(latest, { version: 'v2', deployment: 'd2' }), old);
   assert.equal(restoreTarget(latest, { version: 'failed-v3' }), latest);
-  assert.throws(() => restoreTarget({ ...latest, previous: null }, { version: 'v2' }), /No previous/);
+  assert.throws(() => restoreTarget({ ...latest, previous: null }, { version: 'v2', deployment: 'd2' }), /No previous/);
 });
 
 test('HTTP識別子とホームのnoindexが一致した配信を受け入れる', async () => {
@@ -78,4 +78,23 @@ test('配信記録はrunの開始順でなく成功artifactの作成順を使う
   const second = { ...first, id: 2, created_at: '2026-09-20T01:00:00Z' };
   assert.equal(newestReceiptArtifact([first, second]), second);
   assert.equal(newestReceiptArtifact([{ ...second, expired: true }, first]), first);
+});
+
+test('初期解除は未配信・未接続を明示したWorkerだけを受け入れる', async () => {
+  const { assertInitialWorker } = await import('./delivery/control.mjs');
+  for (const worker of [{}, { deployed_on: null }, { deployed_on: '2026-09-20T00:00:00Z', references: { domains: [] } }, { deployed_on: null, references: { domains: [{ hostname: 'example.test' }] } }]) assert.throws(() => assertInitialWorker(worker), /Worker/);
+  assert.doesNotThrow(() => assertInitialWorker({ deployed_on: null, references: { domains: [] } }));
+});
+
+test('初回解除のPATCH後に中断してもopen/bootstrapを再検証して完了できる', async () => {
+  const { initialControlNeedsWrite } = await import('./delivery/control.mjs');
+  assert.equal(initialControlNeedsWrite({ state: 'open', release_id: 'bootstrap' }), false);
+  assert.equal(initialControlNeedsWrite({ state: 'frozen', release_id: 'bootstrap' }), true);
+  assert.throws(() => initialControlNeedsWrite({ state: 'open', release_id: 'release-1' }), /bootstrap/);
+});
+
+test('Versionが同じでもDeploymentが異なれば最後の成功artifactへ戻す', async () => {
+  const { restoreTarget } = await import('./delivery/control.mjs');
+  const receipt = { version: 'v2', deployment: 'd2', verification_run: '20', previous: { version: 'v1', deployment: 'd1', verification_run: '10' } };
+  assert.equal(restoreTarget(receipt, { version: 'v2', deployment: 'different' }), receipt);
 });

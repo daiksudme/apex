@@ -60,7 +60,7 @@ CloudflareのWorkers Scripts権限はこの運用ではaccount単位であり、
 5. 「Delivery」を`deploy`で実行し、同じVerify run IDを指定します。検証済みartifactをダウンロード・ハッシュ照合して配信し、再ビルドしません。
 6. 「Worker infrastructure」を`verify`で実行します。Wrangler更新後のTerraform planが無差分であること、URL設定・HTTP・配信記録を確認します。ここまで成功してから別PRでmain自動配信を有効化します。
 
-初期化中断・秘密値不足・API失敗を成功と扱いません。初回解除は一度だけで、通常リリースの停止・再開には転用しません。正式接続を伴う停止状態と候補の横断制御は#10へ引き継ぎます。
+初期化中断・秘密値不足・API失敗を成功と扱いません。初回解除は`bootstrap`専用で、通常リリースの停止・再開には転用しません。PATCH後の読戻し失敗・中断では、未配信・未接続のWorker、artifact、最新SHAを再検証して、既に`open/bootstrap`なら再書込せず完了できます。Workerの未配信・未接続属性が欠けている場合も拒否します。正式接続を伴う停止状態と候補の横断制御は#10へ引き継ぎます。
 
 ## 配信と復旧
 
@@ -72,7 +72,7 @@ Verifyはmain pushの成功artifactを90日保存します。manifestには完�
 
 成功記録はrunの起動順でなくartifactの作成順から選び、記録されたattemptの成功を照合します。Deliveryの再試行はrunの再実行でなく、新しい手動実行を開始してください。artifact記録を上書きせず、各実行を独立して照合するためです。
 
-復旧は「Delivery」の`rollback`を手動実行します。現在の配信が最新成功記録と同じなら、その直前の成功artifactを選びます。失敗した新配信が現在有効なら、最後の成功artifactを選びます。現在のmainにある制御コードと停止状態を再確認し、過去の配信物を再ビルドせず配信します。初回配信以前やartifact期限切れでは復旧できないため失敗として止まり、新しい検証候補を用意します。
+復旧は「Delivery」の`rollback`を手動実行します。現在のVersionとDeployment IDがともに最新成功記録と同じなら、その直前の成功artifactを選びます。失敗した新配信が現在有効なら、最後の成功artifactを選びます。現在のmainにある制御コードと停止状態を再確認し、過去の配信物を再ビルドせず配信します。初回配信以前やartifact期限切れでは復旧できないため失敗として止まり、新しい検証候補を用意します。
 
 IaCは`default` workspaceだけを使い、apply前後のstateを30日保護・90日保持の`backups/`へ保存します。apply失敗後も部分stateを保全します。runner強制停止では後処理を保証できないため、再開時に実stateと直前backupを確認します。生のplan・stateとTerraformログはartifactに出さず、runner内の`.private/`へ限定します。
 

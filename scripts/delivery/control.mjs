@@ -14,10 +14,17 @@ export async function changeWhenOpen(readControl, readMain, sha, change) {
 }
 export function restoreTarget(previous, active) {
   if (!previous) throw new Error('No verified artifact to restore');
-  const target = active.version === previous.version ? previous.previous : previous;
+  const target = active.version === previous.version && active.deployment && active.deployment === previous.deployment ? previous.previous : previous;
   if (!target?.verification_run) throw new Error('No previous verified artifact');
   return target;
 }
 export function newestReceiptArtifact(artifacts) {
   return artifacts.filter((item) => item.name === 'delivery-receipt' && !item.expired).sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at) || b.id - a.id)[0];
+}
+export function assertInitialWorker(worker) {
+  if (worker?.deployed_on !== null || !Array.isArray(worker.references?.domains) || worker.references.domains.length) throw new Error('Initial Worker state is unknown, deployed or connected');
+}
+export function initialControlNeedsWrite(control) {
+  if (control?.release_id !== 'bootstrap' || !['frozen', 'open'].includes(control.state)) throw new Error('Only initial bootstrap control can be released');
+  return control.state === 'frozen';
 }
