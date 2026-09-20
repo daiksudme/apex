@@ -1,6 +1,8 @@
 ---
 import { site } from '../config/site';
 import '../styles/global.css';
+interface Props { title?: string; description?: string }
+const { title, description = site.description } = Astro.props;
 ---
 
 <!doctype html>
@@ -8,12 +10,13 @@ import '../styles/global.css';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content={site.description} />
-    <title>{site.name}</title>
+    <meta name="description" content={description} />
+    <title>{title ? `${title} | ${site.name}` : site.name}</title>
   </head>
   <body>
     <header>
       <a href="/" aria-label={`${site.name} ホーム`}>{site.name}</a>
+      <nav aria-label="メイン"><a href="/posts">記事一覧</a></nav>
     </header>
     <main>
       <slot />
