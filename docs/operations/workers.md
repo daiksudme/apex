@@ -36,9 +36,9 @@ provider更新時は`terraform providers lock -platform=linux_amd64 -platform=da
 
 ## R2と権限の準備
 
-先に[.infraの導入手順](https://github.com/daiksudme/.infra)で登録・4バケット・保持設定・実検証を完了します。R2登録と規約同意、トークン作成と初期投入は利用者が行います。Standard無料枠内を基本とし、超過が見込まれる場合は適用前に確認します。
+先に[.infraの導入手順](https://github.com/daiksudme/.infra)で登録・非公開の4バケット・実検証を完了します。R2登録と規約同意、トークン作成と初期投入は利用者が行います。Standard無料枠内を基本とし、超過が見込まれる場合は適用前に確認します。
 
-apex用のObject Read & Write資格情報は`daiksudme-tfstate-apex`だけに限定します。`.infra`の検証CLIをこの資格情報で実行し、他stateの読み取り拒否、匿名拒否、保持と復元を確認してください。実際のTerraformロック試験は各IaC実行でも行います。foundationのstate内容や資格情報はapexへ渡しません。
+apex用のObject Read & Write資格情報は`daiksudme-tfstate-apex`だけに限定します。`.infra`の検証CLIをこの資格情報で実行し、他stateの読み取り拒否、匿名拒否、使い捨てデータの読書きを確認してください。実際のTerraformロック試験は各IaC実行でも行います。foundationのstate内容や資格情報はapexへ渡しません。
 
 | 秘密値 | 必要な範囲 | Environment |
 | --- | --- | --- |
@@ -47,7 +47,7 @@ apex用のObject Read & Write資格情報は`daiksudme-tfstate-apex`だけに限
 | `IAC_GITHUB_TOKEN` | apex限定のAdministration・Environments・Variables writeとContents read。TerraformのGitHub設定用 | `apex-operations` |
 | `CONTROL_READ_TOKEN` | apex限定のVariables read。配信停止とWorker IDの読取専用 | `apex-operations`、`apex-delivery` |
 | `CONTROL_WRITE_TOKEN` | 別トークンでapex限定のVariables write。初回解除専用 | `apex-operations` |
-| `R2_ACCESS_KEY_ID`／`R2_SECRET_ACCESS_KEY` | apexバケットだけのObject Read & Write | `apex-operations`、`apex-state` |
+| `R2_ACCESS_KEY_ID`／`R2_SECRET_ACCESS_KEY` | apexバケットだけのObject Read & Write | `apex-operations` |
 
 CloudflareのWorkers Scripts権限はこの運用ではaccount単位であり、トークンだけでWorker `apex`に閉じているとは扱いません。GitHub Variablesも個別変数単位の分離ではありません。DNS／Zone権限は与えず、コードの識別子検査・main限定Environment・承認で経路を制限します。GitHub内蔵tokenはartifact・Contentsの読み取りだけに使い、Variablesの読取能力を仮定しません。[^cf-permissions] [^gh-variables]
 
@@ -68,7 +68,7 @@ CloudflareのWorkers Scripts権限はこの運用ではaccount単位であり、
 
 Verifyはmain pushの成功artifactを90日保存します。manifestには完全SHA・検証run ID・全ファイルのパスと内容から算出したハッシュを保存します。別workflow、PR、失敗run、ハッシュ不一致のartifactは受け付けません。
 
-配信、WorkerのIaC、初回解除、state backupは同じ`apex-delivery`の排他を使い、実行中の処理を自動キャンセルしません。配信の変更直前に停止状態と最新mainを再取得します。起動時のVariablesスナップショットだけで判定せず、不明・停止・古いSHAは失敗として配信しません。
+配信、WorkerのIaC、初回解除は同じ`apex-delivery`の排他を使い、実行中の処理を自動キャンセルしません。配信の変更直前に停止状態と最新mainを再取得します。起動時のVariablesスナップショットだけで判定せず、不明・停止・古いSHAは失敗として配信しません。
 
 成功時は`delivery-receipt` artifactへSHA・ハッシュ・Worker ID・Version／Deployment ID・run／attempt・直前の成功記録を保存します。HTTPの識別ファイルとホーム、noindex、workers.dev有効・プレビュー無効を確認してから成功記録を書きます。
 
@@ -76,13 +76,11 @@ Verifyはmain pushの成功artifactを90日保存します。manifestには完�
 
 復旧は「Delivery」の`rollback`を手動実行します。現在のVersionとDeployment IDがともに最新成功記録と同じなら、その直前の成功artifactを選びます。失敗した新配信が現在有効なら、最後の成功artifactを選びます。現在のmainにある制御コードと停止状態を再確認し、過去の配信物を再ビルドせず配信します。初回配信以前やartifact期限切れでは復旧できないため失敗として止まり、新しい検証候補を用意します。
 
-IaCは`default` workspaceだけを使い、apply前後のstateを30日保護・90日保持の`backups/`へ保存します。apply失敗後も部分stateを保全します。runner強制停止では後処理を保証できないため、再開時に実stateと直前backupを確認します。生のplan・stateとTerraformログはartifactに出さず、runner内の`.private/`へ限定します。
-
-`apex-state`へR2秘密値を投入すると、Worker ID作成後の日次workflowが同じstateの世代を保存します。保持期限内のbackupを維持するため、Actionsの失敗通知を確認してください。
+IaCは`default` workspaceとR2の現行stateだけを使います。独自のstateバックアップ・世代保持・日次ジョブは設けません。失敗・中断時は実stateとリソースを確認してから再開します。生のplan・stateとTerraformログはartifactに出さず、runner内の`.private/`へ限定します。サイト配信artifactによるロールバックは別の仕組みとして維持します。
 
 ## 検証範囲
 
-ローカルの単体テスト・Terraform mock・Wrangler dry-runは実配信の証明ではありません。R2相互アクセス拒否・ロック・保持・復元、TerraformとWranglerの併用、HTTP検証、実際の同時実行と復旧は実環境で別途記録します。
+ローカルの単体テスト・Terraform mock・Wrangler dry-runは実配信の証明ではありません。R2相互アクセス拒否・ロック、TerraformとWranglerの併用、HTTP検証、実際の同時実行と配信の復旧は実環境で別途記録します。
 
 Issue #4では初回・通常配信までを扱います。Custom Domain、DNS・TLS、正式タグ、リポジトリ間のリリース制御と障害試験は#10・#12の対象です。
 

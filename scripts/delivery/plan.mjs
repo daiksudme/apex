@@ -1,6 +1,6 @@
 import { account } from './control.mjs';
 export function assertPlan(plan, bootstrap) {
-  const allowed = ['cloudflare_worker.apex', 'github_actions_variable.control', 'github_actions_variable.worker', 'github_repository_environment.protected', 'github_repository_environment.delivery', 'github_repository_environment_deployment_policy.protected', 'github_repository_environment_deployment_policy.delivery', 'github_repository_environment.state', 'github_repository_environment_deployment_policy.state'];
+  const allowed = ['cloudflare_worker.apex', 'github_actions_variable.control', 'github_actions_variable.worker', 'github_repository_environment.protected', 'github_repository_environment.delivery', 'github_repository_environment_deployment_policy.protected', 'github_repository_environment_deployment_policy.delivery'];
   if (!Array.isArray(plan.resource_changes)) throw new Error('Invalid plan');
   for (const { address, change } of plan.resource_changes) {
     if (!allowed.includes(address) || !change.actions.every((action) => ['no-op', 'create', 'update'].includes(action))) throw new Error('Destructive or unrelated plan');

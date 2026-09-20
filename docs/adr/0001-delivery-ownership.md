@@ -90,7 +90,7 @@ workers.devは公開検証先であり、非公開環境ではない。公開可
 | `family` | family。Worker・Access・サイト固有設定 | Worker識別子、familyの保護完了条件 |
 | `apex` | apex。Worker・GitHub設定 | Worker名／ID、配信候補と準備完了条件 |
 
-保管サービスの選定・構築、暗号化、認可、ロック、バックアップ、backend自身のブートストラップは[.infra #3](https://github.com/daiksudme/.infra/issues/3)が担当する。
+保管サービスの選定・構築、暗号化、認可、ロック、backend自身のブートストラップは[.infra #3](https://github.com/daiksudme/.infra/issues/3)が担当する。初期構成では独自のstateバックアップを設けない。
 apexのroot moduleとstate内容はapexが所有し、`.infra`には配置しない。
 各stateの実行権限を分け、apexやfamilyから`terraform_remote_state`等で共通stateを読ませない。
 秘密値・生のplan／stateを公開コード、Issue、CIログ、artifactへ保存しない。
@@ -209,7 +209,7 @@ backendは`.infra` #3でR2の4バケット分離を採用する。資格情報�
 | [apex #4](https://github.com/daiksudme/apex/issues/4) | Worker作成→Wrangler配信→Terraform plan無差分、委任属性の保持、workers.dev有効・プレビュー無効、Domain未接続 |
 | [apex #10](https://github.com/daiksudme/apex/issues/10) | 資格情報、永続停止、配信とWorker変更applyの競合・改名／削除の拒否、待機・キャンセル・API障害、古い候補／runの拒否、通常planの接続変更拒否、失敗後の再開 |
 | [apex #12](https://github.com/daiksudme/apex/issues/12) | 停止した同一候補への接続、DNS・TLS・HTTP、正式タグとRelease、失敗時の復旧と停止解除 |
-| [.infra #3](https://github.com/daiksudme/.infra/issues/3) | state暗号化・認可・ロック・復元と相互参照の不要性 |
+| [.infra #3](https://github.com/daiksudme/.infra/issues/3) | state暗号化・認可・ロックと相互参照の不要性 |
 
 このADRでは文書・固定版schemaの整合を確認した。Terraform／Wranglerの実環境併用、停止制御、DNS・TLSは未検証である。
 provider／Wrangler更新時、委任属性の書き戻し、権限分離の不成立、停止制御の競合が見つかった場合は、該当する後続Issueで契約を見直してから適用する。

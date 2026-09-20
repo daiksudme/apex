@@ -89,19 +89,3 @@ import {
   to       = github_repository_environment_deployment_policy.protected
   id       = "apex:apex-operations:${each.value}"
 }
-
-resource "github_repository_environment" "state" {
-  repository        = "apex"
-  environment       = "apex-state"
-  can_admins_bypass = false
-  deployment_branch_policy {
-    protected_branches     = false
-    custom_branch_policies = true
-  }
-  lifecycle { prevent_destroy = true }
-}
-resource "github_repository_environment_deployment_policy" "state" {
-  repository     = "apex"
-  environment    = github_repository_environment.state.environment
-  branch_pattern = "main"
-}
