@@ -122,15 +122,20 @@ Google OAuth、familyの個別Allow、メールOTP不使用の条件は変更し
 ### 永続的な配信停止
 
 apexのリポジトリActions変数`APEX_DELIVERY_CONTROL`に、状態`open`／`frozen`とリリースIDを一つのJSON値で保持する。
-`frozen`は新しい配信を止める状態であり、現在のサイトを停止する意味ではない。
+`frozen`は新しい配信とWorker実体の変更を止める状態であり、現在のサイトを停止する意味ではない。
 Terraformの`github_actions_variable`は初期値`{"state":"frozen","release_id":"bootstrap"}`で作成し、`ignore_changes = [value]`で運用値を更新対象から外す。[^github-variable]
 削除・再作成も通常planでは拒否する。消失・不正値・取得不能を`open`と解釈しない。
 運用中の値を書ける経路はapexの停止・再開専用workflowだけにする。
 
-通常配信と停止・再開は、apex内で固定のconcurrency group `apex-delivery`を共有し、`cancel-in-progress: false`とする。
+通常配信、停止・再開、Workerを変更するapex IaC applyは、apex内で固定のconcurrency group `apex-delivery`を共有し、`cancel-in-progress: false`とする。
 ジョブが排他区間を取得した後、更新の直前にREST APIから変数を再取得する。起動時の`vars`スナップショットだけでは判定しない。
 配信は`open`の場合だけ許可し、配信完了と記録まで同じ排他区間に置く。
 停止は先行配信の終了後に`frozen`を書き、読み戻してリリースIDと候補を照合してから完了を通知する。
+
+apex IaCも排他区間内で停止状態をAPIから取得し、最新planを確認してから同じplanを適用する。
+`frozen`中はWorkerの作成・更新・改名・置換・削除を含むplanを拒否し、候補のWorker名／IDを接続完了まで維持する。状態取得不能・不正値でも適用しない。
+停止処理は先行するWorker変更applyの完了も待ち、候補との一致を確認する。状態確認だけを排他区間の外で済ませない。
+初期Workerと停止変数の初回作成は、接続候補もCustom Domainも存在しないことを確認する保護されたbootstrap専用操作に限定する。通常applyにはこの例外を設けず、初期化後の変数消失やWorker消失をbootstrapとして自動復旧しない。
 
 GitHubのconcurrencyはリポジトリ内の制御であり、`.infra`との共通ロックにはならない。待機順も保証として使わない。[^github-concurrency]
 `.infra`は停止完了の通知だけで進まず、apexの変数と受け入れ記録をAPIで再取得する。
@@ -202,7 +207,7 @@ backendサービスと権限付与方法は未選定であり、未検証のAPI�
 | Issue | 実環境で確認するもの |
 | --- | --- |
 | [apex #4](https://github.com/daiksudme/apex/issues/4) | Worker作成→Wrangler配信→Terraform plan無差分、委任属性の保持、workers.dev有効・プレビュー無効、Domain未接続 |
-| [apex #10](https://github.com/daiksudme/apex/issues/10) | 資格情報、永続停止、同時実行・待機・キャンセル・API障害、古い候補／runの拒否、通常planの接続変更拒否、失敗後の再開 |
+| [apex #10](https://github.com/daiksudme/apex/issues/10) | 資格情報、永続停止、配信とWorker変更applyの競合・改名／削除の拒否、待機・キャンセル・API障害、古い候補／runの拒否、通常planの接続変更拒否、失敗後の再開 |
 | [apex #12](https://github.com/daiksudme/apex/issues/12) | 停止した同一候補への接続、DNS・TLS・HTTP、正式タグとRelease、失敗時の復旧と停止解除 |
 | [.infra #3](https://github.com/daiksudme/.infra/issues/3) | state暗号化・認可・ロック・復元と相互参照の不要性 |
 
