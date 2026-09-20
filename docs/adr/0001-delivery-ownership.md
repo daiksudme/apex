@@ -75,7 +75,7 @@ provider 5.25.0の書き込み可能な属性を次のように割り当てる�
 
 Terraformの`lifecycle.ignore_changes`は`[subdomain, observability, logpush, tags, tail_consumers]`に限定する。
 `all`やWorker名・accountを無視する指定は使わない。これは更新時の委任であり、新規作成・削除を防ぐ仕組みではない。[^terraform-lifecycle]
-作成時の既定値、Wrangler配信後のplan、Worker名変更時の挙動を#4で検証し、委任属性が戻される場合は配信開始前に解決する。
+作成時の既定値、Wrangler配信後のplan、Worker名変更時の挙動を#4で検証する。初回配信はこの併用検証のために行い、委任属性の書き戻し等を解決して検証に成功するまで、後続の通常配信workflowを有効化しない。
 
 Wrangler設定には`workers_dev: true`、`preview_urls: false`を明記し、`route`／`routes`を置かない。
 環境別設定にもCustom DomainやDNSを追加しない。省略時の既定値に依存せず、配信後に実設定を確認する。[^wrangler-config]
