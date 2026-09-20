@@ -3,8 +3,10 @@ type: Guide
 title: apexの開発と検証
 description: daiksud.meの静的ブログをローカルで起動し、配信物を検証する手順。
 sources:
-  - id: pnpm-installation
-    resource: https://pnpm.io/installation
+  - id: mise-setup
+    resource: https://mise.jdx.dev/getting-started.html
+  - id: pnpm-version-policy
+    resource: https://pnpm.io/settings/cli#pmonfail
 ---
 
 ## apex
@@ -13,37 +15,45 @@ Astroで静的生成するブログの開発用リポジトリです。現在は
 
 ## 必要な環境
 
-- Node.js 24.21.0（`.node-version`）
-- pnpm 12.5.1（`package.json`の`packageManager`）
+- mise（CI・再現検証では2026.9.11）
+- Node.js 24.21.0とpnpm 12.5.1（`mise.toml`）
 - Chromiumを実行できるmacOSまたはLinux
 
-Node.jsのバージョンマネージャーで指定版を選び、`node --version` と `pnpm --version` を確認してください。pnpmが未導入の場合は、[公式の固定版インストール手順](https://pnpm.io/installation#installing-a-specific-version)で12.5.1を導入してください。[^pnpm-installation]
+[公式手順](https://mise.jdx.dev/getting-started.html)でmiseを導入します。Node.jsとpnpmのインストール・版の選択はmiseが担当します。取得したリポジトリの`mise.toml`を確認してから信頼し、次の手順を実行してください。`mise exec`を使うため、シェルの設定変更は不要です。[^mise-setup]
 
 ```sh
 git clone https://github.com/daiksudme/apex.git
 cd apex
-pnpm install --frozen-lockfile
-pnpm exec playwright install chromium
-pnpm run dev
+mise trust mise.toml
+mise install
+mise exec -- node --version
+mise exec -- pnpm --version
+mise exec -- pnpm install --frozen-lockfile
+mise exec -- pnpm exec playwright install chromium
+mise exec -- pnpm run dev
 ```
 
-開発サーバーのURLは `http://localhost:4321/` です。Linuxでブラウザーのシステム依存が不足する場合は、専用の開発環境で `pnpm exec playwright install --with-deps chromium` を実行してください。
+開発サーバーのURLは `http://localhost:4321/` です。Linuxでブラウザーのシステム依存が不足する場合は、専用の開発環境で `mise exec -- pnpm exec playwright install --with-deps chromium` を実行してください。
 
 ## 検証と静的ビルド
 
 ```sh
-pnpm run check
-pnpm test
-pnpm run preview
+mise exec -- pnpm run check
+mise exec -- pnpm test
+mise exec -- pnpm run preview
 ```
 
-`pnpm test` は静的ビルドを作り直し、`127.0.0.1:4321` で一時プレビューを起動してChromiumで確認します。開発サーバーや別のプレビューが同じポートを使っている場合は、先に停止してください。テストが起動したサーバーは終了時に停止します。
+`mise exec -- pnpm test` は静的ビルドを作り直し、`127.0.0.1:4321` で一時プレビューを起動してChromiumで確認します。開発サーバーや別のプレビューが同じポートを使っている場合は、先に停止してください。テストが起動したサーバーは終了時に停止します。
 
-静的配信物だけが必要な場合は `pnpm run build` を実行します。出力先は `dist/` です。`pnpm run preview` はビルド済みの出力を確認するコマンドであり、本番配信用サーバーではありません。
+静的配信物だけが必要な場合は `mise exec -- pnpm run build` を実行します。出力先は `dist/` です。`mise exec -- pnpm run preview` はビルド済みの出力を確認するコマンドであり、本番配信用サーバーではありません。
 
-PRとmainへのpushではGitHub Actionsが `pnpm install --frozen-lockfile`、型検証、ビルド、スモークテストを実行します。型検証やテストの失敗は修正してから統合します。ブラウザーの失敗時にはテストレポートとトレースをActionsのartifactに保存します。
+PRとmainへのpushではGitHub Actionsも`mise.toml`からNode.jsとpnpmを導入し、`pnpm install --frozen-lockfile`、型検証、ビルド、スモークテストを実行します。型検証やテストの失敗は修正してから統合します。ブラウザーの失敗時にはテストレポートとトレースをActionsのartifactに保存します。
 
-依存の更新は `pnpm add` などで行い、`package.json`と`pnpm-lock.yaml`を一緒にコミットします。`pnpm-workspace.yaml`でNode.jsの版の検査・完全版保存・依存のビルド許可を管理します。
+依存の更新は `mise exec -- pnpm add` などで行い、`package.json`と`pnpm-lock.yaml`を一緒にコミットします。`pnpm-workspace.yaml`でNode.jsの版の検査・完全版保存・依存のビルド許可を管理します。
+
+Node.jsとpnpmの更新時は`mise.toml`を変更し、`package.json`の`engines`と`packageManager`も同じ版へ揃えます。Node.jsの宣言版は`preinstall`と`check`で照合します。依存が導入済みでインストール処理が省略される場合も、`check`で不一致を検出します。pnpmは`pmOnFail: error`により、版が違っても別の版を自動取得せず失敗します。`mise install`後に`mise exec`で実行してください。[^pnpm-version-policy]
+
+シェルでmiseを有効化済みなら、選択されている版を確認して`pnpm run dev`などを直接実行することもできます。
 
 ## 構成と変更
 
@@ -66,4 +76,5 @@ IaC・配信・停止制御・接続workflowの実装と実環境検証は後続
 
 公開可能なサンプルだけを置いてください。秘密値や非公開原稿は、下書きであってもコミットしません。`.env`、依存、キャッシュ、生成物、テスト結果、Terraformのstate／plan／変数値はGit管理から除外します。通常ビルドとPR検証にCloudflare資格情報は不要です。
 
-[^pnpm-installation]: pnpm公式の版指定インストール手順。プロジェクトでは12.5.1に固定する。
+[^mise-setup]: mise公式の導入・プロジェクト設定・execによる実行手順。
+[^pnpm-version-policy]: pnpmのpmOnFail設定。インストール担当はmiseとし、pnpm自身は不一致を拒否する。

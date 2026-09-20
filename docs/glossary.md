@@ -10,7 +10,7 @@ description: サイト開発で使う用語とコード上の対応。
 | --- | --- | --- | --- |
 | ホーム | サイト名と説明を最初に表示するページ | apexの閲覧 | `src/pages/index.astro`、`/` |
 | 静的配信物 | ビルド時に生成するHTML・CSS等。閲覧要求ごとにサーバーで生成しない | apexのビルド | `dist/`、`output: static` |
-| ローカルプレビュー | ビルド済みの静的配信物を開発環境で確認するためのサーバー | apexの検証 | `pnpm run preview` |
+| ローカルプレビュー | ビルド済みの静的配信物を開発環境で確認するためのサーバー | apexの検証 | `mise exec -- pnpm run preview` |
 | Worker | apexの静的配信先の実体。存在管理と配信物の更新を分離する | apex配信 | `cloudflare_worker` |
 | Version | 配信候補が参照するWorkerの版 | apex配信 | Worker Version ID |
 | Deployment | 実際に配信されるVersionを示す配信記録 | apex配信 | Worker Deployment ID |
