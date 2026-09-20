@@ -115,6 +115,6 @@ IaC・配信・停止制御・接続workflowの実装と実環境検証は後続
 
 ## workers.devへの配信手順
 
-[初回配信と復旧](docs/operations/workers.md)にR2・資格情報・保護された手動workflow・artifact検証をまとめています。初回併用検証の成功後に、別PRで自動配信を有効化します。
+[初回配信と復旧](docs/operations/workers.md)にR2・資格情報・保護された手動workflow・artifact検証をまとめています。初回併用検証の成功と配信用Secretsの投入後、mainのVerify成功を契機に同じ成果物を自動配信します。
 
 Terraformの検証・整形・provider lock更新もGitHub Actionsから実行します。ローカルTerraform実行や自作の運用JavaScriptは使いません。

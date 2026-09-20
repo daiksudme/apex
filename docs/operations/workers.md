@@ -50,6 +50,8 @@ plan本文・state・バイナリ・診断ログはrunner内だけで扱い、�
 
 ## 配信と初回解除
 
+自動配信はmain pushのVerify成功だけを対象にします。完了したVerifyのSHAと起動時mainのSHAが一致する場合だけ資格情報付きジョブへ進み、検証済みSHAを明示checkoutします。自動配信はmain限定の`apex-delivery`、手動操作は承認必須の`apex-operations`を使います。
+
 mainのVerifyはテスト済みdistをtarにまとめ、SHA-256で照合できる形式2の`verified-site`を保存します。manifestの`format`・`sha`・`run`・`hash`を検証し、成功した同repoのmain push Verifyだけを使います。配信ジョブは再ビルドしません。
 
 ```sh

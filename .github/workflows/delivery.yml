@@ -1,5 +1,9 @@
 name: Delivery
 on:
+  workflow_run:
+    workflows: [Verify]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       operation:
@@ -25,19 +29,24 @@ concurrency:
   cancel-in-progress: false
 jobs:
   preflight:
-    if: github.ref == 'refs/heads/main'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_sha == github.sha))
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
       - name: Bind delivery code to verification
         env:
           GH_TOKEN: ${{ github.token }}
-          OPERATION: ${{ inputs.operation }}
-          VERIFY_RUN_ID: ${{ inputs.verification_run }}
+          OPERATION: ${{ github.event_name == 'workflow_run' && 'deploy' || inputs.operation }}
+          VERIFY_RUN_ID: ${{ github.event.workflow_run.id || inputs.verification_run }}
           VERSION_ID: ${{ inputs.version_id }}
           RECEIPT_RUN: ${{ inputs.receipt_run }}
         run: |
@@ -50,14 +59,19 @@ jobs:
           fi
   deliver:
     needs: preflight
-    if: github.ref == 'refs/heads/main'
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_sha == github.sha))
     runs-on: ubuntu-24.04
     timeout-minutes: 15
-    environment: apex-operations
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'apex-operations' || 'apex-delivery' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
@@ -66,8 +80,8 @@ jobs:
       - name: Deliver a verified artifact without rebuilding
         run: bash .github/scripts/publish.sh
         env:
-          OPERATION: ${{ inputs.operation }}
-          VERIFY_RUN_ID: ${{ inputs.verification_run }}
+          OPERATION: ${{ github.event_name == 'workflow_run' && 'deploy' || inputs.operation }}
+          VERIFY_RUN_ID: ${{ github.event.workflow_run.id || inputs.verification_run }}
           VERSION_ID: ${{ inputs.version_id }}
           RECEIPT_RUN: ${{ inputs.receipt_run }}
           GH_TOKEN: ${{ github.token }}
