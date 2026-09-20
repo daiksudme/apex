@@ -156,8 +156,8 @@ planから該当変更だけを除いてapplyする方式や`-target`による�
 
 ### 初回接続と正式公開
 
-1. 共通基盤の準備後、apex TerraformでWorkerの存在を用意し、#4でWranglerとの併用を検証する。
-2. 通常配信を明示的に許可して、検証済み配信物をworkers.devへ配信する。候補のapex SHA・ハッシュ・Version／Deploymentを記録する。
+1. 共通基盤の準備後、apex TerraformでWorkerの存在を用意し、同じ識別子・必要な権限・検証workflowが揃ったことを確認する。
+2. 初期停止を明示的に解除して、検証済み配信物をworkers.devへ配信する。#4でWrangler再配信後のTerraform planと設定保持を検証し、候補のapex SHA・ハッシュ・Version／Deploymentを記録する。
 3. リリース担当者が候補と`.infra` SHAを選ぶ。apexの専用workflowが排他区間で停止を取得し、現在の配信が候補と一致することを確認する。違えば停止を保ち候補の選定からやり直す。
 4. 停止した同じ候補を受け入れ、承認記録を確定する。再ビルドや新しいVersionの配信は行わない。
 5. `.infra`の保護されたリリースworkflowが、停止状態・リリースID・受け入れ済み候補・現在のVersion／Deployment・両リポジトリSHAを照合する。自分のrun ID／attemptもリリース記録に結び付ける。
@@ -184,7 +184,7 @@ planから該当変更だけを除いてapplyする方式や`-target`による�
 対応する`.infra` run／attemptが実行中・待機中・状態不明なら解除しない。
 復旧時は接続処理が終了していること、復旧後のDomain／Worker状態と検証結果を確認する。
 `.infra`の再試行・新attemptは接続直前の停止照合を省けず、古い成功記録だけで進めない。
-`always()`やタイムアウトによる無条件解除は行わない。初期`bootstrap`の解除も、#4の準備完了を確認する専用操作として記録する。
+`always()`やタイムアウトによる無条件解除は行わない。初期`bootstrap`の解除は、Workerの存在・識別子・権限・検証workflowの準備を確認する専用操作として記録する。初回配信後に行う#4の併用検証を、初回配信の前提にはしない。
 
 ### .infra計画との整合と帰結
 
