@@ -3,15 +3,12 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { github, cloudflare, currentControl, latestMain, required } from './api.mjs';
 import { assertDelivery } from './control.mjs';
 import { assertPlan } from './plan.mjs';
-import { backupState, applyWithBackups } from '../../foundation-tools/lib/state.mjs';
-import { stateClient, bucketFor } from '../../foundation-tools/lib/config.mjs';
 import { checkBackend, checkTerraformEnvironment } from '../../foundation-tools/lib/backend.mjs';
 const root = 'terraform/apex';
 const bootstrap = process.env.OPERATION === 'bootstrap';
 const verify = process.env.OPERATION === 'verify';
 mkdirSync('.private', { recursive: true, mode: 0o700 });
 const log = openSync('.private/terraform.log', 'w', 0o600);
-const client = stateClient();
 const run = (args) => spawnSync('terraform', [`-chdir=${root}`, ...args], { stdio: ['ignore', log, log] }).status;
 const capture = (args) => execFileSync('terraform', [`-chdir=${root}`, ...args], { encoding: 'utf8', maxBuffer: 32 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] });
 async function gate() {
@@ -44,14 +41,9 @@ try {
     console.log('Terraform plan has no changes after delivery.');
   } else {
     assertPlan(JSON.parse(capture(['show', '-json', '../../.private/apex.tfplan'])), bootstrap);
-    await applyWithBackups(async (phase) => {
-      const snapshot = await backupState(client, bucketFor('apex'), { allowMissing: bootstrap && phase === 'before' });
-      console.log(JSON.stringify({ phase, snapshot }));
-    }, async () => {
-      await gate();
-      if (run(['apply', '-input=false', '../../.private/apex.tfplan']) !== 0) throw new Error('Apply failed');
-    });
-    console.log('IaC apply and state backups completed.');
+    await gate();
+    if (run(['apply', '-input=false', '../../.private/apex.tfplan']) !== 0) throw new Error('Apply failed');
+    console.log('IaC apply completed.');
   }
 } catch { console.error('IaC failed. No state or plan was published; inspect permissions, controls and private diagnostics before retrying.'); process.exitCode = 1; }
-finally { closeSync(log); client.destroy(); }
+finally { closeSync(log); }

@@ -98,3 +98,10 @@ test('Versionが同じでもDeploymentが異なれば最後の成功artifactへ�
   const receipt = { version: 'v2', deployment: 'd2', verification_run: '20', previous: { version: 'v1', deployment: 'd1', verification_run: '10' } };
   assert.equal(restoreTarget(receipt, { version: 'v2', deployment: 'different' }), receipt);
 });
+
+test('state専用EnvironmentはIaCの管理対象に含めない', async () => {
+  const { assertPlan } = await import('./delivery/plan.mjs');
+  for (const address of ['github_repository_environment.state', 'github_repository_environment_deployment_policy.state']) {
+    assert.throws(() => assertPlan({ resource_changes: [{ address, change: { actions: ['create'], after: {} } }] }, false), /plan/);
+  }
+});
