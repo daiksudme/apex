@@ -10,7 +10,7 @@
     "dev": "astro dev",
     "check": "node scripts/check-node.mjs && astro check",
     "build": "astro build",
-    "test": "node --test scripts/check-node.test.mjs && pnpm run build && playwright test",
+    "test": "node --test scripts/*.test.mjs && pnpm run build && playwright test",
     "preview": "astro preview"
   },
   "dependencies": { "astro": "7.3.3" },

@@ -7,6 +7,8 @@ sources:
     resource: https://mise.jdx.dev/getting-started.html
   - id: pnpm-version-policy
     resource: https://pnpm.io/settings/cli#pmonfail
+  - id: mise-path-priority
+    resource: https://mise.jdx.dev/configuration/settings.html
 ---
 
 ## apex
@@ -55,6 +57,8 @@ Node.jsとpnpmの更新時は`mise.toml`を変更し、`package.json`の`engines
 
 シェルでmiseを有効化済みなら、選択されている版を確認して`pnpm run dev`などを直接実行することもできます。
 
+このプロジェクトは`activate_aggressive = true`を設定し、miseのツールをPATHの先頭へ置きます。mise有効化後にHomebrewなどのパスが追加されても、pnpmが起動するNode.jsを含めて指定版を使用するためです。グローバル設定やシェル設定の編集は不要です。[^mise-path-priority]
+
 ## 構成と変更
 
 - ページは `src/pages/`、共通レイアウトは `src/layouts/`、スタイルは `src/styles/` に置きます。
@@ -78,3 +82,4 @@ IaC・配信・停止制御・接続workflowの実装と実環境検証は後続
 
 [^mise-setup]: mise公式の導入・プロジェクト設定・execによる実行手順。
 [^pnpm-version-policy]: pnpmのpmOnFail設定。インストール担当はmiseとし、pnpm自身は不一致を拒否する。
+[^mise-path-priority]: mise公式のactivate_aggressive設定。プロジェクト内のツール選択を優先する。
