@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 source "$ROOT/.github/scripts/guard.sh"
+[[ ${GITHUB_RUN_ATTEMPT:-} == 1 ]] || { echo "Start a new delivery dispatch instead of rerunning an existing run." >&2; exit 1; }
 WORK=$(mktemp -d); trap 'rm -rf "$WORK"' EXIT
 worker=$(worker_json)
 worker_id=$(jq -er .id <<< "$worker")

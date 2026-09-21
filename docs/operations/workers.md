@@ -67,6 +67,8 @@ gh workflow run delivery.yml --repo daiksudme/apex --ref main -f operation=deplo
 gh workflow run delivery.yml --repo daiksudme/apex --ref main -f operation=rollback -f version_id=VERSION_ID -f receipt_run=DELIVERY_RUN_ID
 ```
 
+Deliveryの再試行は新しい手動実行で行い、既存runの再実行は拒否します。初回解除の再試行は引き続き可能です。
+
 成功したDeliveryの形式2 `delivery-receipt`からVersion IDとrun IDを選びます。指定値と記録のWorker・成功attempt・SHAを照合し、Wrangler標準rollbackでそのVersionを再配信します。過去artifactの自動探索は行いません。停止・最新main・HTTPの確認は通常配信と共通です。記録の期限切れ・不一致、利用不能なVersionは拒否します。
 
 旧形式1のartifact／記録は利用しません。移行後のmain Verifyで形式2を生成します。現在は実配信前なので稼働Versionの移行はありません。自動配信PRは初回配信とTerraform再planの確認までDraftで保持します。

@@ -61,6 +61,8 @@ reject_without_publish() {
 export MOCK_MAIN=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 reject_without_publish
 unset MOCK_MAIN
+export GITHUB_RUN_ATTEMPT=2; reject_without_publish
+export GITHUB_RUN_ATTEMPT=1
 export CONTROL_MODE=error; reject_without_publish
 export CONTROL_MODE=frozen; reject_without_publish
 export CONTROL_MODE=open
