@@ -45,6 +45,7 @@ jobs:
           test "$(node --version)" = "v$(jq -r .engines.node package.json)"
           test "$(pnpm --version)" = "$(jq -r .engines.pnpm package.json)"
       - run: bash .github/tests/operations.sh
+      - run: bash .github/tests/approve.sh
       - run: shellcheck .github/scripts/*.sh .github/tests/*.sh
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
