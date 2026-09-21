@@ -38,4 +38,4 @@ description: 執筆者が公開を明示した記事だけを、閲覧者が一�
 
 公開サンプルは1件とし、サンプルであることを本文で明記する。
 テスト専用原稿は通常の記事ディレクトリへ置かない。
-検証は`scripts/posts.test.mjs`、`scripts/content-build.test.mjs`、`tests/posts.spec.ts`で行う。
+検証は`test-content/posts.test.mjs`、`test-content/content-build.test.mjs`、`tests/posts.spec.ts`で行う。
