@@ -17,7 +17,7 @@ case "${OPERATION:-}" in
     verification_run=$VERIFY_RUN_ID
     latest_main
     require_open
-    WRANGLER_OUTPUT_FILE_PATH="$WORK/wrangler.jsonl" pnpm exec wrangler deploy --assets "$WORK/site/dist"
+    WRANGLER_OUTPUT_FILE_PATH="$WORK/wrangler.jsonl" pnpm exec wrangler deploy --name apex --assets "$WORK/site/dist"
     version=$(jq -ser 'map(select(.type == "deploy" and .worker_name == "apex")) | last.version_id' "$WORK/wrangler.jsonl")
     ;;
   rollback)
@@ -30,7 +30,7 @@ case "${OPERATION:-}" in
     sha=$(jq -r .sha "$receipt"); hash=$(jq -r .hash "$receipt"); verification_run=$(jq -r .verification_run "$receipt")
     latest_main
     require_open
-    pnpm exec wrangler rollback "$VERSION_ID" --message "Restore verified delivery run $RECEIPT_RUN"
+    pnpm exec wrangler rollback "$VERSION_ID" --name apex --message "Restore verified delivery run $RECEIPT_RUN"
     version=$VERSION_ID
     ;;
   *) echo 'Unknown delivery operation' >&2; exit 1 ;;
