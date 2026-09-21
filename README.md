@@ -118,3 +118,11 @@ IaC・配信・停止制御・接続workflowの実装と実環境検証は後続
 [初回配信と復旧](docs/operations/workers.md)にR2・資格情報・保護された手動workflow・artifact検証をまとめています。初回併用検証の成功後に、別PRで自動配信を有効化します。
 
 Terraformの検証・整形・provider lock更新もGitHub Actionsから実行します。ローカルTerraform実行や自作の運用JavaScriptは使いません。
+
+## PRの承認とmain保護
+
+CODEOWNERSはdaiksudです。mainのRulesetによるPR・承認1件・Code Ownerレビュー・必須検証・未解決スレッド解消の必須化は、所有者本人のPRが標準ルールでマージ可能になることを実PRで確認してから完了とします。Rulesetの定義・実適用はこの自動承認workflowの導入と分け、条件不成立時にbypassや独自の承認方式へ切り替えません。
+
+GitHub Actionsの「Allow GitHub Actions to create and approve pull requests」を有効にします。Owner approvalはmainのコードからメタデータだけを読み、daiksudの非Draft PRの最新SHAについて`.github/required-checks.json`の検証成功後にApproveします。別の投稿者や失敗・未実行の検証は承認しません。実設定の適用とCode Owner本人のPRのマージ可否は、CIとは別に実PRで確認します。
+
+自動Approveは、管理者本人が投稿したPRのCI結果に基づく承認です。VerifyはPR内のworkflow・テスト変更も検証対象として実行し、所有者による検証定義の変更を禁止しません。独立した内容レビューの代わりにはせず、変更のレビュー・必須CI・未解決指摘の確認を統合前に行います。承認処理自体はmainのコードから実行し、最新mainを含まないPRや承認直前に対象ブランチが変わったPRを拒否します。
