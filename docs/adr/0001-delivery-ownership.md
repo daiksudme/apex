@@ -145,9 +145,9 @@ GitHubのconcurrencyはリポジトリ内の制御であり、`.infra`との共�
 ### 候補と通常更新
 
 候補の記録にはリリースID、apex完全SHA、配信物ハッシュ、Worker名／ID、Version ID、Deployment ID、`.infra`完全SHAを対応付ける。
-配信物ハッシュは配信対象全ファイルの相対パスと内容ハッシュから再現可能に計算し、受け入れ結果とともに保護された記録へ保存する。
+配信物ハッシュは検証済み配信対象を格納したtarのSHA-256として計算し、受け入れ結果とともに保護された記録へ保存する。
 記録には承認者、検証結果、workflow run ID／attemptを含める。秘密値・生のplanは含めない。
-記録の保存形式・改変防止と有効期限切れ時の再検証は#10で実装・試験する。
+記録は形式2とし、成果物はtarのSHA-256で照合する。復旧は成功記録のrun IDと検証済みVersion IDを指定し、Wrangler標準rollbackを使う。記録の期限切れや不一致は拒否する。リポジトリ間の受け入れ制御は#10で実装・試験する。
 
 通常のmain更新はCI成功後、apexの排他区間で`open`を再確認してworkers.devへ配信する。
 `frozen`中の更新は配信せず、未配信であることを実行結果に残す。停止解除だけで過去の待機候補を一斉配信しない。
@@ -210,6 +210,8 @@ backendは`.infra` #3でR2の4バケット分離を採用する。資格情報�
 | [apex #10](https://github.com/daiksudme/apex/issues/10) | 資格情報、永続停止、配信とWorker変更applyの競合・改名／削除の拒否、待機・キャンセル・API障害、古い候補／runの拒否、通常planの接続変更拒否、失敗後の再開 |
 | [apex #12](https://github.com/daiksudme/apex/issues/12) | 停止した同一候補への接続、DNS・TLS・HTTP、正式タグとRelease、失敗時の復旧と停止解除 |
 | [.infra #3](https://github.com/daiksudme/.infra/issues/3) | state暗号化・認可・ロックと相互参照の不要性 |
+
+Terraformは検証・整形・lock更新を含めGitHub Actions上だけで実行する。独自のstate／plan全属性解析、毎回の実ロック競合・アクセス拒否試験と証明ファイルは廃止し、標準設定とCI検証を中心にする。運用JavaScriptは持たず、必要な接続処理だけ短いBashと標準CLIで行う。
 
 このADRでは文書・固定版schemaの整合を確認した。Terraform／Wranglerの実環境併用、停止制御、DNS・TLSは未検証である。
 provider／Wrangler更新時、委任属性の書き戻し、権限分離の不成立、停止制御の競合が見つかった場合は、該当する後続Issueで契約を見直してから適用する。

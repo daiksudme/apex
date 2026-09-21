@@ -1,5 +1,4 @@
 [tools]
-terraform = "1.16.3"
 node = "24.21.0"
 pnpm = "12.5.1"
 

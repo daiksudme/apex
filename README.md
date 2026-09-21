@@ -53,7 +53,7 @@ PRとmainへのpushではGitHub Actionsも`mise.toml`からNode.jsとpnpmを導�
 
 依存の更新は `mise exec -- pnpm add` などで行い、`package.json`と`pnpm-lock.yaml`を一緒にコミットします。`pnpm-workspace.yaml`でNode.jsの版の検査・完全版保存・依存のビルド許可を管理します。
 
-Node.jsとpnpmの更新時は`mise.toml`を変更し、`package.json`の`engines`と`packageManager`も同じ版へ揃えます。Node.jsの宣言版は`preinstall`と`check`で照合します。依存が導入済みでインストール処理が省略される場合も、`check`で不一致を検出します。pnpmは`pmOnFail: error`により、版が違っても別の版を自動取得せず失敗します。`mise install`後に`mise exec`で実行してください。[^pnpm-version-policy]
+Node.jsとpnpmの更新時は`mise.toml`を変更し、`package.json`の`engines`と`packageManager`も同じ版へ揃えます。Node.jsとpnpmの実行版はCIで宣言値と照合します。ローカルでは`mise exec`で指定版を使います。pnpmは`pmOnFail: error`により、版が違っても別の版を自動取得せず失敗します。`mise install`後に`mise exec`で実行してください。[^pnpm-version-policy]
 
 シェルでmiseを有効化済みなら、選択されている版を確認して`pnpm run dev`などを直接実行することもできます。
 
@@ -116,3 +116,5 @@ IaC・配信・停止制御・接続workflowの実装と実環境検証は後続
 ## workers.devへの配信手順
 
 [初回配信と復旧](docs/operations/workers.md)にR2・資格情報・保護された手動workflow・artifact検証をまとめています。初回併用検証の成功後に、別PRで自動配信を有効化します。
+
+Terraformの検証・整形・provider lock更新もGitHub Actionsから実行します。ローカルTerraform実行や自作の運用JavaScriptは使いません。
