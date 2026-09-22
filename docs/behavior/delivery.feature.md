@@ -1,40 +1,40 @@
 ---
 type: Feature
-title: 検証済みの静的配信物をworkers.devへ届ける
-description: 運用担当者が状態と対象を確認して配信し、同じ配信物で復旧できる条件。
+title: 検証済みの静的配信物をWorkersへ届ける
+description: 運用担当者がWranglerだけで初期化、配信、復旧し、同じ配信物を検証する条件。
 ---
 
-## 機能: 静的配信の制御
+## 機能: 静的配信を自己完結させる
 
-運用担当者はmainで検証した配信物を再ビルドせず配信し、失敗時には直前の検証済み配信物へ戻せる。
+運用担当者は、mainで検証した配信物を再ビルドせずにapex Workerへ配信し、失敗時には指定したVersionへ復旧できる。
 
-### シナリオ: 配信を許可する
+### シナリオ: 初回Workerを初期化する
 
-- 前提: mainの検証runが成功し、artifactのハッシュが一致する
-- もし: `apex-delivery`の排他を取得し、変更直前に停止状態と最新mainを取得する
-- ならば: `open`かつ対象SHAが最新mainの場合だけ配信する
-- かつ: Workerが存在することを確認し、Wranglerで新規作成を代行しない
+- 前提: `apex` Workerが存在せず、Custom Domainも接続していない
+- もし: 保護された手動bootstrapが最新mainの検証済みartifactを受け取る
+- ならば: Wranglerが`apex` Workerを作成してartifactを配信する
+- かつ: workers.devのHTTP、配信SHA、noindexを確認して成功記録を保存する
+
+### シナリオ: 通常の配信を許可する
+
+- 前提: mainの検証runが成功し、artifactのSHAとハッシュが一致する
+- かつ: `apex` Workerが既に存在する
+- もし: `apex-delivery`の排他を取得し、変更直前に最新mainを確認する
+- ならば: Wranglerが同じartifactを配信する
 - かつ: HTTP検証後にSHA・ハッシュ・Version・Deployment・run IDを記録する
 
-### シナリオ: 不明な状態で変更しない
+### シナリオ: Workerが不明な通常配信を拒否する
 
-- もし: artifact不一致・状態取得失敗・不正状態・停止中・古いSHAを検出する
-- ならば: 配信とWorker変更を拒否する
-- かつ: 失敗・中断を成功記録にしない
+- 前提: `apex` Workerが存在しない、複数ある、または取得できない
+- もし: 通常の配信または復旧を実行する
+- ならば: Wranglerを実行せず失敗する
+- かつ: bootstrapだけが初回作成を扱う
 
-### シナリオ: 初期化する
+### シナリオ: 指定したVersionへ復旧する
 
-- 前提: R2ロック検証済みで、保護された手動経路がある
-- もし: 初期Worker・停止変数を作る
-- ならば: Workerも接続候補もCustom Domainもない初回だけ作成を許可する
-- かつ: 初回解除は`frozen/bootstrap`だけを対象にする
-- かつ: 配信後のTerraform無差分とURL設定を確認するまで自動配信を有効化しない
-
-### シナリオ: 直前の配信物へ復旧する
-
-- 前提: 現在の配信記録と直前の成功記録を照合できる
+- 前提: 成功記録のrun IDとVersion IDが一致する
 - もし: 保護された手動復旧を実行する
-- ならば: 直前の成功記録に対応するartifactをハッシュ照合して再ビルドせず配信する
-- かつ: 通常配信と同じ停止状態・最新mainの制御コード・排他・HTTP検証を使う
+- ならば: Wrangler標準rollbackで指定Versionを配信する
+- かつ: 通常配信と同じ最新main・排他・HTTP検証を使う
 
-workers.devにだけ`X-Robots-Tag: noindex`を付ける。Custom Domainと正式リリース制御は#10・#12で扱う。
+Terraform、state、R2 state資格情報、`.infra`は配信経路に含めない。workers.devにだけ`X-Robots-Tag: noindex`を付ける。Custom Domain接続と正式リリースは後続の移行単位で扱う。

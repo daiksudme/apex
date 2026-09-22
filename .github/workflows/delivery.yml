@@ -15,7 +15,7 @@ on:
         description: Verified Worker Version ID for rollback
         type: string
       receipt_run:
-        description: Successful Delivery run containing that version receipt
+        description: Successful Bootstrap or Delivery run containing that version receipt
         type: string
 permissions:
   contents: read
@@ -71,8 +71,7 @@ jobs:
           VERSION_ID: ${{ inputs.version_id }}
           RECEIPT_RUN: ${{ inputs.receipt_run }}
           GH_TOKEN: ${{ github.token }}
-          CONTROL_READ_TOKEN: ${{ secrets.CONTROL_READ_TOKEN }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: delivery-receipt

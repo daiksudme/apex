@@ -2,7 +2,7 @@
 set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 WORK=$(mktemp -d); trap 'rm -rf "$WORK"' EXIT
-export FIXTURES=$WORK GITHUB_REPOSITORY=daiksudme/.infra GITHUB_EVENT_NAME=pull_request_target
+export FIXTURES=$WORK GITHUB_REPOSITORY=daiksudme/apex GITHUB_EVENT_NAME=pull_request_target
 export GITHUB_SHA=cccccccccccccccccccccccccccccccccccccccc
 export GITHUB_EVENT_PATH=$WORK/event.json
 printf '{"pull_request":{"number":7}}' > "$GITHUB_EVENT_PATH"
@@ -28,7 +28,7 @@ chmod +x "$WORK/gh"
 export PATH="$WORK:$PATH"
 valid() {
  rm -f "$WORK/approved" "$WORK/read" "$WORK/dismissed"
- printf '{"state":"open","draft":false,"user":{"login":"daiksud","id":155234749},"base":{"ref":"main","repo":{"full_name":"daiksudme/.infra"}},"head":{"sha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}' > "$WORK/pr.json"
+ printf '{"state":"open","draft":false,"user":{"login":"daiksud","id":155234749},"base":{"ref":"main","repo":{"full_name":"daiksudme/apex"}},"head":{"sha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}}' > "$WORK/pr.json"
  printf '{"check_runs":[{"id":2,"name":"verify","head_sha":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","status":"completed","conclusion":"success","app":{"id":15368}}]}' > "$WORK/checks.json"
 }
 valid
@@ -39,7 +39,7 @@ for change in '.draft = true' '.user.login = "contributor"' '.state = "closed"' 
  bash "$ROOT/.github/scripts/approve.sh"
  test ! -f "$WORK/approved"
 done
-for change in '.check_runs[0].conclusion = "failure"' '.check_runs = []' '.check_runs[0].name = "terraform-maintenance"' '.check_runs[0].app.id = 1' '.check_runs[0].head_sha = "old"' '.check_runs[0].status = "in_progress"'; do
+for change in '.check_runs[0].conclusion = "failure"' '.check_runs = []' '.check_runs[0].name = "manual-maintenance"' '.check_runs[0].app.id = 1' '.check_runs[0].head_sha = "old"' '.check_runs[0].status = "in_progress"'; do
  valid; jq "$change" "$WORK/checks.json" > "$WORK/next"; mv "$WORK/next" "$WORK/checks.json"
  bash "$ROOT/.github/scripts/approve.sh"
  test ! -f "$WORK/approved"

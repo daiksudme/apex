@@ -99,15 +99,13 @@ heroImage:
 
 ## 配信と基盤の管理契約
 
-[管理責任とリリース境界のADR](docs/adr/0001-delivery-ownership.md)で、apexのTerraform・Wranglerと共通基盤 `.infra` の責任を定めています。
-apexはWorkerと配信を、`.infra`はDNSとCustom Domainを所有します。state全体や管理資格情報はリポジトリ間で共有しません。
+[管理責任とリリース境界のADR](docs/adr/0001-delivery-ownership.md)で、apexがWorker、配信、復旧、Custom DomainをWranglerで管理する責任を定めています。DNS Zone、Nameserver、DNSSEC、他サイトのhostname・Workerは管理しません。
 
-通常配信と初回ドメイン接続は別経路です。接続時は新しい配信を永続的に止め、受け入れ済みの同じ候補を照合し、接続後の確認に成功してから正式タグを付けます。
-IaC・配信・停止制御・接続workflowの実装と実環境検証は後続Issueで行います。
+通常配信、初回bootstrap、Custom Domain接続は別経路です。Custom DomainのDNS・TLS・HTTP確認が成功するまで、正式タグは作成しません。
 
 ## 公開リポジトリでの取り扱い
 
-公開可能なサンプルだけを置いてください。秘密値や非公開原稿は、下書きであってもコミットしません。`.env`、依存、キャッシュ、生成物、テスト結果、Terraformのstate／plan／変数値はGit管理から除外します。通常ビルドとPR検証にCloudflare資格情報は不要です。
+公開可能なサンプルだけを置いてください。秘密値や非公開原稿は、下書きであってもコミットしません。`.env`、依存、キャッシュ、生成物、テスト結果はGit管理から除外します。通常ビルドとPR検証にCloudflare資格情報は不要です。
 
 [^mise-setup]: mise公式の導入・プロジェクト設定・execによる実行手順。
 [^pnpm-version-policy]: pnpmのpmOnFail設定。インストール担当はmiseとし、pnpm自身は不一致を拒否する。
@@ -115,9 +113,7 @@ IaC・配信・停止制御・接続workflowの実装と実環境検証は後続
 
 ## workers.devへの配信手順
 
-[初回配信と復旧](docs/operations/workers.md)にR2・資格情報・保護された手動workflow・artifact検証をまとめています。初回併用検証の成功後に、別PRで自動配信を有効化します。
-
-Terraformの検証・整形・provider lock更新もGitHub Actionsから実行します。ローカルTerraform実行や自作の運用JavaScriptは使いません。
+[初回配信と復旧](docs/operations/workers.md)にWrangler bootstrap、artifact検証、配信、rollbackをまとめています。初回bootstrap後に、別PRでstagingと自動配信を有効化します。
 
 ## PRの承認とmain保護
 
