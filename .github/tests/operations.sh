@@ -19,7 +19,10 @@ set -euo pipefail
 case "$*" in
   *git/ref/heads/main*) echo "${MOCK_MAIN:-$GITHUB_SHA}" ;;
   *actions/runs/123*) printf '{"repository":{"full_name":"daiksudme/apex"},"head_sha":"%s","head_branch":"main","event":"push","status":"completed","conclusion":"success","path":".github/workflows/verify.yml"}\n' "$GITHUB_SHA" ;;
-  *actions/runs/999/attempts/1*) echo '{"path":".github/workflows/delivery.yml","head_branch":"main","status":"completed","conclusion":"success"}' ;;
+  *actions/runs/999/attempts/1*)
+    jq -n --arg path "${RECEIPT_WORKFLOW:-.github/workflows/delivery.yml}" \
+      '{path:$path,head_branch:"main",status:"completed",conclusion:"success"}'
+    ;;
   'run download'*)
     target=${!#}
     mkdir -p "$target"
@@ -115,8 +118,15 @@ reject_without_wrangler
 export OPERATION=rollback RECEIPT_RUN=999 VERSION_ID=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 export RECEIPT_FILE="$TMP/receipt.json"
 jq '.delivery_run = "999"' "$TMP/bootstrap-receipt.json" >"$RECEIPT_FILE"
+export RECEIPT_WORKFLOW=.github/workflows/delivery.yml
+reject_without_wrangler
+
+export RECEIPT_WORKFLOW=.github/workflows/bootstrap.yml
 rm -f "$COMMAND_LOG"
 run_publish
 grep -q 'wrangler rollback bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' "$COMMAND_LOG"
+
+export RECEIPT_WORKFLOW=.github/workflows/verify.yml
+reject_without_wrangler
 
 echo 'Terraform-free bootstrap, delivery, and rollback checks passed.'

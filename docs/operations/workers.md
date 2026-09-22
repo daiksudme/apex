@@ -43,7 +43,7 @@ gh workflow run delivery.yml --repo daiksudme/apex --ref main -f operation=deplo
 gh workflow run delivery.yml --repo daiksudme/apex --ref main -f operation=rollback -f version_id=VERSION_ID -f receipt_run=DELIVERY_RUN_ID
 ```
 
-配信は最新mainと検証済みartifactのrun・SHA・hashを照合し、既存Workerを一意に確認してから実行します。rollbackは成功記録のrun IDとVersion IDを照合し、Wrangler標準rollbackを使います。どちらも再ビルドせず、`apex-delivery`で排他し、HTTP検証に失敗した場合は成功記録を作りません。[^workers-commands] [^workers-rollback]
+配信は最新mainと検証済みartifactのrun・SHA・hashを照合し、既存Workerを一意に確認してから実行します。rollbackは成功したBootstrapまたはDeliveryのrun IDとVersion IDを照合し、recordのoperationと実行workflowが対応する場合だけWrangler標準rollbackを使います。どちらも再ビルドせず、`apex-delivery`で排他し、HTTP検証に失敗した場合は成功記録を作りません。[^workers-commands] [^workers-rollback]
 
 PRステージング、mainの自動配信、Custom Domain、正式リリースは後続の移行単位で有効化します。Custom Domain接続では既存競合を削除・上書きせず、DNS・TLS・HTTPが成功するまでv1.0.0を作成しません。
 

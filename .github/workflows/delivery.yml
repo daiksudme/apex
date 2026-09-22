@@ -15,7 +15,7 @@ on:
         description: Verified Worker Version ID for rollback
         type: string
       receipt_run:
-        description: Successful Delivery run containing that version receipt
+        description: Successful Bootstrap or Delivery run containing that version receipt
         type: string
 permissions:
   contents: read

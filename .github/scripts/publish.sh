@@ -52,8 +52,11 @@ case "${OPERATION:-}" in
       '.format == 2 and .status == "verified" and .delivery_run == $run and .version == $version and .worker == $worker and (.attempt | test("^[1-9][0-9]*$")) and (.sha | test("^[a-f0-9]{40}$")) and (.hash | test("^[a-f0-9]{64}$")) and (.verification_run | test("^[0-9]+$"))' \
       "$receipt" >/dev/null
     attempt=$(jq -r .attempt "$receipt")
+    receipt_operation=$(jq -r .operation "$receipt")
     gh api "repos/$REPOSITORY/actions/runs/$RECEIPT_RUN/attempts/$attempt" |
-      jq -e 'select(.path == ".github/workflows/delivery.yml" and .head_branch == "main" and .status == "completed" and .conclusion == "success")' >/dev/null
+      jq -e --arg operation "$receipt_operation" \
+        'select(.head_branch == "main" and .status == "completed" and .conclusion == "success" and ((.path == ".github/workflows/bootstrap.yml" and $operation == "bootstrap") or (.path == ".github/workflows/delivery.yml" and ($operation == "deploy" or $operation == "rollback"))))' \
+        >/dev/null
     sha=$(jq -r .sha "$receipt")
     hash=$(jq -r .hash "$receipt")
     verification_run=$(jq -r .verification_run "$receipt")
