@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "apex-staging",
+  "account_id": "a1f28decfde7c9df1884714e574d2059",
+  "compatibility_date": "2026-09-20",
+  "workers_dev": false,
+  "preview_urls": true,
+  "assets": { "directory": "./dist", "html_handling": "auto-trailing-slash", "not_found_handling": "404-page" },
+  "observability": { "enabled": false },
+  "send_metrics": false
+}

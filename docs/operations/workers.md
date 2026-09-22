@@ -89,3 +89,15 @@ format／lockはTerraformソース差分だけをartifactに保存します。�
 [^gh-variables]: GitHub Actions Variables APIの読取・書込権限。
 [^worker-api]: Get Worker APIの未配信時刻とCustom Domain参照。
 [^cf-headers]: Cloudflare Static Assetsのホスト条件付きヘッダー。
+
+## PRのステージング
+
+apex-stagingは本番とは別のWorkerです。Terraformは存在とmain限定のapex-staging Environment、APEX_STAGING_WORKER_IDを管理します。このEnvironmentには本番と別のWorkers Scripts WriteトークンをCLOUDFLARE_DEPLOY_TOKENとして登録します。権限はaccount単位であり、Worker単位に制限されるとは扱いません。
+
+VerifyはPRのマージ結果を資格情報なしで検証・ビルドし、形式2のartifactを保存します。Stagingはmainのコードからrun・PR head・base・マージSHA・hashを照合し、Wranglerの固定設定でVersionをアップロードします。絶対パス・親ディレクトリ参照・リンク・特殊ファイルを含むarchiveは展開しません。
+
+ステージングの_headersだけはmainの環境設定で置き換え、全パスをnoindexにします。静的ページは再ビルドしません。staging-receiptには元artifactのsource_hashと環境ヘッダーのheaders_hashを分けて記録します。本番のヘッダーと配信記録の形式は変更しません。
+
+Version固有URLをActionsのSummaryに表示し、HTTP・配信SHA・記事・画像・320px画面を確認します。ブラウザージョブもmainの共通smoke testを使い、PRの実行コードや配信用資格情報を持ちません。PR内の新しいテストは元のVerifyでローカルプレビューに対して実行します。Preview URLは公開URLであり、秘密の原稿や資格情報は配信物に含めません。
+
+成功条件はverifyとstagingの両方です。Worker未準備、資格情報不足、配信失敗、動作確認失敗、PR更新はstaging成功になりません。EnvironmentとWorkerの初回bootstrap後、実チェックの生成・成功を確認してmainの必須チェックへstagingを登録します。URLを維持するためPR終了時のVersion削除は行わず、本番のVersionと混在させません。

@@ -130,3 +130,7 @@ GitHub Actionsの「Allow GitHub Actions to create and approve pull requests」�
 GitHubのreview作成APIはHEAD一致を条件とする書込を提供しないため、自動承認前にmainの実Rulesetで古い承認の無効化（dismiss_stale_reviews_on_push）が有効であることを確認します。保護がない場合はApproveしません。
 
 承認前にはstrictな必須チェックも確認し、main更新後の未検証状態でマージできないようにします。投稿したreviewのIDを取得してHEAD・対象・mainを再確認し、途中変更や確認失敗があればそのreviewを取り消して失敗にします。
+
+## PRプレビュー
+
+PRのVerify成功後、別WorkerのVersion固有URLへステージング配信します。配信と実URLのsmoke testが成功するとstagingチェックが成功します。URLはStaging runのSummaryに表示します。初回bootstrapと専用トークンの登録、実確認後にmainの必須チェックへ追加します。[ステージングの管理と制限](docs/operations/workers.md#prのステージング)を参照してください。

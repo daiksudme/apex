@@ -31,5 +31,6 @@ description: サイト開発で使う用語とコード上の対応。
 | 自動Approve | 所有者本人の最新PRが必須検証を通ったことに基づくBotの承認。独立した内容レビューを意味しない | PRレビュー | `Owner approval`、`approve.sh` |
 | 必須チェック | 成功しない限りmainへ統合できない検証結果 | PR統合 | `verify`、`.github/required-checks.json` |
 | 古い承認の無効化 | 新しい変更に以前の承認を引き継がせないGitHubの保護 | main保護 | `dismiss_stale_reviews_on_push` |
+| PRプレビュー | 本番と別のWorker Versionで公開候補を確認するURL | PR検証 | `apex-staging`、`Staging` |
 
 配信とリリース制御の所有者・遷移は[管理契約ADR](adr/0001-delivery-ownership.md)に記録する。

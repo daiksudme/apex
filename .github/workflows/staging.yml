@@ -1,0 +1,128 @@
+name: Staging
+on:
+  workflow_run:
+    workflows: [Verify]
+    types: [completed]
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+concurrency:
+  group: staging-${{ github.event.workflow_run.head_branch || github.run_id }}
+  cancel-in-progress: false
+jobs:
+  source:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      checks: write
+    outputs:
+      head: ${{ steps.source.outputs.head }}
+      check: ${{ steps.source.outputs.check }}
+      configured: ${{ steps.source.outputs.configured }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_RUN_ID: ${{ github.event.workflow_run.id }}
+          WORKER_ID: ${{ vars.APEX_STAGING_WORKER_ID }}
+        run: |
+          set -euo pipefail
+          info=$(bash .github/scripts/pr-source.sh)
+          head=$(jq -r .head <<< "$info")
+          check=$(gh api "repos/$GITHUB_REPOSITORY/check-runs" --method POST -f name=staging -f head_sha="$head" -f status=in_progress --jq .id)
+          echo "head=$head" >> "$GITHUB_OUTPUT"
+          echo "check=$check" >> "$GITHUB_OUTPUT"
+          if [[ $WORKER_ID =~ ^[a-f0-9-]{32,36}$ ]]; then echo 'configured=true' >> "$GITHUB_OUTPUT"; fi
+  deploy:
+    needs: source
+    if: needs.source.outputs.configured == 'true'
+    environment: apex-staging
+    concurrency:
+      group: apex-staging
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+      build: ${{ steps.deploy.outputs.build }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: 2026.9.11
+          cache: false
+      - run: pnpm install --frozen-lockfile
+      - id: deploy
+        run: bash .github/scripts/staging.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_RUN_ID: ${{ github.event.workflow_run.id }}
+          APEX_STAGING_WORKER_ID: ${{ vars.APEX_STAGING_WORKER_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DEPLOY_TOKEN }}
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: staging-receipt
+          path: .staging/receipt.json
+          include-hidden-files: true
+          retention-days: 7
+          if-no-files-found: error
+  browser:
+    needs: [source, deploy]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+        with:
+          version: 2026.9.11
+          cache: false
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright test tests/staging.spec.ts
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ needs.deploy.outputs.url }}
+  report:
+    needs: [source, deploy, browser]
+    if: always() && needs.source.outputs.check != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+      checks: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          CHECK_ID: ${{ needs.source.outputs.check }}
+          DEPLOY_RESULT: ${{ needs.deploy.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+          VERIFY_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          [[ $CHECK_ID =~ ^[0-9]+$ ]]
+          conclusion=failure
+          if [[ $DEPLOY_RESULT == success && $BROWSER_RESULT == success ]] && bash .github/scripts/pr-source.sh >/dev/null; then conclusion=success; fi
+          gh api "repos/$GITHUB_REPOSITORY/check-runs/$CHECK_ID" --method PATCH -f status=completed -f conclusion="$conclusion" >/dev/null
+          if [[ $conclusion == success ]]; then bash .github/scripts/approve.sh; fi
