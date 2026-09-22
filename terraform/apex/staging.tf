@@ -12,8 +12,8 @@ resource "github_actions_variable" "staging_worker" {
   value         = cloudflare_worker.staging.id
 }
 resource "github_repository_environment" "staging" {
-  repository       = "apex"
-  environment      = "apex-staging"
+  repository        = "apex"
+  environment       = "apex-staging"
   can_admins_bypass = false
   deployment_branch_policy {
     protected_branches     = false
