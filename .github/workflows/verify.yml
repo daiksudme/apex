@@ -39,6 +39,7 @@ jobs:
       - run: bash .github/tests/operations.sh
       - run: bash .github/tests/approve.sh
       - run: bash .github/tests/no-terraform.sh
+      - run: bash .github/tests/no-terraform-fixture.sh
       - run: shellcheck .github/scripts/*.sh .github/tests/*.sh
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
