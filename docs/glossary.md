@@ -27,5 +27,9 @@ description: サイト開発で使う用語とコード上の対応。
 | 配信記録 | HTTP検証後のSHA・hash・Version／Deployment・runの対応 | apex配信 | 形式2の`delivery-receipt`、`receipt.json` |
 | リリースID | 停止・候補・接続・復旧・再開を同一操作として照合する識別子 | リリース制御 | `APEX_DELIVERY_CONTROL.release_id`（未実装） |
 | state | Terraformが管理対象と実リソースの対応を保持する非公開データ | 各IaC管理境界 | R2の4バケット。各root moduleがstate内容を所有（実環境は導入時に検証） |
+| Code Owner | 変更箇所のレビューを担当する所有者。全ファイルをdaiksudが所有する | PRレビュー | `.github/CODEOWNERS` |
+| 自動Approve | 所有者本人の最新PRが必須検証を通ったことに基づくBotの承認。独立した内容レビューを意味しない | PRレビュー | `Owner approval`、`approve.sh` |
+| 必須チェック | 成功しない限りmainへ統合できない検証結果 | PR統合 | `verify`、`.github/required-checks.json` |
+| 古い承認の無効化 | 新しい変更に以前の承認を引き継がせないGitHubの保護 | main保護 | `dismiss_stale_reviews_on_push` |
 
 配信とリリース制御の所有者・遷移は[管理契約ADR](adr/0001-delivery-ownership.md)に記録する。
