@@ -9,17 +9,10 @@ playwright-report/
 test-results/
 *.log
 .DS_Store
-.terraform/
-*.tfstate
-*.tfstate.*
-*.tfplan
-*.tfvars
-*.tfvars.json
 .pnpm-store/
 .wrangler/
 .private/
 .delivery/
 .previous/
-foundation-tools/
 manifest.json
 site.tar
