@@ -37,4 +37,19 @@ description: 運用担当者がWranglerだけで初期化、配信、復旧し�
 - ならば: Wrangler標準rollbackで指定Versionを配信する
 - かつ: 通常配信と同じ最新main・排他・HTTP検証を使う
 
+### シナリオ: PRの検証済み配信物をステージングへ届ける
+
+- 前提: 同じリポジトリのopenなPRに対する`pull_request` Verify runが成功している
+- かつ: Verify runのPR head・base・merge SHA、artifactのrun・SHA・ハッシュが現在のPRと一致する
+- もし: main上のStaging workflowがそのartifactを受け取る
+- ならば: PR由来のworkflow・設定・依存scriptを実行せず、静的artifactだけを専用Workerへ配信する
+- かつ: staging URLのHTTP、配信SHA、noindexを確認してPRの必須チェックを成功にする
+
+### シナリオ: 信頼できないPRの配信物を拒否する
+
+- 前提: Verify runのイベント、成功状態、PR対応、SHA、artifactハッシュ、またはtarの内容のいずれかが不正である
+- もし: Staging workflowがartifactを受け取ろうとする
+- ならば: Wranglerを実行せず失敗する
+- かつ: PRのhead・base・merge SHAが更新、close、または競合状態になった場合も同様に失敗する
+
 Terraform、state、R2 state資格情報、`.infra`は配信経路に含めない。workers.devにだけ`X-Robots-Tag: noindex`を付ける。Custom Domain接続と正式リリースは後続の移行単位で扱う。

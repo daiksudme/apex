@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+verify_archive() {
+  local archive=$1 entry
+  while IFS= read -r entry; do
+    case "$entry" in
+      /* | *\\* | */../* | .. | ../*) return 1 ;;
+    esac
+  done < <(tar -tf "$archive")
+  tar -tvf "$archive" | awk 'substr($0, 1, 1) !~ /^[d-]$/ { exit 1 }'
+}
+
 case "${1:-}" in
   pack)
     [[ $GITHUB_SHA =~ ^[a-f0-9]{40}$ && $GITHUB_RUN_ID =~ ^[0-9]+$ ]]
@@ -14,6 +25,7 @@ case "${1:-}" in
     cd "${2:?artifact directory required}"
     jq -e --arg sha "${3:?SHA required}" --arg run "${4:?run required}" '.format == 2 and .sha == $sha and .run == $run and (.hash | test("^[a-f0-9]{64}$"))' manifest.json >/dev/null
     test "$(jq -r .hash manifest.json)" = "$(sha256sum site.tar | cut -d ' ' -f1)"
+    verify_archive site.tar
     mkdir dist
     tar --no-same-owner --no-same-permissions -xf site.tar -C dist
     ;;
