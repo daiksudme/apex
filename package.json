@@ -9,18 +9,12 @@
     "pnpm": "12.5.1"
   },
   "scripts": {
-    "dev": "astro dev",
-    "check": "astro check",
-    "build": "astro build",
-    "preview": "astro preview"
+    "build": "astro build"
   },
   "dependencies": {
     "astro": "7.3.3"
   },
   "devDependencies": {
-    "@astrojs/check": "0.9.10",
-    "@playwright/test": "1.63.0",
-    "typescript": "6.0.3",
     "wrangler": "4.135.0"
   }
 }
