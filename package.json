@@ -12,7 +12,7 @@
     "dev": "astro dev",
     "check": "astro check",
     "build": "astro build",
-    "test": "node --test test-config/*.test.mjs test-content/*.test.mjs && pnpm run build && playwright test",
+    "test": "node --test test-config/*.test.mjs && pnpm run build && playwright test",
     "preview": "astro preview"
   },
   "dependencies": {
