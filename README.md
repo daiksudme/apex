@@ -8,7 +8,7 @@ description: Astroで作る静的サイトの概要とビルド方法。
 
 Astroで構築した静的サイトです。出力先は `dist/` です。Cloudflareの配信設定は [wrangler.jsonc](wrangler.jsonc) で管理します。
 
-公開URLは <https://apex.daiksud-a1f.workers.dev/> です。
+公開中のサイトは <https://apex.daiksud-a1f.workers.dev/> で確認できます。
 
 ### ビルド
 
