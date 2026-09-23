@@ -1,4 +1,4 @@
 export const site = {
   name: 'daiksud.me',
-  description: 'サイトを準備しています。',
+  description: 'Cloudflare Workersで公開しています。',
 } as const;
