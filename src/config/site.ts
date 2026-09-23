@@ -1,4 +1,4 @@
 export const site = {
   name: 'daiksud.me',
-  description: 'ブログの公開に向けて準備しています。',
+  description: 'サイトを準備しています。',
 } as const;

@@ -45,15 +45,3 @@ h1 {
 p {
   margin: 0;
 }
-
-header { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; }
-.post-list { list-style: none; padding: 0; }
-.post-list li { margin-block: 2rem; }
-h2 { line-height: 1.4; }
-.tags { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; list-style: none; padding: 0; }
-img { display: block; max-width: 100%; height: auto; }
-.hero { margin-block: 2rem; }
-.prose { margin-block: 3rem; }
-.prose > * + * { margin-top: 1.5rem; }
-pre { overflow-x: auto; padding: 1rem; border-radius: 0.5rem; }
-code { font-size: 0.95em; }

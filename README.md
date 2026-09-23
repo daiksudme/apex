@@ -1,7 +1,7 @@
 ---
 type: Guide
 title: apexの開発と検証
-description: daiksud.meの静的ブログをローカルで起動し、配信物を検証する手順。
+description: Astroの最小サイトをビルドし、Cloudflare Git Integrationへ接続する手順。
 sources:
   - id: mise-setup
     resource: https://mise.jdx.dev/getting-started.html
@@ -9,120 +9,88 @@ sources:
     resource: https://pnpm.io/settings/cli#pmonfail
   - id: mise-path-priority
     resource: https://mise.jdx.dev/configuration/settings.html
+  - id: workers-git
+    resource: https://developers.cloudflare.com/workers/ci-cd/builds/git-integration/github-integration/
+  - id: workers-build-image
+    resource: https://developers.cloudflare.com/workers/ci-cd/builds/build-image/
+  - id: worker-previews
+    resource: https://developers.cloudflare.com/workers/previews/get-started/
 ---
 
 ## apex
 
-Astroで静的生成するブログの開発用リポジトリです。ホーム、記事一覧とMarkdownの記事詳細を提供します。
+Astroでトップページ1枚を静的生成するサイトです。サイト名と準備中の説明を表示し、記事機能は含みません。出力先は`dist/`です。`daiksud.me`は表示名であり、Custom Domainは未接続です。
 
-## 必要な環境
+## ローカルでビルドする
 
-- mise（CI・再現検証では2026.9.11）
-- Node.js 24.21.0とpnpm 12.5.1（`mise.toml`）
-- Chromiumを実行できるmacOSまたはLinux
+Node.js 24.21.0、pnpm 12.5.1を`mise.toml`と`package.json`で固定しています。Wrangler 4.135.0はプロジェクトの開発依存です。Cloudflareのアカウント・tokenは不要です。
 
-[公式手順](https://mise.jdx.dev/getting-started.html)でmiseを導入します。Node.jsとpnpmのインストール・版の選択はmiseが担当します。取得したリポジトリの`mise.toml`を確認してから信頼し、次の手順を実行してください。`mise exec`を使うため、シェルの設定変更は不要です。[^mise-setup]
+miseを導入し、取得した設定を確認してから実行します。[^mise-setup]
 
 ```sh
 git clone https://github.com/daiksudme/apex.git
 cd apex
 mise trust mise.toml
 mise install
-mise exec -- node --version
-mise exec -- pnpm --version
 mise exec -- pnpm install --frozen-lockfile
-mise exec -- pnpm exec playwright install chromium
-mise exec -- pnpm run dev
+mise exec -- pnpm run build
 ```
 
-開発サーバーのURLは `http://localhost:4321/` です。Linuxでブラウザーのシステム依存が不足する場合は、専用の開発環境で `mise exec -- pnpm exec playwright install --with-deps chromium` を実行してください。
+指定版のNode.js・pnpmが選択されている環境では、`pnpm install --frozen-lockfile`と`pnpm run build`だけでビルドできます。開発時は`pnpm run dev`、ビルド済みページの確認は`pnpm run preview`を使います。URLは`http://localhost:4321/`です。
 
-## 検証と静的ビルド
+miseの`activate_aggressive`でプロジェクトのツールを優先し、pnpmの`pmOnFail: error`で版の不一致を拒否します。[^mise-path-priority] [^pnpm-version-policy]
+
+## 検証する
 
 ```sh
+mise exec -- pnpm exec playwright install chromium
 mise exec -- pnpm run check
 mise exec -- pnpm test
-mise exec -- pnpm run preview
+mise exec -- pnpm exec wrangler deploy --dry-run
 ```
 
-`mise exec -- pnpm test` は静的ビルドを作り直し、`127.0.0.1:4321` で一時プレビューを起動してChromiumで確認します。開発サーバーや別のプレビューが同じポートを使っている場合は、先に停止してください。テストが起動したサーバーは終了時に停止します。
+`pnpm test`は設定契約テスト、静的ビルド、Chromiumでの表示・320px幅・404応答を確認します。テスト中は`127.0.0.1:4321`を使用します。Linuxでブラウザ依存が不足する場合は、専用環境で`pnpm exec playwright install --with-deps chromium`を使います。Wranglerの`--dry-run`はローカルの構成検証だけを行い、Workerを作成・配信しません。
 
-静的配信物だけが必要な場合は `mise exec -- pnpm run build` を実行します。出力先は `dist/` です。`mise exec -- pnpm run preview` はビルド済みの出力を確認するコマンドであり、本番配信用サーバーではありません。
+PRとmainのGitHub Actions `verify`も同じ検証を実施します。GitHub ActionsからCloudflareへの配信は行いません。CODEOWNERS、必須チェック、Owner approvalは保護付きマージのために残しています。Owner approvalは所有者の最新PRと成功した必須チェックを照合するもので、独立した内容レビューの代わりにはなりません。
 
-PRとmainへのpushではGitHub Actionsも`mise.toml`からNode.jsとpnpmを導入し、`pnpm install --frozen-lockfile`、型検証、ビルド、スモークテストを実行します。型検証やテストの失敗は修正してから統合します。ブラウザーの失敗時にはテストレポートとトレースをActionsのartifactに保存します。
+## Cloudflareへ接続する
 
-依存の更新は `mise exec -- pnpm add` などで行い、`package.json`と`pnpm-lock.yaml`を一緒にコミットします。`pnpm-workspace.yaml`でNode.jsの版の検査・完全版保存・依存のビルド許可を管理します。
+リポジトリのビルドがmainで成功してから、人がCloudflare Dashboardで初回接続を行います。事前のWorker作成や手動deployは不要です。[^workers-git]
 
-Node.jsとpnpmの更新時は`mise.toml`を変更し、`package.json`の`engines`と`packageManager`も同じ版へ揃えます。Node.jsとpnpmの実行版はCIで宣言値と照合します。ローカルでは`mise exec`で指定版を使います。pnpmは`pmOnFail: error`により、版が違っても別の版を自動取得せず失敗します。`mise install`後に`mise exec`で実行してください。[^pnpm-version-policy]
+1. **Workers & Pages > Create application > Import a repository > Get started**を開きます。
+2. GitHubを選び、必要ならCloudflare GitHub Appを`daiksudme/apex`だけに認可し、そのリポジトリを選択します。
+3. 次の設定とBuild Variablesを指定してimportします。Build Variablesはビルド環境の既定版との不一致を防ぎます。[^workers-build-image]
 
-シェルでmiseを有効化済みなら、選択されている版を確認して`pnpm run dev`などを直接実行することもできます。
+| 設定 | 値 |
+| --- | --- |
+| Worker / project name | `apex` |
+| Production branch | `main` |
+| Root directory | リポジトリのルート |
+| Build command | `pnpm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Preview command | `npx wrangler preview` |
+| `NODE_VERSION` | `24.21.0` |
+| `PNPM_VERSION` | `12.5.1` |
 
-このプロジェクトは`activate_aggressive = true`を設定し、miseのツールをPATHの先頭へ置きます。mise有効化後にHomebrewなどのパスが追加されても、pnpmが起動するNode.jsを含めて指定版を使用するためです。グローバル設定やシェル設定の編集は不要です。[^mise-path-priority]
+初回production deploymentが成功したら、**Settings > Build > Branch control**で**Builds for non-production branches**を有効にします。Worker PreviewsはWrangler 4.135.0以上と`previews`設定を使い、branchごとのURLを更新します。[^worker-previews]
+
+その後はmainへのpushでproduction、feature branchへのpushでPreviewが自動更新されます。実際のproduction URLの表示、PR上のbuild statusとPreview URL、同じbranchへの次のpushでURLが維持され内容が更新されることを確認してください。ローカルテストやdry-runだけでは、この接続・配信の成功を確認できません。
+
+配信設定の正本は`wrangler.jsonc`です。DashboardはGitHub接続とBuilds実行設定を担当します。Cloudflare API、Terraform、独自bootstrap、GitHubのCloudflare配信用Secretsは使用しません。DNS・Custom Domain・他サイト・`v1.0.0`リリースは対象外です。
 
 ## 構成と変更
 
-- ページは `src/pages/`、共通レイアウトは `src/layouts/`、スタイルは `src/styles/` に置きます。
-- サイト名・説明は `src/config/site.ts` で管理します。
-- [受け入れ条件](docs/behavior/site-shell.feature.md)と `tests/home.spec.ts` を対応させます。
-- [用語集](docs/glossary.md)で、サイトと配信物の意味を共有します。
+- トップページ: `src/pages/index.astro`
+- 表示名と説明: `src/config/site.ts`
+- レイアウトとスタイル: `src/layouts/`、`src/styles/`
+- [受け入れ条件](docs/behavior/site-shell.feature.md)、[用語集](docs/glossary.md)、[配信の管理責任](docs/adr/0001-delivery-ownership.md)
+- [PRの検証と承認](docs/behavior/pull-request.feature.md)
 
-タグページとCloudflare配信はまだありません。`0.1.0` は開発中のパッケージ版であり、正式公開を表しません。
-
-## 記事の追加・更新・公開
-
-`src/content/posts/`にMarkdownファイルを追加します。ファイル名は自由ですが、URLになる`slug`は英小文字・数字をハイフンで区切り、下書きを含め一意にします。公開後にファイル名やタイトルを変えてもslugは維持してください。slugを変えるとURLが変わり、以前のURLへの転送は自動では作られません。
-
-```yaml
-title: 記事のタイトル
-slug: first-note
-description: 記事の短い説明
-publishedAt: "2026-09-20T18:00:00+09:00"
-tags: [notes]
-draft: true
-```
-
-上記を本文冒頭の`---`で囲み、その後にMarkdownの本文を書きます。6項目はすべて必須です。タグの正本は`src/domain/posts.ts`の`tags`で、現在は`notes`（表示名「ノート」）を使えます。タグなしは`tags: []`です。未定義タグは下書きでもビルドエラーになります。
-
-公開時は`draft: false`にします。未来日時でも公開されるため、日時による予約投稿には使いません。一覧と詳細で同じ公開条件を使い、公開日時の降順・同じ瞬間ならslug昇順で並びます。
-
-日時は引用符で囲んだISO 8601文字列で、秒とUTCオフセットを必ず含めます。`"2026-09-20T09:00:00Z"`も同じ瞬間です。表示は日本時間の`2026-09-20 18:00 JST`になります。日付だけや時差のない日時は受け付けません。
-
-更新時は必要に応じて`updatedAt: "2026-09-21T09:30:00+09:00"`を追加します。更新日時は一覧の順序を変えません。任意の見出し画像は次の形で指定し、公開画像を`public/images/`へ置きます。
-
-```yaml
-heroImage:
-  src: /images/sample-landscape.svg
-  alt: 青い空と緑の丘を描いたサンプル画像
-```
-
-公開サンプルは`welcome.md`の1件です。通常記事へ下書きのテスト原稿を混ぜず、異常系・下書き・0件の検証は一時ディレクトリで実ビルドします。`pnpm test`は下書き本文が配信物に含まれないことも検査します。[記事の受け入れ条件](docs/behavior/posts.feature.md)を参照してください。
-
-## 配信と基盤の管理契約
-
-[管理責任とリリース境界のADR](docs/adr/0001-delivery-ownership.md)で、apexがWorker、配信、復旧、Custom DomainをWranglerで管理する責任を定めています。DNS Zone、Nameserver、DNSSEC、他サイトのhostname・Workerは管理しません。
-
-通常配信、初回bootstrap、Custom Domain接続は別経路です。Custom DomainのDNS・TLS・HTTP確認が成功するまで、正式タグは作成しません。
-
-## 公開リポジトリでの取り扱い
-
-公開可能なサンプルだけを置いてください。秘密値や非公開原稿は、下書きであってもコミットしません。`.env`、依存、キャッシュ、生成物、テスト結果はGit管理から除外します。通常ビルドとPR検証にCloudflare資格情報は不要です。
+Node.js・pnpmの更新時は`mise.toml`、`package.json`、CloudflareのBuild Variablesを揃えます。依存更新は`pnpm add`等で行い、`pnpm-lock.yaml`もコミットします。秘密値・非公開コンテンツをコミットしないでください。
 
 [^mise-setup]: mise公式の導入・プロジェクト設定・execによる実行手順。
-[^pnpm-version-policy]: pnpmのpmOnFail設定。インストール担当はmiseとし、pnpm自身は不一致を拒否する。
-[^mise-path-priority]: mise公式のactivate_aggressive設定。プロジェクト内のツール選択を優先する。
-
-## workers.devへの配信手順
-
-[初回配信と復旧](docs/operations/workers.md)にWrangler bootstrap、artifact検証、配信、rollbackをまとめています。初回bootstrap後に、別PRでstagingと自動配信を有効化します。
-
-## PRの承認とmain保護
-
-CODEOWNERSはdaiksudです。mainのRulesetによるPR・承認1件・Code Ownerレビュー・必須検証・未解決スレッド解消の必須化は、所有者本人のPRが標準ルールでマージ可能になることを実PRで確認してから完了とします。Rulesetの定義・実適用はこの自動承認workflowの導入と分け、条件不成立時にbypassや独自の承認方式へ切り替えません。
-
-GitHub Actionsの「Allow GitHub Actions to create and approve pull requests」を有効にします。Owner approvalはmainのコードからメタデータだけを読み、daiksudの非Draft PRの最新SHAについて`.github/required-checks.json`の検証成功後にApproveします。別の投稿者や失敗・未実行の検証は承認しません。実設定の適用とCode Owner本人のPRのマージ可否は、CIとは別に実PRで確認します。
-
-自動Approveは、管理者本人が投稿したPRのCI結果に基づく承認です。VerifyはPR内のworkflow・テスト変更も検証対象として実行し、所有者による検証定義の変更を禁止しません。独立した内容レビューの代わりにはせず、変更のレビュー・必須CI・未解決指摘の確認を統合前に行います。承認処理自体はmainのコードから実行し、最新mainを含まないPRや承認直前に対象ブランチが変わったPRを拒否します。
-
-GitHubのreview作成APIはHEAD一致を条件とする書込を提供しないため、自動承認前にmainの実Rulesetで古い承認の無効化（dismiss_stale_reviews_on_push）が有効であることを確認します。保護がない場合はApproveしません。
-
-承認前にはstrictな必須チェックも確認し、main更新後の未検証状態でマージできないようにします。投稿したreviewのIDを取得してHEAD・対象・mainを再確認し、途中変更や確認失敗があればそのreviewを取り消して失敗にします。
+[^mise-path-priority]: miseのactivate_aggressiveによるPATH優先順位。
+[^pnpm-version-policy]: pnpmのpmOnFailによる版の不一致の拒否。
+[^workers-git]: Cloudflare GitHub Integrationによるimportと自動build。
+[^workers-build-image]: Workers BuildsのNode.js・pnpmの版指定。
+[^worker-previews]: Worker Previewsの必要版と設定、Git連携。
