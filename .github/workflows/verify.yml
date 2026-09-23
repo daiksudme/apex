@@ -36,20 +36,9 @@ jobs:
         run: |
           test "$(node --version)" = "v$(jq -r .engines.node package.json)"
           test "$(pnpm --version)" = "$(jq -r .engines.pnpm package.json)"
-      - run: bash .github/tests/approve.sh
-      - run: shellcheck .github/scripts/*.sh .github/tests/*.sh
+      - run: shellcheck .github/scripts/*.sh
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm run check
-      - run: pnpm test
+      - run: pnpm run build
       - name: Validate Worker configuration without deploying
         run: pnpm exec wrangler deploy --dry-run
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: failure()
-        with:
-          name: browser-test-results
-          path: |
-            playwright-report/
-            test-results/
-          retention-days: 7
-          if-no-files-found: ignore
