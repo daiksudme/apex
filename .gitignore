@@ -12,7 +12,3 @@ test-results/
 .pnpm-store/
 .wrangler/
 .private/
-.delivery/
-.previous/
-manifest.json
-site.tar
