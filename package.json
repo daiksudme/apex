@@ -9,12 +9,14 @@
     "pnpm": "12.5.1"
   },
   "scripts": {
-    "build": "astro build"
+    "build": "astro build",
+    "test": "vitest run"
   },
   "dependencies": {
     "astro": "7.3.3"
   },
   "devDependencies": {
+    "vitest": "5.0.1",
     "wrangler": "4.136.3"
   }
 }
