@@ -1,8 +1,10 @@
 ---
+import { getPageTitle } from '../config/page-title';
 import { site } from '../config/site';
 import '../styles/global.css';
 interface Props { title?: string; description?: string }
 const { title, description = site.description } = Astro.props;
+const pageTitle = getPageTitle(title);
 ---
 
 <!doctype html>
@@ -11,7 +13,7 @@ const { title, description = site.description } = Astro.props;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <title>{title ? `${title} | ${site.name}` : site.name}</title>
+    <title>{pageTitle}</title>
   </head>
   <body>
     <header>
