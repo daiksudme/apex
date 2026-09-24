@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { site } from './site';
+import { site } from '../config/site';
 import { getPageTitle } from './page-title';
 
 describe('getPageTitle', () => {
