@@ -7,6 +7,7 @@ import {
   findDeployment,
   isTargetCheck,
   listDeployments,
+  listStatuses,
   parseBuildDetails,
   statusForConclusion,
   statusDecision,
@@ -449,4 +450,34 @@ it('fails when GitHub rejects or misreports a new Deployment', async () => {
       payload: { ...request.payload, build_id: buildId } }, { status: 201 })
     : Response.json([]);
   await expect(ensureDeployment(wrongBuild, request)).rejects.toThrow();
+});
+
+it('reads every Status page for one Deployment before deciding to write', async () => {
+  const first = { id: 1, state: 'pending', log_url: null };
+  const terminal = { id: 2, state: 'success', log_url: previewBuildCheck().details_url };
+  const urls = [];
+  const getPage = async (url) => {
+    urls.push(String(url));
+    if (new URL(url).searchParams.get('page') === '1') {
+      return Response.json([first], {
+        headers: { link: '<https://api.github.com/repositories/1377818284/deployments/123/statuses?page=2>; rel="next"' },
+      });
+    }
+    return Response.json([terminal]);
+  };
+  expect(await listStatuses(getPage, 123)).toEqual([first, terminal]);
+  expect(urls.map((value) => {
+    const url = new URL(value);
+    return [url.origin + url.pathname, url.searchParams.get('per_page'), url.searchParams.get('page')];
+  })).toEqual([
+    ['https://api.github.com/repos/daiksudme/apex/deployments/123/statuses', '100', '1'],
+    ['https://api.github.com/repos/daiksudme/apex/deployments/123/statuses', '100', '2'],
+  ]);
+  let calls = 0;
+  await expect(listStatuses(async () => { calls += 1; return Response.json([]); }, 0)).rejects.toThrow();
+  await expect(listStatuses(async () => { calls += 1; return Response.json([]); }, '123/other')).rejects.toThrow();
+  expect(calls).toBe(0);
+  await expect(listStatuses(async () => { throw new Error('API failed'); }, 123)).rejects.toThrow('API failed');
+  await expect(listStatuses(async () => new Response('error', { status: 500 }), 123)).rejects.toThrow();
+  await expect(listStatuses(async () => Response.json({ message: 'not a list' }), 123)).rejects.toThrow();
 });

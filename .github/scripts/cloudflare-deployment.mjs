@@ -154,27 +154,31 @@ export function statusDecision(statuses, expected) {
   return 'skip';
 }
 
+async function collectPages(getPage, url, resource) {
+  const all = [];
+  for (let page = 1; ; page += 1) {
+    url.searchParams.set('page', String(page));
+    const response = await getPage(url.toString());
+    if (!response.ok) {
+      throw new Error(`GitHub ${resource} list failed: ${response.status}`);
+    }
+    const items = await response.json();
+    if (!Array.isArray(items)) {
+      throw new Error(`GitHub ${resource} list was not an array`);
+    }
+    all.push(...items);
+    if (!/<[^>]+>;\s*rel="next"/i.test(response.headers.get('link') ?? '')) {
+      return all;
+    }
+  }
+}
+
 export async function listDeployments(getPage, request) {
   const url = new URL(deploymentsUrl);
   url.searchParams.set('sha', request.ref);
   url.searchParams.set('environment', request.environment);
   url.searchParams.set('per_page', '100');
-  const deployments = [];
-  for (let page = 1; ; page += 1) {
-    url.searchParams.set('page', String(page));
-    const response = await getPage(url.toString());
-    if (!response.ok) {
-      throw new Error(`GitHub Deployment list failed: ${response.status}`);
-    }
-    const items = await response.json();
-    if (!Array.isArray(items)) {
-      throw new Error('GitHub Deployment list was not an array');
-    }
-    deployments.push(...items);
-    if (!/<[^>]+>;\s*rel="next"/i.test(response.headers.get('link') ?? '')) {
-      return deployments;
-    }
-  }
+  return collectPages(getPage, url, 'Deployment');
 }
 
 export async function ensureDeployment(api, request) {
@@ -196,4 +200,13 @@ export async function ensureDeployment(api, request) {
     throw new Error('GitHub Deployment creation returned another Build');
   }
   return match;
+}
+
+export async function listStatuses(getPage, deploymentId) {
+  if (!Number.isSafeInteger(deploymentId) || deploymentId <= 0) {
+    throw new Error('Invalid GitHub Deployment ID');
+  }
+  const url = new URL(`${deploymentsUrl}/${deploymentId}/statuses`);
+  url.searchParams.set('per_page', '100');
+  return collectPages(getPage, url, 'Deployment Status');
 }
