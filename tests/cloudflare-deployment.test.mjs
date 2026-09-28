@@ -1,15 +1,20 @@
 import { expect, it } from 'vitest';
 import {
   classifyEnvironment,
+  deploymentRequest,
+  deploymentStatusRequest,
+  findDeployment,
   isTargetCheck,
   parseBuildDetails,
   statusForConclusion,
+  statusDecision,
   terminalConclusion,
   validatedBranch,
 } from '../.github/scripts/cloudflare-deployment.mjs';
 
 const checkSha = 'a'.repeat(40);
 const buildId = 'a700dfa8-72aa-469e-a91f-9c067b04a9c7';
+const productionBuildId = 'e23c9f40-5ca4-4df5-a1b3-4a0932d5671d';
 const previewBuildId = '8788aeb6-807f-4ccc-8578-212f34f47a3f';
 const previewSlug = 'codex-44-preview-event-probe';
 
@@ -17,6 +22,13 @@ function genericBuildCheck() {
   return {
     external_id: buildId,
     details_url: `https://dash.cloudflare.com/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production/builds/${buildId}`,
+  };
+}
+
+function productionBuildCheck() {
+  return {
+    external_id: productionBuildId,
+    details_url: `https://dash.cloudflare.com/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production/builds/${productionBuildId}`,
   };
 }
 
@@ -205,4 +217,137 @@ it('accepts only the target Worker Preview Build URL with its matching Build ID'
     change(check);
     expect(parseBuildDetails(check), field).toBeNull();
   }
+});
+
+it('builds Deployment requests for the Check SHA and each Cloudflare build', () => {
+  const event = sourceEventAndSuite().event;
+  event.check_run.id = 108865227916;
+  event.check_run.head_sha = '37976fe0d6136469e1d458b0c97f4a920e914169';
+  const details = { buildId: previewBuildId, kind: 'preview', previewSlug };
+  const preview = deploymentRequest(event, 'preview', details);
+  expect(preview).toEqual({
+    ref: '37976fe0d6136469e1d458b0c97f4a920e914169',
+    environment: 'preview',
+    auto_merge: false,
+    required_contexts: [],
+    production_environment: false,
+    payload: {
+      source: 'cloudflare-workers-builds',
+      build_id: previewBuildId,
+      check_run_id: 108865227916,
+    },
+  });
+  expect(preview.ref).not.toBe('708e015c6767f28ccfcf65b994568c084cc49650');
+  const productionEvent = targetEvent();
+  productionEvent.check_run.id = 108901733751;
+  productionEvent.check_run.head_sha = '708e015c6767f28ccfcf65b994568c084cc49650';
+  expect(deploymentRequest(productionEvent, 'production', { buildId: productionBuildId, kind: 'generic' })).toEqual({
+    ref: '708e015c6767f28ccfcf65b994568c084cc49650',
+    environment: 'production',
+    auto_merge: false,
+    required_contexts: [],
+    production_environment: true,
+    payload: {
+      source: 'cloudflare-workers-builds',
+      build_id: productionBuildId,
+      check_run_id: 108901733751,
+    },
+  });
+  const rebuiltId = '11111111-1111-4111-8111-111111111111';
+  const rebuilt = deploymentRequest(event, 'preview', { ...details, buildId: rebuiltId });
+  expect(rebuilt.ref).toBe(preview.ref);
+  expect(rebuilt.payload.build_id).toBe(rebuiltId);
+  expect(() => deploymentRequest(event, 'unknown', details)).toThrow();
+});
+
+it('builds terminal Status requests without inactivating other Previews', () => {
+  const previewCheck = previewBuildCheck();
+  expect(deploymentStatusRequest(previewCheck, 'preview', 'success')).toEqual({
+    state: 'success',
+    log_url: previewCheck.details_url,
+    auto_inactive: false,
+  });
+  const failedCheck = genericBuildCheck();
+  for (const state of ['failure', 'error']) {
+    expect(deploymentStatusRequest(failedCheck, 'preview', state)).toEqual({
+      state,
+      log_url: failedCheck.details_url,
+      auto_inactive: false,
+    });
+  }
+  expect(deploymentStatusRequest(failedCheck, 'production', 'failure')).toEqual({
+    state: 'failure',
+    log_url: failedCheck.details_url,
+    auto_inactive: false,
+  });
+  expect(() => deploymentStatusRequest(previewCheck, 'preview', 'unknown')).toThrow();
+  expect(() => deploymentStatusRequest(previewCheck, 'unknown', 'success')).toThrow();
+});
+
+it('links only a successful Production Status to the verified public endpoint', () => {
+  const check = productionBuildCheck();
+  expect(deploymentStatusRequest(check, 'production', 'success')).toEqual({
+    state: 'success',
+    log_url: check.details_url,
+    auto_inactive: false,
+    environment_url: 'https://apex.daiksud-a1f.workers.dev/',
+  });
+  expect(deploymentStatusRequest(check, 'production', 'error')).toEqual({
+    state: 'error',
+    log_url: check.details_url,
+    auto_inactive: false,
+  });
+});
+
+it('finds exactly one Deployment for a Build without collapsing same-SHA rebuilds', () => {
+  const request = deploymentRequest({
+    check_run: { head_sha: 'a'.repeat(40), id: 108865227916 },
+  }, 'preview', { buildId: previewBuildId });
+  const matching = {
+    id: 101,
+    sha: request.ref,
+    environment: 'preview',
+    payload: request.payload,
+  };
+  expect(findDeployment([matching], request)).toBe(matching);
+  const earlierCheck = { ...matching, payload: { ...matching.payload, check_run_id: 108864963627 } };
+  expect(findDeployment([earlierCheck], request)).toBe(earlierCheck);
+  const stringPayload = { ...matching, payload: JSON.stringify(matching.payload) };
+  expect(findDeployment([stringPayload], request)).toBe(stringPayload);
+  expect(findDeployment([], request)).toBeNull();
+  expect(findDeployment([{ ...matching, payload: { ...matching.payload, build_id: buildId } }], request)).toBeNull();
+  expect(findDeployment([{ ...matching, sha: 'b'.repeat(40) }], request)).toBeNull();
+  expect(findDeployment([{ ...matching, environment: 'production' }], request)).toBeNull();
+  expect(findDeployment([{ ...matching, payload: { ...matching.payload, source: 'other' } }], request)).toBeNull();
+  expect(findDeployment([{ ...matching, payload: '{broken' }], request)).toBeNull();
+  expect(() => findDeployment([matching, { ...matching, id: 102 }], request)).toThrow();
+  expect(() => findDeployment([{ ...matching, id: null }], request)).toThrow();
+});
+
+it('creates a missing Status and leaves an identical result alone', () => {
+  const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
+  const matching = { id: 201, state: expected.state, log_url: expected.log_url };
+  const conflictingState = { ...matching, id: 202, state: 'failure' };
+  const conflictingLog = { ...matching, id: 203, log_url: 'https://example.com/other-build' };
+
+  expect(statusDecision([], expected)).toBe('create');
+  expect(statusDecision([matching], expected)).toBe('skip');
+  expect(statusDecision([{ ...matching, environment_url: null }], expected)).toBe('skip');
+  expect(statusDecision([{ ...matching, environment_url: '' }], expected)).toBe('skip');
+  expect(() => statusDecision([conflictingState], expected)).toThrow();
+  expect(() => statusDecision([conflictingLog], expected)).toThrow();
+  expect(() => statusDecision([matching, conflictingState], expected)).toThrow();
+  expect(() => statusDecision([conflictingState, matching], expected)).toThrow();
+
+  const productionExpected = deploymentStatusRequest(productionBuildCheck(), 'production', 'success');
+  const productionMatching = {
+    state: 'success',
+    log_url: productionExpected.log_url,
+    environment_url: productionExpected.environment_url,
+  };
+  expect(statusDecision([productionMatching], productionExpected)).toBe('skip');
+  for (const environment_url of [undefined, null, '', 'https://example.com/stale']) {
+    expect(() => statusDecision([{ ...productionMatching, environment_url }], productionExpected)).toThrow();
+  }
+  expect(() => statusDecision([{ ...matching, environment_url: 'https://example.com/preview' }], expected)).toThrow();
 });

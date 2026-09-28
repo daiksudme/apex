@@ -76,3 +76,78 @@ export function statusForConclusion(conclusion) {
   }
   return null;
 }
+
+export function deploymentRequest(event, environment, buildDetails) {
+  if (environment !== 'preview' && environment !== 'production') {
+    throw new Error(`Unknown deployment environment: ${environment}`);
+  }
+  return {
+    ref: event.check_run.head_sha,
+    environment,
+    auto_merge: false,
+    required_contexts: [],
+    production_environment: environment === 'production',
+    payload: {
+      source: 'cloudflare-workers-builds',
+      build_id: buildDetails.buildId,
+      check_run_id: event.check_run.id,
+    },
+  };
+}
+
+export function deploymentStatusRequest(check, environment, state) {
+  if (environment !== 'preview' && environment !== 'production') {
+    throw new Error(`Unknown deployment environment: ${environment}`);
+  }
+  if (state !== 'success' && state !== 'failure' && state !== 'error') {
+    throw new Error(`Unknown deployment state: ${state}`);
+  }
+  const request = {
+    state,
+    log_url: check.details_url,
+    auto_inactive: false,
+  };
+  if (environment === 'production' && state === 'success') {
+    request.environment_url = 'https://apex.daiksud-a1f.workers.dev/';
+  }
+  return request;
+}
+
+export function findDeployment(deployments, request) {
+  let match = null;
+  for (const deployment of deployments) {
+    if (deployment?.sha !== request.ref || deployment?.environment !== request.environment) {
+      continue;
+    }
+    let payload = deployment.payload;
+    if (typeof payload === 'string') {
+      try {
+        payload = JSON.parse(payload);
+      } catch {
+        continue;
+      }
+    }
+    if (payload?.source !== request.payload.source || payload?.build_id !== request.payload.build_id) {
+      continue;
+    }
+    if (!Number.isSafeInteger(deployment.id) || deployment.id <= 0 || match) {
+      throw new Error('Ambiguous Cloudflare Deployment identity');
+    }
+    match = deployment;
+  }
+  return match;
+}
+
+export function statusDecision(statuses, expected) {
+  if (statuses.length === 0) {
+    return 'create';
+  }
+  for (const status of statuses) {
+    if (status?.state !== expected.state
+      || status?.log_url !== expected.log_url
+      || (status?.environment_url ?? '') !== (expected.environment_url ?? '')) {
+      throw new Error('Conflicting Cloudflare Deployment Status');
+    }
+  }
+  return 'skip';
+}
