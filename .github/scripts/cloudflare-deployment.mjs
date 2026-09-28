@@ -25,3 +25,26 @@ export function validatedBranch(event, suite) {
   }
   return branch;
 }
+
+export function parseBuildDetails(check) {
+  const buildId = check?.external_id;
+  if (typeof buildId !== 'string'
+    || !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(buildId)
+    || typeof check?.details_url !== 'string') {
+    return null;
+  }
+
+  let url;
+  try {
+    url = new URL(check.details_url);
+  } catch {
+    return null;
+  }
+  const path = `/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production/builds/${buildId}`;
+  if (url.origin !== 'https://dash.cloudflare.com'
+    || url.username || url.password || url.search || url.hash
+    || url.pathname !== path) {
+    return null;
+  }
+  return { buildId, kind: 'generic' };
+}
