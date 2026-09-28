@@ -98,6 +98,17 @@ it('recognizes Preview only for a non-main branch with a Preview Build path', ()
   expect(classifyEnvironment('codex/44-preview-event-probe', { kind: 'generic' }, 'success')).toBeNull();
 });
 
+it('records a failed non-main generic Build as a failed Preview attempt', () => {
+  const generic = { kind: 'generic' };
+  expect(classifyEnvironment('codex/42-mise-toolchain', generic, 'failure')).toBe('preview');
+  expect(classifyEnvironment('codex/42-mise-toolchain', generic, 'error')).toBe('preview');
+  expect(classifyEnvironment('codex/42-mise-toolchain', generic, 'success')).toBeNull();
+  expect(classifyEnvironment('codex/42-mise-toolchain', generic, null)).toBeNull();
+  expect(classifyEnvironment('codex/42-mise-toolchain', generic, 'unknown')).toBeNull();
+  expect(classifyEnvironment('main', generic, 'error')).toBe('production');
+  expect(classifyEnvironment(null, generic, 'failure')).toBeNull();
+});
+
 it('accepts only the target repository, App, and Check name together', () => {
   expect(isTargetCheck(targetEvent())).toBe(true);
 

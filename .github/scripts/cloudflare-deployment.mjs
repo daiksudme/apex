@@ -53,14 +53,18 @@ export function parseBuildDetails(check) {
   return match ? { buildId, kind: 'preview', previewSlug: match[1] } : null;
 }
 
-export function classifyEnvironment(branch, buildDetails) {
+export function classifyEnvironment(branch, buildDetails, state) {
   if (branch === 'main') {
     return buildDetails?.kind === 'generic' ? 'production' : null;
   }
   if (typeof branch !== 'string' || !branch || branch.trim() !== branch) {
     return null;
   }
-  return buildDetails?.kind === 'preview' ? 'preview' : null;
+  if (buildDetails?.kind === 'preview'
+    || (buildDetails?.kind === 'generic' && (state === 'failure' || state === 'error'))) {
+    return 'preview';
+  }
+  return null;
 }
 
 export function statusForConclusion(conclusion) {
