@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   classifyEnvironment,
+  deploymentRequest,
   isTargetCheck,
   parseBuildDetails,
   statusForConclusion,
@@ -205,4 +206,46 @@ it('accepts only the target Worker Preview Build URL with its matching Build ID'
     change(check);
     expect(parseBuildDetails(check), field).toBeNull();
   }
+});
+
+it('builds Deployment requests for the Check SHA and each Cloudflare build', () => {
+  const event = sourceEventAndSuite().event;
+  event.check_run.id = 108865227916;
+  event.check_run.head_sha = '37976fe0d6136469e1d458b0c97f4a920e914169';
+  const details = { buildId: previewBuildId, kind: 'preview', previewSlug };
+  const preview = deploymentRequest(event, 'preview', details);
+  expect(preview).toEqual({
+    ref: '37976fe0d6136469e1d458b0c97f4a920e914169',
+    environment: 'preview',
+    auto_merge: false,
+    required_contexts: [],
+    production_environment: false,
+    payload: {
+      source: 'cloudflare-workers-builds',
+      build_id: previewBuildId,
+      check_run_id: 108865227916,
+    },
+  });
+  expect(preview.ref).not.toBe('708e015c6767f28ccfcf65b994568c084cc49650');
+  const productionEvent = targetEvent();
+  productionEvent.check_run.id = 108901733751;
+  productionEvent.check_run.head_sha = '708e015c6767f28ccfcf65b994568c084cc49650';
+  const productionBuildId = 'e23c9f40-5ca4-4df5-a1b3-4a0932d5671d';
+  expect(deploymentRequest(productionEvent, 'production', { buildId: productionBuildId, kind: 'generic' })).toEqual({
+    ref: '708e015c6767f28ccfcf65b994568c084cc49650',
+    environment: 'production',
+    auto_merge: false,
+    required_contexts: [],
+    production_environment: true,
+    payload: {
+      source: 'cloudflare-workers-builds',
+      build_id: productionBuildId,
+      check_run_id: 108901733751,
+    },
+  });
+  const rebuiltId = '11111111-1111-4111-8111-111111111111';
+  const rebuilt = deploymentRequest(event, 'preview', { ...details, buildId: rebuiltId });
+  expect(rebuilt.ref).toBe(preview.ref);
+  expect(rebuilt.payload.build_id).toBe(rebuiltId);
+  expect(() => deploymentRequest(event, 'unknown', details)).toThrow();
 });

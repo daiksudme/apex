@@ -76,3 +76,21 @@ export function statusForConclusion(conclusion) {
   }
   return null;
 }
+
+export function deploymentRequest(event, environment, buildDetails) {
+  if (environment !== 'preview' && environment !== 'production') {
+    throw new Error(`Unknown deployment environment: ${environment}`);
+  }
+  return {
+    ref: event.check_run.head_sha,
+    environment,
+    auto_merge: false,
+    required_contexts: [],
+    production_environment: environment === 'production',
+    payload: {
+      source: 'cloudflare-workers-builds',
+      build_id: buildDetails.buildId,
+      check_run_id: event.check_run.id,
+    },
+  };
+}
