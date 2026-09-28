@@ -54,5 +54,11 @@ export function parseBuildDetails(check) {
 }
 
 export function classifyEnvironment(branch, buildDetails) {
-  return branch === 'main' && buildDetails?.kind === 'generic' ? 'production' : null;
+  if (branch === 'main') {
+    return buildDetails?.kind === 'generic' ? 'production' : null;
+  }
+  if (typeof branch !== 'string' || !branch || branch.trim() !== branch) {
+    return null;
+  }
+  return buildDetails?.kind === 'preview' ? 'preview' : null;
 }

@@ -71,6 +71,17 @@ it('recognizes Production only for main with a generic Build path', () => {
   expect(classifyEnvironment('', { kind: 'generic' }, 'success')).toBeNull();
 });
 
+it('recognizes Preview only for a non-main branch with a Preview Build path', () => {
+  const preview = { kind: 'preview', previewSlug };
+  expect(classifyEnvironment('codex/44-preview-event-probe', preview, 'success')).toBe('preview');
+  expect(classifyEnvironment('codex/44-preview-event-probe', preview, 'failure')).toBe('preview');
+  expect(classifyEnvironment('main', preview, 'success')).toBeNull();
+  expect(classifyEnvironment(null, preview, 'success')).toBeNull();
+  expect(classifyEnvironment('', preview, 'success')).toBeNull();
+  expect(classifyEnvironment('  ', preview, 'success')).toBeNull();
+  expect(classifyEnvironment('codex/44-preview-event-probe', { kind: 'generic' }, 'success')).toBeNull();
+});
+
 it('accepts only the target repository, App, and Check name together', () => {
   expect(isTargetCheck(targetEvent())).toBe(true);
 
