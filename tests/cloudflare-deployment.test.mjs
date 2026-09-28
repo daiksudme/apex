@@ -12,6 +12,7 @@ import {
 
 const checkSha = 'a'.repeat(40);
 const buildId = 'a700dfa8-72aa-469e-a91f-9c067b04a9c7';
+const productionBuildId = 'e23c9f40-5ca4-4df5-a1b3-4a0932d5671d';
 const previewBuildId = '8788aeb6-807f-4ccc-8578-212f34f47a3f';
 const previewSlug = 'codex-44-preview-event-probe';
 
@@ -19,6 +20,13 @@ function genericBuildCheck() {
   return {
     external_id: buildId,
     details_url: `https://dash.cloudflare.com/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production/builds/${buildId}`,
+  };
+}
+
+function productionBuildCheck() {
+  return {
+    external_id: productionBuildId,
+    details_url: `https://dash.cloudflare.com/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production/builds/${productionBuildId}`,
   };
 }
 
@@ -231,7 +239,6 @@ it('builds Deployment requests for the Check SHA and each Cloudflare build', () 
   const productionEvent = targetEvent();
   productionEvent.check_run.id = 108901733751;
   productionEvent.check_run.head_sha = '708e015c6767f28ccfcf65b994568c084cc49650';
-  const productionBuildId = 'e23c9f40-5ca4-4df5-a1b3-4a0932d5671d';
   expect(deploymentRequest(productionEvent, 'production', { buildId: productionBuildId, kind: 'generic' })).toEqual({
     ref: '708e015c6767f28ccfcf65b994568c084cc49650',
     environment: 'production',
@@ -273,4 +280,19 @@ it('builds terminal Status requests without inactivating other Previews', () => 
   });
   expect(() => deploymentStatusRequest(previewCheck, 'preview', 'unknown')).toThrow();
   expect(() => deploymentStatusRequest(previewCheck, 'unknown', 'success')).toThrow();
+});
+
+it('links only a successful Production Status to the verified public endpoint', () => {
+  const check = productionBuildCheck();
+  expect(deploymentStatusRequest(check, 'production', 'success')).toEqual({
+    state: 'success',
+    log_url: check.details_url,
+    auto_inactive: false,
+    environment_url: 'https://apex.daiksud-a1f.workers.dev/',
+  });
+  expect(deploymentStatusRequest(check, 'production', 'error')).toEqual({
+    state: 'error',
+    log_url: check.details_url,
+    auto_inactive: false,
+  });
 });

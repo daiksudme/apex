@@ -102,9 +102,13 @@ export function deploymentStatusRequest(check, environment, state) {
   if (state !== 'success' && state !== 'failure' && state !== 'error') {
     throw new Error(`Unknown deployment state: ${state}`);
   }
-  return {
+  const request = {
     state,
     log_url: check.details_url,
     auto_inactive: false,
   };
+  if (environment === 'production' && state === 'success') {
+    request.environment_url = 'https://apex.daiksud-a1f.workers.dev/';
+  }
+  return request;
 }
