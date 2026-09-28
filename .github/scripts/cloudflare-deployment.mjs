@@ -112,3 +112,28 @@ export function deploymentStatusRequest(check, environment, state) {
   }
   return request;
 }
+
+export function findDeployment(deployments, request) {
+  let match = null;
+  for (const deployment of deployments) {
+    if (deployment?.sha !== request.ref || deployment?.environment !== request.environment) {
+      continue;
+    }
+    let payload = deployment.payload;
+    if (typeof payload === 'string') {
+      try {
+        payload = JSON.parse(payload);
+      } catch {
+        continue;
+      }
+    }
+    if (payload?.source !== request.payload.source || payload?.build_id !== request.payload.build_id) {
+      continue;
+    }
+    if (!Number.isSafeInteger(deployment.id) || deployment.id <= 0 || match) {
+      throw new Error('Ambiguous Cloudflare Deployment identity');
+    }
+    match = deployment;
+  }
+  return match;
+}

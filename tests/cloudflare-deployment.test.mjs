@@ -3,6 +3,7 @@ import {
   classifyEnvironment,
   deploymentRequest,
   deploymentStatusRequest,
+  findDeployment,
   isTargetCheck,
   parseBuildDetails,
   statusForConclusion,
@@ -295,4 +296,29 @@ it('links only a successful Production Status to the verified public endpoint', 
     log_url: check.details_url,
     auto_inactive: false,
   });
+});
+
+it('finds exactly one Deployment for a Build without collapsing same-SHA rebuilds', () => {
+  const request = deploymentRequest({
+    check_run: { head_sha: 'a'.repeat(40), id: 108865227916 },
+  }, 'preview', { buildId: previewBuildId });
+  const matching = {
+    id: 101,
+    sha: request.ref,
+    environment: 'preview',
+    payload: request.payload,
+  };
+  expect(findDeployment([matching], request)).toBe(matching);
+  const earlierCheck = { ...matching, payload: { ...matching.payload, check_run_id: 108864963627 } };
+  expect(findDeployment([earlierCheck], request)).toBe(earlierCheck);
+  const stringPayload = { ...matching, payload: JSON.stringify(matching.payload) };
+  expect(findDeployment([stringPayload], request)).toBe(stringPayload);
+  expect(findDeployment([], request)).toBeNull();
+  expect(findDeployment([{ ...matching, payload: { ...matching.payload, build_id: buildId } }], request)).toBeNull();
+  expect(findDeployment([{ ...matching, sha: 'b'.repeat(40) }], request)).toBeNull();
+  expect(findDeployment([{ ...matching, environment: 'production' }], request)).toBeNull();
+  expect(findDeployment([{ ...matching, payload: { ...matching.payload, source: 'other' } }], request)).toBeNull();
+  expect(findDeployment([{ ...matching, payload: '{broken' }], request)).toBeNull();
+  expect(() => findDeployment([matching, { ...matching, id: 102 }], request)).toThrow();
+  expect(() => findDeployment([{ ...matching, id: null }], request)).toThrow();
 });
