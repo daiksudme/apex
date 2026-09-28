@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
 import {
+  classifyEnvironment,
   isTargetCheck,
   parseBuildDetails,
   terminalConclusion,
@@ -58,6 +59,16 @@ it('uses the Check state instead of the event action for terminal results', () =
     action: 'completed',
     check_run: { status: 'in_progress', conclusion: null },
   })).toBeNull();
+});
+
+it('recognizes Production only for main with a generic Build path', () => {
+  expect(classifyEnvironment('main', { kind: 'generic' }, 'success')).toBe('production');
+  expect(classifyEnvironment('main', { kind: 'generic' }, 'failure')).toBe('production');
+  expect(classifyEnvironment('main', { kind: 'preview', previewSlug }, 'success')).toBeNull();
+  expect(classifyEnvironment('main', null, 'success')).toBeNull();
+  expect(classifyEnvironment('main', { kind: 'unknown' }, 'success')).toBeNull();
+  expect(classifyEnvironment(null, { kind: 'generic' }, 'success')).toBeNull();
+  expect(classifyEnvironment('', { kind: 'generic' }, 'success')).toBeNull();
 });
 
 it('accepts only the target repository, App, and Check name together', () => {

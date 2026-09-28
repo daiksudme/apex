@@ -52,3 +52,7 @@ export function parseBuildDetails(check) {
   const match = url.pathname.match(previewPath);
   return match ? { buildId, kind: 'preview', previewSlug: match[1] } : null;
 }
+
+export function classifyEnvironment(branch, buildDetails) {
+  return branch === 'main' && buildDetails?.kind === 'generic' ? 'production' : null;
+}
