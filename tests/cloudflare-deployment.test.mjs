@@ -7,6 +7,7 @@ import {
   isTargetCheck,
   parseBuildDetails,
   statusForConclusion,
+  statusDecision,
   terminalConclusion,
   validatedBranch,
 } from '../.github/scripts/cloudflare-deployment.mjs';
@@ -321,4 +322,18 @@ it('finds exactly one Deployment for a Build without collapsing same-SHA rebuild
   expect(findDeployment([{ ...matching, payload: '{broken' }], request)).toBeNull();
   expect(() => findDeployment([matching, { ...matching, id: 102 }], request)).toThrow();
   expect(() => findDeployment([{ ...matching, id: null }], request)).toThrow();
+});
+
+it('creates a missing Status and leaves an identical result alone', () => {
+  const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
+  const matching = { id: 201, state: expected.state, log_url: expected.log_url };
+  const conflictingState = { ...matching, id: 202, state: 'failure' };
+  const conflictingLog = { ...matching, id: 203, log_url: 'https://example.com/other-build' };
+
+  expect(statusDecision([], expected)).toBe('create');
+  expect(statusDecision([matching], expected)).toBe('skip');
+  expect(() => statusDecision([conflictingState], expected)).toThrow();
+  expect(() => statusDecision([conflictingLog], expected)).toThrow();
+  expect(() => statusDecision([matching, conflictingState], expected)).toThrow();
+  expect(() => statusDecision([conflictingState, matching], expected)).toThrow();
 });
