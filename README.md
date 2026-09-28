@@ -12,7 +12,7 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 ### テストとビルド
 
-Node.js `24.21.0` と pnpm `12.5.1` を使用します。バージョンは [mise.toml](mise.toml) と [package.json](package.json) で固定しています。
+Node.js `26.10.0` と pnpm `12.6.0` を使用します。バージョンは [mise.toml](mise.toml) と [package.json](package.json) で固定しています。
 
 ```sh
 mise trust mise.toml
