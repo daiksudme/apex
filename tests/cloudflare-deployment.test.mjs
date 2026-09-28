@@ -332,8 +332,22 @@ it('creates a missing Status and leaves an identical result alone', () => {
 
   expect(statusDecision([], expected)).toBe('create');
   expect(statusDecision([matching], expected)).toBe('skip');
+  expect(statusDecision([{ ...matching, environment_url: null }], expected)).toBe('skip');
+  expect(statusDecision([{ ...matching, environment_url: '' }], expected)).toBe('skip');
   expect(() => statusDecision([conflictingState], expected)).toThrow();
   expect(() => statusDecision([conflictingLog], expected)).toThrow();
   expect(() => statusDecision([matching, conflictingState], expected)).toThrow();
   expect(() => statusDecision([conflictingState, matching], expected)).toThrow();
+
+  const productionExpected = deploymentStatusRequest(productionBuildCheck(), 'production', 'success');
+  const productionMatching = {
+    state: 'success',
+    log_url: productionExpected.log_url,
+    environment_url: productionExpected.environment_url,
+  };
+  expect(statusDecision([productionMatching], productionExpected)).toBe('skip');
+  for (const environment_url of [undefined, null, '', 'https://example.com/stale']) {
+    expect(() => statusDecision([{ ...productionMatching, environment_url }], productionExpected)).toThrow();
+  }
+  expect(() => statusDecision([{ ...matching, environment_url: 'https://example.com/preview' }], expected)).toThrow();
 });

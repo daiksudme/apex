@@ -143,7 +143,9 @@ export function statusDecision(statuses, expected) {
     return 'create';
   }
   for (const status of statuses) {
-    if (status?.state !== expected.state || status?.log_url !== expected.log_url) {
+    if (status?.state !== expected.state
+      || status?.log_url !== expected.log_url
+      || (status?.environment_url ?? '') !== (expected.environment_url ?? '')) {
       throw new Error('Conflicting Cloudflare Deployment Status');
     }
   }
