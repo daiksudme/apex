@@ -50,6 +50,13 @@ jobs:
           production_environment: ${{ env[fromJSON(steps.suite.outputs.data).head_branch] == 'apex-production-branch' }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Build preview URL
+        id: preview_url
+        if: steps.deployment.outcome == 'success'
+        env:
+          BRANCH: ${{ fromJSON(steps.suite.outputs.data).head_branch }}
+        run: |
+          printf 'environment_url=https://%s-apex.daiksud-a1f.workers.dev/\n' "${BRANCH//\//-}" >> "$GITHUB_OUTPUT"
       - name: Record successful deployment
         if: steps.deployment.outcome == 'success'
         uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
@@ -61,5 +68,6 @@ jobs:
           state: success
           auto_inactive: false
           log_url: ${{ github.event.check_run.details_url }}
+          environment_url: ${{ env[fromJSON(steps.suite.outputs.data).head_branch] == 'apex-production-branch' && 'https://apex.daiksud-a1f.workers.dev/' || steps.preview_url.outputs.environment_url }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
