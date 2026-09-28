@@ -27,3 +27,5 @@ mise exec -- pnpm run build
 Cloudflare Workers Builds の `Workers Builds: apex` Check が成功すると、[同期 Workflow](.github/workflows/cloudflare-check-probe.yml) がその Check の SHA で GitHub Deployment と `success` Status を記録します。Check Suite のブランチが `main` なら `production`、それ以外の空でないブランチなら `preview` に記録します。実際のデプロイは Cloudflare Workers Builds が実行します。
 
 同期が失敗した場合は、GitHub Actions の「Record Cloudflare deployment」Workflow の実行ログで、Check Suite の取得、Deployment 作成、Status 作成のどこで失敗したかを確認してください。初期版は成功した Check だけを記録し、再実行による重複や途中失敗で残る未完了の Deployment は自動で修復しません。
+
+`main` の Ruleset `default` は `preview` への成功した Deployment をマージ条件にしています。この条件だけを戻す場合は、GitHub の Settings → Rules → Rulesets → `default` で Required deployments から `preview` を除き、他のルールは維持してください。
