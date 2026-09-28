@@ -37,6 +37,18 @@ function productionBuildCheck() {
   };
 }
 
+function withEmptyCurrentStatus(api, deployment) {
+  return (url, init) => {
+    if (url === 'https://api.github.com/graphql') {
+      return Response.json({ data: { node: {
+        __typename: 'Deployment', databaseId: deployment.id, state: 'PENDING',
+        repository: { nameWithOwner: 'daiksudme/apex' }, latestStatus: null,
+      } } });
+    }
+    return api(url, init);
+  };
+}
+
 function previewBuildCheck() {
   return {
     external_id: previewBuildId,
@@ -485,7 +497,7 @@ it('reads every Status page for one Deployment before deciding to write', async 
 });
 
 it('creates a terminal Status once and reuses it on rerun', async () => {
-  const deployment = { id: 123 };
+  const deployment = { id: 123, node_id: 'D_123' };
   const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
   const stored = [];
   const posts = [];
@@ -497,14 +509,15 @@ it('creates a terminal Status once and reuses it on rerun', async () => {
     stored.push(created);
     return Response.json(created, { status: 201 });
   };
-  expect(await ensureStatus(api, deployment, expected)).toEqual({ action: 'created', statusId: 201 });
+  const requestApi = withEmptyCurrentStatus(api, deployment);
+  expect(await ensureStatus(requestApi, deployment, expected)).toEqual({ action: 'created', statusId: 201 });
   expect(posts).toEqual([{ url: 'https://api.github.com/repos/daiksudme/apex/deployments/123/statuses', body: expected }]);
-  expect(await ensureStatus(api, deployment, expected)).toEqual({ action: 'skipped' });
+  expect(await ensureStatus(requestApi, deployment, expected)).toEqual({ action: 'skipped' });
   expect(posts).toHaveLength(1);
 });
 
 it('recovers a Status creation that persisted before the API call failed', async () => {
-  const deployment = { id: 123 };
+  const deployment = { id: 123, node_id: 'D_123' };
   const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
   const stored = [];
   let posts = 0;
@@ -514,13 +527,14 @@ it('recovers a Status creation that persisted before the API call failed', async
     stored.push({ id: 202, state: expected.state, log_url: expected.log_url, environment_url: '' });
     throw new Error('connection lost after Status create');
   };
-  await expect(ensureStatus(api, deployment, expected)).rejects.toThrow('connection lost');
-  expect(await ensureStatus(api, deployment, expected)).toEqual({ action: 'skipped' });
+  const requestApi = withEmptyCurrentStatus(api, deployment);
+  await expect(ensureStatus(requestApi, deployment, expected)).rejects.toThrow('connection lost');
+  expect(await ensureStatus(requestApi, deployment, expected)).toEqual({ action: 'skipped' });
   expect(posts).toBe(1);
 });
 
 it('rejects conflicting, failed, or invalid Status creation results', async () => {
-  const deployment = { id: 123 };
+  const deployment = { id: 123, node_id: 'D_123' };
   const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
   let posts = 0;
   const conflict = async (_url, init) => {
@@ -529,7 +543,8 @@ it('rejects conflicting, failed, or invalid Status creation results', async () =
   };
   await expect(ensureStatus(conflict, deployment, expected)).rejects.toThrow();
   expect(posts).toBe(0);
-  const responseFor = (response) => async (_url, init) => init ? response : Response.json([]);
+  const responseFor = (response) => withEmptyCurrentStatus(
+    async (_url, init) => init ? response : Response.json([]), deployment);
   await expect(ensureStatus(responseFor(new Response('error', { status: 500 })), deployment, expected)).rejects.toThrow();
   await expect(ensureStatus(responseFor(Response.json({ id: 203, ...expected }, { status: 202 })), deployment, expected)).rejects.toThrow();
   await expect(ensureStatus(responseFor(Response.json({ id: 0, ...expected }, { status: 201 })), deployment, expected)).rejects.toThrow();
@@ -582,4 +597,65 @@ it('reads the current Deployment Status from the verified GraphQL node', async (
   ]) {
     await expect(latestDeploymentStatus(reply({ data: { node: changed } }), deployment)).rejects.toThrow();
   }
+});
+
+it('checks current Status before writing when REST history is empty', async () => {
+  const deployment = { id: 123, node_id: 'D_123' };
+  const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
+  const statusUrl = 'https://api.github.com/repos/daiksudme/apex/deployments/123/statuses';
+  const current = { state: 'SUCCESS', logUrl: expected.log_url, environmentUrl: null };
+  const fake = (latestStatus, state = 'ACTIVE') => {
+    const calls = { graphql: 0, posts: 0 };
+    const api = async (url, init) => {
+      if (url === 'https://api.github.com/graphql' && init?.method === 'POST') {
+        calls.graphql += 1;
+        return Response.json({ data: { node: { __typename: 'Deployment',
+          databaseId: 123, state, repository: { nameWithOwner: 'daiksudme/apex' }, latestStatus } } });
+      }
+      if (url.startsWith(`${statusUrl}?`) && !init) return Response.json([]);
+      if (url === statusUrl && init?.method === 'POST') {
+        calls.posts += 1;
+        return Response.json({ id: 301, ...expected }, { status: 201 });
+      }
+      throw new Error(`Unexpected GitHub API call: ${url}`);
+    };
+    return { api, calls };
+  };
+
+  const matching = fake(current);
+  expect(await ensureStatus(matching.api, deployment, expected)).toEqual({ action: 'skipped' });
+  expect(matching.calls).toEqual({ graphql: 1, posts: 0 });
+
+  const conflicting = fake({ ...current, state: 'FAILURE' }, 'FAILURE');
+  await expect(ensureStatus(conflicting.api, deployment, expected)).rejects.toThrow();
+  expect(conflicting.calls.posts).toBe(0);
+
+  const retainedWithoutDetails = fake(null, 'ACTIVE');
+  await expect(ensureStatus(retainedWithoutDetails.api, deployment, expected)).rejects.toThrow();
+  expect(retainedWithoutDetails.calls.posts).toBe(0);
+
+  const partial = fake(null, 'PENDING');
+  expect(await ensureStatus(partial.api, deployment, expected)).toEqual({ action: 'created', statusId: 301 });
+  expect(partial.calls).toEqual({ graphql: 1, posts: 1 });
+
+  let postsAfterError = 0;
+  const graphqlError = async (url, init) => {
+    if (url.startsWith(`${statusUrl}?`) && !init) return Response.json([]);
+    if (url === 'https://api.github.com/graphql') return Response.json({ errors: [{ message: 'GraphQL failed' }] });
+    postsAfterError += 1;
+    return Response.json({});
+  };
+  await expect(ensureStatus(graphqlError, deployment, expected)).rejects.toThrow();
+  expect(postsAfterError).toBe(0);
+
+  let graphReads = 0;
+  const alreadyListed = async (url, init) => {
+    if (url.startsWith(`${statusUrl}?`) && !init) {
+      return Response.json([{ id: 401, state: expected.state, log_url: expected.log_url, environment_url: '' }]);
+    }
+    graphReads += 1;
+    throw new Error('GraphQL must not run when REST has a Status');
+  };
+  expect(await ensureStatus(alreadyListed, deployment, expected)).toEqual({ action: 'skipped' });
+  expect(graphReads).toBe(0);
 });

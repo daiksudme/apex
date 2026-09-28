@@ -217,7 +217,10 @@ export async function listStatuses(getPage, deploymentId) {
 
 export async function ensureStatus(api, deployment, expected) {
   const statuses = await listStatuses(api, deployment.id);
-  if (statusDecision(statuses, expected) === 'skip') {
+  const known = statuses.length === 0
+    ? await latestDeploymentStatus(api, deployment) : null;
+  const previous = statuses.length === 0 && known ? [known] : statuses;
+  if (statusDecision(previous, expected) === 'skip') {
     return { action: 'skipped' };
   }
   const response = await api(deploymentStatusesUrl(deployment.id), {
