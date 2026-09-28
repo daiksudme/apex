@@ -1,38 +1,65 @@
-name: Cloudflare check probe
+name: Record Cloudflare deployment
 
 on:
   check_run:
-    types: [created, completed]
+    types: [completed]
 
 permissions:
   checks: read
+  contents: read
+  deployments: write
 
 jobs:
-  observe:
+  record:
     if: >-
       github.event.repository.full_name == 'daiksudme/apex' &&
       github.event.check_run.app.id == 85455 &&
       github.event.check_run.app.slug == 'cloudflare-workers-and-pages' &&
-      github.event.check_run.name == 'Workers Builds: apex'
+      github.event.check_run.name == 'Workers Builds: apex' &&
+      github.event.check_run.status == 'completed' &&
+      github.event.check_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    # The runner's env lookup is case-sensitive; string comparisons are not.
+    env:
+      main: apex-production-branch
     steps:
-      - name: Inspect Cloudflare check and suite
-        shell: bash
+      - name: Get check suite
+        id: suite
+        uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
+        with:
+          route: GET /repos/{owner}/{repo}/check-suites/{check_suite_id}
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          check_suite_id: ${{ github.event.check_run.check_suite.id }}
         env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          CHECK_SUITE_ID: ${{ github.event.check_run.check_suite.id }}
-        run: |
-          jq -c '{action, repository: .repository.full_name, check_run: {
-            id: .check_run.id,
-            name: .check_run.name,
-            head_sha: .check_run.head_sha,
-            status: .check_run.status,
-            conclusion: .check_run.conclusion,
-            details_url: .check_run.details_url,
-            check_suite_id: .check_run.check_suite.id,
-            app: {id: .check_run.app.id, slug: .check_run.app.slug}
-          }}' "$GITHUB_EVENT_PATH"
-          printf 'run_url=%s/%s/actions/runs/%s\n' "$GITHUB_SERVER_URL" "$GH_REPO" "$GITHUB_RUN_ID"
-          gh api "repos/$GH_REPO/check-suites/$CHECK_SUITE_ID" \
-            --jq '{id, head_branch, head_sha, status, conclusion, app: {id: .app.id, slug: .app.slug}}'
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Create deployment
+        id: deployment
+        if: >-
+          fromJSON(steps.suite.outputs.data).head_sha == github.event.check_run.head_sha &&
+          fromJSON(steps.suite.outputs.data).head_branch != ''
+        uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
+        with:
+          route: POST /repos/{owner}/{repo}/deployments
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          ref: ${{ github.event.check_run.head_sha }}
+          environment: ${{ env[fromJSON(steps.suite.outputs.data).head_branch] == 'apex-production-branch' && 'production' || 'preview' }}
+          auto_merge: false
+          required_contexts: '[]'
+          production_environment: ${{ env[fromJSON(steps.suite.outputs.data).head_branch] == 'apex-production-branch' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Record successful deployment
+        if: steps.deployment.outcome == 'success'
+        uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0
+        with:
+          route: POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
+          deployment_id: ${{ fromJSON(steps.deployment.outputs.data || '{}').id }}
+          state: success
+          auto_inactive: false
+          log_url: ${{ github.event.check_run.details_url }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
