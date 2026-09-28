@@ -40,11 +40,15 @@ export function parseBuildDetails(check) {
   } catch {
     return null;
   }
-  const path = `/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production/builds/${buildId}`;
+  const basePath = '/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production';
   if (url.origin !== 'https://dash.cloudflare.com'
-    || url.username || url.password || url.search || url.hash
-    || url.pathname !== path) {
+    || url.username || url.password || url.search || url.hash) {
     return null;
   }
-  return { buildId, kind: 'generic' };
+  if (url.pathname === `${basePath}/builds/${buildId}`) {
+    return { buildId, kind: 'generic' };
+  }
+  const previewPath = new RegExp(`^${basePath}/previews/([a-z0-9]+(?:-[a-z0-9]+)*)/builds/${buildId}$`);
+  const match = url.pathname.match(previewPath);
+  return match ? { buildId, kind: 'preview', previewSlug: match[1] } : null;
 }

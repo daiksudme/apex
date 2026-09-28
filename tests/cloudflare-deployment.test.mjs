@@ -8,11 +8,20 @@ import {
 
 const checkSha = 'a'.repeat(40);
 const buildId = 'a700dfa8-72aa-469e-a91f-9c067b04a9c7';
+const previewBuildId = '8788aeb6-807f-4ccc-8578-212f34f47a3f';
+const previewSlug = 'codex-44-preview-event-probe';
 
 function genericBuildCheck() {
   return {
     external_id: buildId,
     details_url: `https://dash.cloudflare.com/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production/builds/${buildId}`,
+  };
+}
+
+function previewBuildCheck() {
+  return {
+    external_id: previewBuildId,
+    details_url: `https://dash.cloudflare.com/a1f28decfde7c9df1884714e574d2059/workers/services/view/apex/production/previews/${previewSlug}/builds/${previewBuildId}`,
   };
 }
 
@@ -120,6 +129,30 @@ it('accepts only the target Worker generic Build URL with its matching Build ID'
   ];
   for (const [field, change] of mismatches) {
     const check = genericBuildCheck();
+    change(check);
+    expect(parseBuildDetails(check), field).toBeNull();
+  }
+});
+
+it('accepts only the target Worker Preview Build URL with its matching Build ID', () => {
+  expect(parseBuildDetails(previewBuildCheck())).toEqual({
+    buildId: previewBuildId,
+    kind: 'preview',
+    previewSlug,
+  });
+
+  const mismatches = [
+    ['missing slug', (check) => { check.details_url = check.details_url.replace(previewSlug, ''); }],
+    ['encoded slash', (check) => { check.details_url = check.details_url.replace(previewSlug, 'codex%2Fother'); }],
+    ['extra segment', (check) => { check.details_url = check.details_url.replace('/builds/', '/extra/builds/'); }],
+    ['different external ID', (check) => { check.external_id = buildId; }],
+    ['wrong account', (check) => { check.details_url = check.details_url.replace('a1f28decfde7c9df1884714e574d2059', 'other'); }],
+    ['wrong Worker', (check) => { check.details_url = check.details_url.replace('/apex/', '/other/'); }],
+    ['wrong host', (check) => { check.details_url = check.details_url.replace('dash.cloudflare.com', 'example.com'); }],
+    ['query', (check) => { check.details_url += '?x=1'; }],
+  ];
+  for (const [field, change] of mismatches) {
+    const check = previewBuildCheck();
     change(check);
     expect(parseBuildDetails(check), field).toBeNull();
   }
