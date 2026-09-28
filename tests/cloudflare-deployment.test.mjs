@@ -5,6 +5,7 @@ import {
   deploymentStatusRequest,
   findDeployment,
   isTargetCheck,
+  listDeployments,
   parseBuildDetails,
   statusForConclusion,
   statusDecision,
@@ -350,4 +351,36 @@ it('creates a missing Status and leaves an identical result alone', () => {
     expect(() => statusDecision([{ ...productionMatching, environment_url }], productionExpected)).toThrow();
   }
   expect(() => statusDecision([{ ...matching, environment_url: 'https://example.com/preview' }], expected)).toThrow();
+});
+
+it('reads every Deployment page for the exact SHA and Environment', async () => {
+  const request = deploymentRequest({ check_run: { head_sha: 'a'.repeat(40), id: 1 } },
+    'preview', { buildId: previewBuildId });
+  const matching = { id: 102, sha: request.ref, environment: 'preview', payload: request.payload };
+  const otherBuild = { ...matching, id: 101, payload: { ...matching.payload, build_id: buildId } };
+  const urls = [];
+  const getPage = async (url) => {
+    urls.push(String(url));
+    if (new URL(url).searchParams.get('page') === '1') {
+      return Response.json([otherBuild], {
+        headers: { link: '<https://api.github.com/repositories/1377818284/deployments?page=2>; rel="next"' },
+      });
+    }
+    return Response.json([matching]);
+  };
+  const all = await listDeployments(getPage, request);
+  expect(all).toEqual([otherBuild, matching]);
+  expect(findDeployment(all, request)).toEqual(matching);
+  expect(urls.map((value) => {
+    const url = new URL(value);
+    return [url.origin + url.pathname, url.searchParams.get('sha'),
+      url.searchParams.get('environment'), url.searchParams.get('per_page'), url.searchParams.get('page')];
+  })).toEqual([
+    ['https://api.github.com/repos/daiksudme/apex/deployments', request.ref, 'preview', '100', '1'],
+    ['https://api.github.com/repos/daiksudme/apex/deployments', request.ref, 'preview', '100', '2'],
+  ]);
+
+  await expect(listDeployments(async () => { throw new Error('API failed'); }, request)).rejects.toThrow('API failed');
+  await expect(listDeployments(async () => new Response('error', { status: 500 }), request)).rejects.toThrow();
+  await expect(listDeployments(async () => Response.json({ message: 'not a list' }), request)).rejects.toThrow();
 });

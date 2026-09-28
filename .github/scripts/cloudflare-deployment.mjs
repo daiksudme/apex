@@ -151,3 +151,26 @@ export function statusDecision(statuses, expected) {
   }
   return 'skip';
 }
+
+export async function listDeployments(getPage, request) {
+  const url = new URL('https://api.github.com/repos/daiksudme/apex/deployments');
+  url.searchParams.set('sha', request.ref);
+  url.searchParams.set('environment', request.environment);
+  url.searchParams.set('per_page', '100');
+  const deployments = [];
+  for (let page = 1; ; page += 1) {
+    url.searchParams.set('page', String(page));
+    const response = await getPage(url.toString());
+    if (!response.ok) {
+      throw new Error(`GitHub Deployment list failed: ${response.status}`);
+    }
+    const items = await response.json();
+    if (!Array.isArray(items)) {
+      throw new Error('GitHub Deployment list was not an array');
+    }
+    deployments.push(...items);
+    if (!/<[^>]+>;\s*rel="next"/i.test(response.headers.get('link') ?? '')) {
+      return deployments;
+    }
+  }
+}
