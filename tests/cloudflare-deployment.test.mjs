@@ -70,6 +70,13 @@ it('maps the main terminal Check conclusions without inventing success', () => {
   expect(statusForConclusion('unknown')).toBeNull();
 });
 
+it('maps every other documented non-success Check conclusion to error', () => {
+  for (const conclusion of ['action_required', 'neutral', 'skipped', 'stale', 'timed_out']) {
+    expect(statusForConclusion(conclusion), conclusion).toBe('error');
+  }
+  expect(statusForConclusion('startup_failure')).toBeNull();
+});
+
 it('recognizes Production only for main with a generic Build path', () => {
   expect(classifyEnvironment('main', { kind: 'generic' }, 'success')).toBe('production');
   expect(classifyEnvironment('main', { kind: 'generic' }, 'failure')).toBe('production');

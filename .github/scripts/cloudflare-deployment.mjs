@@ -67,7 +67,7 @@ export function statusForConclusion(conclusion) {
   if (conclusion === 'success' || conclusion === 'failure') {
     return conclusion;
   }
-  if (conclusion === 'cancelled') {
+  if (['cancelled', 'action_required', 'neutral', 'skipped', 'stale', 'timed_out'].includes(conclusion)) {
     return 'error';
   }
   return null;
