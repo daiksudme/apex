@@ -94,3 +94,17 @@ export function deploymentRequest(event, environment, buildDetails) {
     },
   };
 }
+
+export function deploymentStatusRequest(check, environment, state) {
+  if (environment !== 'preview' && environment !== 'production') {
+    throw new Error(`Unknown deployment environment: ${environment}`);
+  }
+  if (state !== 'success' && state !== 'failure' && state !== 'error') {
+    throw new Error(`Unknown deployment state: ${state}`);
+  }
+  return {
+    state,
+    log_url: check.details_url,
+    auto_inactive: false,
+  };
+}

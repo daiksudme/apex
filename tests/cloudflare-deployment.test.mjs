@@ -2,6 +2,7 @@ import { expect, it } from 'vitest';
 import {
   classifyEnvironment,
   deploymentRequest,
+  deploymentStatusRequest,
   isTargetCheck,
   parseBuildDetails,
   statusForConclusion,
@@ -248,4 +249,28 @@ it('builds Deployment requests for the Check SHA and each Cloudflare build', () 
   expect(rebuilt.ref).toBe(preview.ref);
   expect(rebuilt.payload.build_id).toBe(rebuiltId);
   expect(() => deploymentRequest(event, 'unknown', details)).toThrow();
+});
+
+it('builds terminal Status requests without inactivating other Previews', () => {
+  const previewCheck = previewBuildCheck();
+  expect(deploymentStatusRequest(previewCheck, 'preview', 'success')).toEqual({
+    state: 'success',
+    log_url: previewCheck.details_url,
+    auto_inactive: false,
+  });
+  const failedCheck = genericBuildCheck();
+  for (const state of ['failure', 'error']) {
+    expect(deploymentStatusRequest(failedCheck, 'preview', state)).toEqual({
+      state,
+      log_url: failedCheck.details_url,
+      auto_inactive: false,
+    });
+  }
+  expect(deploymentStatusRequest(failedCheck, 'production', 'failure')).toEqual({
+    state: 'failure',
+    log_url: failedCheck.details_url,
+    auto_inactive: false,
+  });
+  expect(() => deploymentStatusRequest(previewCheck, 'preview', 'unknown')).toThrow();
+  expect(() => deploymentStatusRequest(previewCheck, 'unknown', 'success')).toThrow();
 });
