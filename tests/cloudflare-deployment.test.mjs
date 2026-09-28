@@ -4,6 +4,7 @@ import {
   deploymentRequest,
   deploymentStatusRequest,
   ensureDeployment,
+  ensureStatus,
   findDeployment,
   isTargetCheck,
   listDeployments,
@@ -480,4 +481,62 @@ it('reads every Status page for one Deployment before deciding to write', async 
   await expect(listStatuses(async () => { throw new Error('API failed'); }, 123)).rejects.toThrow('API failed');
   await expect(listStatuses(async () => new Response('error', { status: 500 }), 123)).rejects.toThrow();
   await expect(listStatuses(async () => Response.json({ message: 'not a list' }), 123)).rejects.toThrow();
+});
+
+it('creates a terminal Status once and reuses it on rerun', async () => {
+  const deployment = { id: 123 };
+  const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
+  const stored = [];
+  const posts = [];
+  const api = async (url, init) => {
+    if (!init) return Response.json(stored);
+    const body = JSON.parse(init.body);
+    posts.push({ url, body });
+    const created = { id: 201, ...body, environment_url: body.environment_url ?? '' };
+    stored.push(created);
+    return Response.json(created, { status: 201 });
+  };
+  expect(await ensureStatus(api, deployment, expected)).toEqual({ action: 'created', statusId: 201 });
+  expect(posts).toEqual([{ url: 'https://api.github.com/repos/daiksudme/apex/deployments/123/statuses', body: expected }]);
+  expect(await ensureStatus(api, deployment, expected)).toEqual({ action: 'skipped' });
+  expect(posts).toHaveLength(1);
+});
+
+it('recovers a Status creation that persisted before the API call failed', async () => {
+  const deployment = { id: 123 };
+  const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
+  const stored = [];
+  let posts = 0;
+  const api = async (_url, init) => {
+    if (!init) return Response.json(stored);
+    posts += 1;
+    stored.push({ id: 202, state: expected.state, log_url: expected.log_url, environment_url: '' });
+    throw new Error('connection lost after Status create');
+  };
+  await expect(ensureStatus(api, deployment, expected)).rejects.toThrow('connection lost');
+  expect(await ensureStatus(api, deployment, expected)).toEqual({ action: 'skipped' });
+  expect(posts).toBe(1);
+});
+
+it('rejects conflicting, failed, or invalid Status creation results', async () => {
+  const deployment = { id: 123 };
+  const expected = deploymentStatusRequest(previewBuildCheck(), 'preview', 'success');
+  let posts = 0;
+  const conflict = async (_url, init) => {
+    if (init) posts += 1;
+    return Response.json([{ id: 201, state: 'failure', log_url: expected.log_url }]);
+  };
+  await expect(ensureStatus(conflict, deployment, expected)).rejects.toThrow();
+  expect(posts).toBe(0);
+  const responseFor = (response) => async (_url, init) => init ? response : Response.json([]);
+  await expect(ensureStatus(responseFor(new Response('error', { status: 500 })), deployment, expected)).rejects.toThrow();
+  await expect(ensureStatus(responseFor(Response.json({ id: 203, ...expected }, { status: 202 })), deployment, expected)).rejects.toThrow();
+  await expect(ensureStatus(responseFor(Response.json({ id: 0, ...expected }, { status: 201 })), deployment, expected)).rejects.toThrow();
+  await expect(ensureStatus(responseFor(Response.json({ id: 204, ...expected, state: 'failure' }, { status: 201 })), deployment, expected)).rejects.toThrow();
+  await expect(ensureStatus(responseFor(Response.json({ id: 205, ...expected, log_url: 'https://example.com/other-build' }, { status: 201 })), deployment, expected)).rejects.toThrow();
+  const productionExpected = deploymentStatusRequest(productionBuildCheck(), 'production', 'success');
+  await expect(ensureStatus(responseFor(Response.json({ id: 206, state: 'success',
+    log_url: productionExpected.log_url, environment_url: '' }, { status: 201 })), deployment, productionExpected)).rejects.toThrow();
+  await expect(ensureStatus(responseFor(Response.json({ id: 207, ...productionExpected,
+    environment_url: 'https://example.com/stale' }, { status: 201 })), deployment, productionExpected)).rejects.toThrow();
 });

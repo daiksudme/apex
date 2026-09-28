@@ -202,11 +202,36 @@ export async function ensureDeployment(api, request) {
   return match;
 }
 
-export async function listStatuses(getPage, deploymentId) {
+function deploymentStatusesUrl(deploymentId) {
   if (!Number.isSafeInteger(deploymentId) || deploymentId <= 0) {
     throw new Error('Invalid GitHub Deployment ID');
   }
-  const url = new URL(`${deploymentsUrl}/${deploymentId}/statuses`);
+  return `${deploymentsUrl}/${deploymentId}/statuses`;
+}
+
+export async function listStatuses(getPage, deploymentId) {
+  const url = new URL(deploymentStatusesUrl(deploymentId));
   url.searchParams.set('per_page', '100');
   return collectPages(getPage, url, 'Deployment Status');
+}
+
+export async function ensureStatus(api, deployment, expected) {
+  const statuses = await listStatuses(api, deployment.id);
+  if (statusDecision(statuses, expected) === 'skip') {
+    return { action: 'skipped' };
+  }
+  const response = await api(deploymentStatusesUrl(deployment.id), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(expected),
+  });
+  if (response.status !== 201) {
+    throw new Error(`GitHub Deployment Status creation failed: ${response.status}`);
+  }
+  const created = await response.json();
+  if (!Number.isSafeInteger(created?.id) || created.id <= 0) {
+    throw new Error('GitHub Deployment Status creation returned an invalid ID');
+  }
+  statusDecision([created], expected);
+  return { action: 'created', statusId: created.id };
 }
