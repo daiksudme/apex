@@ -1,3 +1,5 @@
+const deploymentsUrl = 'https://api.github.com/repos/daiksudme/apex/deployments';
+
 export function terminalConclusion(event) {
   return event.check_run.status === 'completed' ? event.check_run.conclusion : null;
 }
@@ -153,7 +155,7 @@ export function statusDecision(statuses, expected) {
 }
 
 export async function listDeployments(getPage, request) {
-  const url = new URL('https://api.github.com/repos/daiksudme/apex/deployments');
+  const url = new URL(deploymentsUrl);
   url.searchParams.set('sha', request.ref);
   url.searchParams.set('environment', request.environment);
   url.searchParams.set('per_page', '100');
@@ -173,4 +175,25 @@ export async function listDeployments(getPage, request) {
       return deployments;
     }
   }
+}
+
+export async function ensureDeployment(api, request) {
+  const existing = findDeployment(await listDeployments(api, request), request);
+  if (existing) {
+    return existing;
+  }
+  const response = await api(deploymentsUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(request),
+  });
+  if (response.status !== 201) {
+    throw new Error(`GitHub Deployment creation failed: ${response.status}`);
+  }
+  const created = await response.json();
+  const match = findDeployment([created], request);
+  if (!match) {
+    throw new Error('GitHub Deployment creation returned another Build');
+  }
+  return match;
 }

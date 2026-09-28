@@ -3,6 +3,7 @@ import {
   classifyEnvironment,
   deploymentRequest,
   deploymentStatusRequest,
+  ensureDeployment,
   findDeployment,
   isTargetCheck,
   listDeployments,
@@ -383,4 +384,69 @@ it('reads every Deployment page for the exact SHA and Environment', async () => 
   await expect(listDeployments(async () => { throw new Error('API failed'); }, request)).rejects.toThrow('API failed');
   await expect(listDeployments(async () => new Response('error', { status: 500 }), request)).rejects.toThrow();
   await expect(listDeployments(async () => Response.json({ message: 'not a list' }), request)).rejects.toThrow();
+});
+
+it('reuses a Build Deployment or creates one for a different Build', async () => {
+  const request = deploymentRequest({ check_run: { head_sha: 'a'.repeat(40), id: 1 } },
+    'preview', { buildId: previewBuildId });
+  const stored = [];
+  const posts = [];
+  const api = async (url, init) => {
+    if (!init) return Response.json(stored);
+    const body = JSON.parse(init.body);
+    posts.push({ url, body });
+    const created = { id: 100 + posts.length, sha: body.ref,
+      environment: body.environment, payload: body.payload };
+    stored.push(created);
+    return Response.json(created, { status: 201 });
+  };
+
+  const created = await ensureDeployment(api, request);
+  expect(posts).toHaveLength(1);
+  expect(created).toEqual(stored[0]);
+  expect(posts).toEqual([{ url: 'https://api.github.com/repos/daiksudme/apex/deployments', body: request }]);
+  expect(await ensureDeployment(api, request)).toEqual(stored[0]);
+  expect(posts).toHaveLength(1);
+
+  const rebuild = deploymentRequest({ check_run: { head_sha: request.ref, id: 2 } },
+    'preview', { buildId: '11111111-1111-4111-8111-111111111111' });
+  expect(await ensureDeployment(api, rebuild)).toEqual(stored[1]);
+  expect(posts[1].body).toEqual(rebuild);
+});
+
+it('recovers a Deployment creation that succeeded before the API call failed', async () => {
+  const request = deploymentRequest({ check_run: { head_sha: 'a'.repeat(40), id: 1 } },
+    'preview', { buildId: previewBuildId });
+  const stored = [];
+  let posts = 0;
+  const api = async (_url, init) => {
+    if (!init) return Response.json(stored);
+    posts += 1;
+    stored.push({ id: 201, sha: request.ref, environment: request.environment, payload: request.payload });
+    throw new Error('connection lost after create');
+  };
+  await expect(ensureDeployment(api, request)).rejects.toThrow('connection lost');
+  expect(await ensureDeployment(api, request)).toEqual(stored[0]);
+  expect(posts).toBe(1);
+});
+
+it('fails when GitHub rejects or misreports a new Deployment', async () => {
+  const request = deploymentRequest({ check_run: { head_sha: 'a'.repeat(40), id: 1 } },
+    'preview', { buildId: previewBuildId });
+  const rejected = async (_url, init) => init
+    ? new Response('error', { status: 500 }) : Response.json([]);
+  await expect(ensureDeployment(rejected, request)).rejects.toThrow();
+  const merged = async (_url, init) => init
+    ? Response.json({ id: 300, sha: request.ref, environment: 'preview', payload: request.payload }, { status: 202 })
+    : Response.json([]);
+  await expect(ensureDeployment(merged, request)).rejects.toThrow();
+  const mismatched = async (_url, init) => init
+    ? Response.json({ id: 301, sha: 'b'.repeat(40), environment: 'preview', payload: request.payload }, { status: 201 })
+    : Response.json([]);
+  await expect(ensureDeployment(mismatched, request)).rejects.toThrow();
+  const wrongBuild = async (_url, init) => init
+    ? Response.json({ id: 302, sha: request.ref, environment: 'preview',
+      payload: { ...request.payload, build_id: buildId } }, { status: 201 })
+    : Response.json([]);
+  await expect(ensureDeployment(wrongBuild, request)).rejects.toThrow();
 });
