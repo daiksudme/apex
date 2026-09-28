@@ -1,0 +1,38 @@
+name: Cloudflare check probe
+
+on:
+  check_run:
+    types: [created, completed]
+
+permissions:
+  checks: read
+
+jobs:
+  observe:
+    if: >-
+      github.event.repository.full_name == 'daiksudme/apex' &&
+      github.event.check_run.app.id == 85455 &&
+      github.event.check_run.app.slug == 'cloudflare-workers-and-pages' &&
+      github.event.check_run.name == 'Workers Builds: apex'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Inspect Cloudflare check and suite
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CHECK_SUITE_ID: ${{ github.event.check_run.check_suite.id }}
+        run: |
+          jq -c '{action, repository: .repository.full_name, check_run: {
+            id: .check_run.id,
+            name: .check_run.name,
+            head_sha: .check_run.head_sha,
+            status: .check_run.status,
+            conclusion: .check_run.conclusion,
+            details_url: .check_run.details_url,
+            check_suite_id: .check_run.check_suite.id,
+            app: {id: .check_run.app.id, slug: .check_run.app.slug}
+          }}' "$GITHUB_EVENT_PATH"
+          printf 'run_url=%s/%s/actions/runs/%s\n' "$GITHUB_SERVER_URL" "$GH_REPO" "$GITHUB_RUN_ID"
+          gh api "repos/$GH_REPO/check-suites/$CHECK_SUITE_ID" \
+            --jq '{id, head_branch, head_sha, status, conclusion, app: {id: .app.id, slug: .app.slug}}'
