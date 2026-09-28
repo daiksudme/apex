@@ -62,3 +62,13 @@ export function classifyEnvironment(branch, buildDetails) {
   }
   return buildDetails?.kind === 'preview' ? 'preview' : null;
 }
+
+export function statusForConclusion(conclusion) {
+  if (conclusion === 'success' || conclusion === 'failure') {
+    return conclusion;
+  }
+  if (conclusion === 'cancelled') {
+    return 'error';
+  }
+  return null;
+}

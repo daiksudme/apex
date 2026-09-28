@@ -3,6 +3,7 @@ import {
   classifyEnvironment,
   isTargetCheck,
   parseBuildDetails,
+  statusForConclusion,
   terminalConclusion,
   validatedBranch,
 } from '../.github/scripts/cloudflare-deployment.mjs';
@@ -59,6 +60,14 @@ it('uses the Check state instead of the event action for terminal results', () =
     action: 'completed',
     check_run: { status: 'in_progress', conclusion: null },
   })).toBeNull();
+});
+
+it('maps the main terminal Check conclusions without inventing success', () => {
+  expect(statusForConclusion('success')).toBe('success');
+  expect(statusForConclusion('failure')).toBe('failure');
+  expect(statusForConclusion('cancelled')).toBe('error');
+  expect(statusForConclusion(null)).toBeNull();
+  expect(statusForConclusion('unknown')).toBeNull();
 });
 
 it('recognizes Production only for main with a generic Build path', () => {
