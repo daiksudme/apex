@@ -9,6 +9,7 @@ import {
   isTargetCheck,
   listDeployments,
   listStatuses,
+  latestDeploymentStatus,
   parseBuildDetails,
   statusForConclusion,
   statusDecision,
@@ -539,4 +540,46 @@ it('rejects conflicting, failed, or invalid Status creation results', async () =
     log_url: productionExpected.log_url, environment_url: '' }, { status: 201 })), deployment, productionExpected)).rejects.toThrow();
   await expect(ensureStatus(responseFor(Response.json({ id: 207, ...productionExpected,
     environment_url: 'https://example.com/stale' }, { status: 201 })), deployment, productionExpected)).rejects.toThrow();
+});
+
+it('reads the current Deployment Status from the verified GraphQL node', async () => {
+  const deployment = { id: 123, node_id: 'D_123' };
+  const current = { state: 'SUCCESS', logUrl: previewBuildCheck().details_url, environmentUrl: null };
+  const node = { __typename: 'Deployment', databaseId: 123, state: 'ACTIVE',
+    repository: { nameWithOwner: 'daiksudme/apex' }, latestStatus: current };
+  const calls = [];
+  const api = async (url, init) => {
+    calls.push({ url, body: JSON.parse(init.body) });
+    return Response.json({ data: { node } });
+  };
+  expect(await latestDeploymentStatus(api, deployment)).toEqual({
+    state: 'success', log_url: current.logUrl, environment_url: null,
+  });
+  expect(calls[0].url).toBe('https://api.github.com/graphql');
+  expect(calls[0].body.variables).toEqual({ id: 'D_123' });
+  expect(calls[0].body.query).toContain('latestStatus');
+  expect(await latestDeploymentStatus(async () => Response.json({ data: { node: { ...node, state: 'PENDING', latestStatus: null } } }), deployment)).toBeNull();
+  expect(await latestDeploymentStatus(async () => Response.json({ data: { node: { ...node, state: 'ABANDONED', latestStatus: null } } }), deployment)).toBeNull();
+  expect(await latestDeploymentStatus(async () => Response.json({ data: { node: { ...node, state: null, latestStatus: null } } }), deployment)).toBeNull();
+
+  let invalidCalls = 0;
+  await expect(latestDeploymentStatus(async () => { invalidCalls += 1; return Response.json({}); }, { id: 123 })).rejects.toThrow();
+  expect(invalidCalls).toBe(0);
+  const reply = (body) => async () => Response.json(body);
+  for (const state of ['ACTIVE', 'SUCCESS', 'FAILURE', 'ERROR']) {
+    await expect(latestDeploymentStatus(reply({ data: { node: { ...node, state, latestStatus: null } } }), deployment)).rejects.toThrow();
+  }
+  await expect(latestDeploymentStatus(reply({ errors: [{ message: 'GraphQL failed' }] }), deployment)).rejects.toThrow();
+  await expect(latestDeploymentStatus(reply({ data: { node: null } }), deployment)).rejects.toThrow();
+  await expect(latestDeploymentStatus(async () => new Response('forbidden', { status: 403 }), deployment)).rejects.toThrow();
+  for (const changed of [
+    { ...node, __typename: 'Repository' },
+    { ...node, databaseId: 124 },
+    { ...node, repository: { nameWithOwner: 'other/apex' } },
+    { ...node, latestStatus: { ...current, state: 'UNKNOWN' } },
+    { ...node, latestStatus: { ...current, logUrl: 42 } },
+    { ...node, latestStatus: { ...current, environmentUrl: 42 } },
+  ]) {
+    await expect(latestDeploymentStatus(reply({ data: { node: changed } }), deployment)).rejects.toThrow();
+  }
 });

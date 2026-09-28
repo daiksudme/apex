@@ -235,3 +235,56 @@ export async function ensureStatus(api, deployment, expected) {
   statusDecision([created], expected);
   return { action: 'created', statusId: created.id };
 }
+
+export async function latestDeploymentStatus(api, deployment) {
+  if (!Number.isSafeInteger(deployment?.id) || deployment.id <= 0
+    || typeof deployment.node_id !== 'string' || !deployment.node_id) {
+    throw new Error('Invalid GitHub Deployment node');
+  }
+  const query = `query($id: ID!) {
+    node(id: $id) {
+      __typename
+      ... on Deployment {
+        databaseId
+        state
+        repository { nameWithOwner }
+        latestStatus { state logUrl environmentUrl }
+      }
+    }
+  }`;
+  const response = await api('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, variables: { id: deployment.node_id } }),
+  });
+  if (!response.ok) {
+    throw new Error(`GitHub Deployment current Status query failed: ${response.status}`);
+  }
+  const result = await response.json();
+  if (!result || (result.errors && (!Array.isArray(result.errors) || result.errors.length))) {
+    throw new Error('GitHub Deployment current Status query returned errors');
+  }
+  const node = result.data?.node;
+  if (node?.__typename !== 'Deployment' || node.databaseId !== deployment.id
+    || node.repository?.nameWithOwner !== 'daiksudme/apex') {
+    throw new Error('GitHub Deployment current Status query returned another Deployment');
+  }
+  if (node.latestStatus === null) {
+    if (node.state === null || node.state === 'PENDING' || node.state === 'ABANDONED') {
+      return null;
+    }
+    throw new Error('GitHub Deployment has a current state without Status details');
+  }
+  const status = node.latestStatus;
+  const states = ['SUCCESS', 'FAILURE', 'ERROR', 'INACTIVE', 'IN_PROGRESS', 'PENDING', 'QUEUED', 'WAITING'];
+  if (!status || !states.includes(status.state)
+    || (status.logUrl !== null && typeof status.logUrl !== 'string')
+    || (status.environmentUrl !== null && typeof status.environmentUrl !== 'string')) {
+    throw new Error('GitHub Deployment current Status query returned invalid Status');
+  }
+  return {
+    state: status.state.toLowerCase(),
+    log_url: status.logUrl,
+    environment_url: status.environmentUrl,
+  };
+}
