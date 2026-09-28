@@ -248,7 +248,7 @@ export async function latestDeploymentStatus(api, deployment) {
     node(id: $id) {
       __typename
       ... on Deployment {
-        databaseId
+        id
         state
         repository { nameWithOwner }
         latestStatus { state logUrl environmentUrl }
@@ -268,7 +268,7 @@ export async function latestDeploymentStatus(api, deployment) {
     throw new Error('GitHub Deployment current Status query returned errors');
   }
   const node = result.data?.node;
-  if (node?.__typename !== 'Deployment' || node.databaseId !== deployment.id
+  if (node?.__typename !== 'Deployment' || node.id !== deployment.node_id
     || node.repository?.nameWithOwner !== 'daiksudme/apex') {
     throw new Error('GitHub Deployment current Status query returned another Deployment');
   }

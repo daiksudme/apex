@@ -41,7 +41,7 @@ function withEmptyCurrentStatus(api, deployment) {
   return (url, init) => {
     if (url === 'https://api.github.com/graphql') {
       return Response.json({ data: { node: {
-        __typename: 'Deployment', databaseId: deployment.id, state: 'PENDING',
+        __typename: 'Deployment', id: deployment.node_id, state: 'PENDING',
         repository: { nameWithOwner: 'daiksudme/apex' }, latestStatus: null,
       } } });
     }
@@ -560,7 +560,7 @@ it('rejects conflicting, failed, or invalid Status creation results', async () =
 it('reads the current Deployment Status from the verified GraphQL node', async () => {
   const deployment = { id: 123, node_id: 'D_123' };
   const current = { state: 'SUCCESS', logUrl: previewBuildCheck().details_url, environmentUrl: null };
-  const node = { __typename: 'Deployment', databaseId: 123, state: 'ACTIVE',
+  const node = { __typename: 'Deployment', id: 'D_123', state: 'ACTIVE',
     repository: { nameWithOwner: 'daiksudme/apex' }, latestStatus: current };
   const calls = [];
   const api = async (url, init) => {
@@ -573,6 +573,11 @@ it('reads the current Deployment Status from the verified GraphQL node', async (
   expect(calls[0].url).toBe('https://api.github.com/graphql');
   expect(calls[0].body.variables).toEqual({ id: 'D_123' });
   expect(calls[0].body.query).toContain('latestStatus');
+  const largeDeployment = { id: 4_000_000_000, node_id: 'D_large' };
+  const largeNode = { ...node, id: 'D_large', databaseId: null };
+  expect(await latestDeploymentStatus(async () => Response.json({ data: { node: largeNode } }), largeDeployment)).toEqual({
+    state: 'success', log_url: current.logUrl, environment_url: null,
+  });
   expect(await latestDeploymentStatus(async () => Response.json({ data: { node: { ...node, state: 'PENDING', latestStatus: null } } }), deployment)).toBeNull();
   expect(await latestDeploymentStatus(async () => Response.json({ data: { node: { ...node, state: 'ABANDONED', latestStatus: null } } }), deployment)).toBeNull();
   expect(await latestDeploymentStatus(async () => Response.json({ data: { node: { ...node, state: null, latestStatus: null } } }), deployment)).toBeNull();
@@ -589,7 +594,7 @@ it('reads the current Deployment Status from the verified GraphQL node', async (
   await expect(latestDeploymentStatus(async () => new Response('forbidden', { status: 403 }), deployment)).rejects.toThrow();
   for (const changed of [
     { ...node, __typename: 'Repository' },
-    { ...node, databaseId: 124 },
+    { ...node, id: 'D_other' },
     { ...node, repository: { nameWithOwner: 'other/apex' } },
     { ...node, latestStatus: { ...current, state: 'UNKNOWN' } },
     { ...node, latestStatus: { ...current, logUrl: 42 } },
@@ -610,7 +615,7 @@ it('checks current Status before writing when REST history is empty', async () =
       if (url === 'https://api.github.com/graphql' && init?.method === 'POST') {
         calls.graphql += 1;
         return Response.json({ data: { node: { __typename: 'Deployment',
-          databaseId: 123, state, repository: { nameWithOwner: 'daiksudme/apex' }, latestStatus } } });
+          id: deployment.node_id, state, repository: { nameWithOwner: 'daiksudme/apex' }, latestStatus } } });
       }
       if (url.startsWith(`${statusUrl}?`) && !init) return Response.json([]);
       if (url === statusUrl && init?.method === 'POST') {
