@@ -1,10 +1,13 @@
 ---
+import Icon from '../components/Icon.astro';
+import TerminalPrompt from '../components/TerminalPrompt.astro';
 import { getPageTitle } from '../lib/page-title';
-import { site } from '../config/site';
+import { navigation, profile, site, topics } from '../config/site';
 import '../styles/global.css';
 interface Props { title?: string; description?: string }
 const { title, description = site.description } = Astro.props;
 const pageTitle = getPageTitle(title);
+const year = new Date().getFullYear();
 ---
 
 <!doctype html>
@@ -13,14 +16,54 @@ const pageTitle = getPageTitle(title);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#1a1b26" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{pageTitle}</title>
   </head>
   <body>
-    <header>
-      <a href="/" aria-label={`${site.name} ホーム`}>{site.name}</a>
+    <a class="skip-link" href="#main-content">本文へスキップ</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label={`${site.name} ホーム`}>
+        {site.name}<span class="cursor" aria-hidden="true"></span>
+      </a>
+      <nav class="header-nav" aria-label="メインナビゲーション">
+        {navigation.slice(1).map((item) => (
+          <a href={item.href} lang="en"><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
+        ))}
+      </nav>
+      <p class="header-tagline" lang="en">{site.tagline}</p>
     </header>
-    <main>
-      <slot />
-    </main>
+    <div class="site-frame">
+      <aside class="sidebar" aria-label="サイトメニュー">
+        <nav class="sidebar-nav" aria-label="ページナビゲーション">
+          {navigation.map((item) => (
+            <a href={item.href} lang="en" aria-current={item.href === Astro.url.pathname ? 'page' : undefined}>
+              <Icon name={item.icon} /><span>{item.label}</span>
+            </a>
+          ))}
+        </nav>
+        <nav class="sidebar-topics" aria-label="トピック">
+          <h2 class="eyebrow" lang="en"><span aria-hidden="true">// </span>Topics</h2>
+          <ul lang="en">
+            {topics.map((topic) => (
+              <li><a href={`#topic-${topic.slug}`} data-tone={topic.tone}><span class="topic-dot" aria-hidden="true"></span>#{topic.slug}</a></li>
+            ))}
+          </ul>
+        </nav>
+        <p class="sidebar-note" lang="en">A personal blog about technology, creativity, and a better tomorrow.</p>
+      </aside>
+      <div class="main-column">
+        <main id="main-content" tabindex="-1">
+          <slot />
+        </main>
+        <footer class="site-footer">
+          <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
+          <div class="footer-meta">
+            <a href={profile.githubUrl} aria-label="daiksudのGitHub"><Icon name="github" size={22} /></a>
+            <p>&copy; {year} {site.name}</p>
+          </div>
+        </footer>
+      </div>
+    </div>
   </body>
 </html>

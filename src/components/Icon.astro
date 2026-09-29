@@ -1,0 +1,20 @@
+---
+const paths = {
+  home: 'm3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9',
+  posts: 'M8 3h11v15H8zM5 6H3v15h13v-2M11 7h5M11 11h5M11 15h3',
+  tags: 'M3 3h8l10 10-8 8L3 11V3ZM7 7h.01',
+  about: 'M12 8h.01M11 12h1v5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
+  github: 'M9 19c-4.3 1.3-4.3-2.2-6-2.7M15 22v-3.4c0-1 .1-1.5-.5-2.1 3.3-.4 6.8-1.6 6.8-7.4A5.8 5.8 0 0 0 19.8 5c.2-1 .2-2-.1-3 0 0-1.2-.4-3.9 1.5a13.5 13.5 0 0 0-7 0C6.1 1.6 4.9 2 4.9 2c-.3 1-.3 2-.1 3a5.8 5.8 0 0 0-1.5 4.1c0 5.8 3.5 7 6.8 7.4-.6.6-.6 1.3-.6 2.1V22',
+  location: 'M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 1 1 16 0ZM15 10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
+  link: 'M10 13a5 5 0 0 0 7 .1l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7-.1l-3 3a5 5 0 0 0 7 7l2-2',
+  arrow: 'M5 12h14m-5-5 5 5-5 5',
+  branch: 'M6 3v12a4 4 0 0 0 4 4h2a6 6 0 0 0 6-6V9M8 5a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM20 7a2 2 0 1 1-4 0 2 2 0 0 1 4 0ZM8 19a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z',
+  terminal: 'm5 7 5 5-5 5m8 0h6',
+} as const;
+interface Props { name: keyof typeof paths; size?: number }
+const { name, size = 20 } = Astro.props;
+---
+
+<svg class="icon" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <path d={paths[name]} />
+</svg>
