@@ -18,8 +18,9 @@ Node.js `26.10.0` と pnpm `12.6.0` を使用します。バージョンは [mis
 mise trust mise.toml
 mise install
 mise exec -- pnpm install --frozen-lockfile
+mise exec -- pnpm check
+mise exec -- pnpm build
 mise exec -- pnpm test
-mise exec -- pnpm run build
 ```
 
 ### Cloudflare デプロイの記録
