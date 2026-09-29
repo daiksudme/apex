@@ -31,6 +31,14 @@ describe('home', () => {
     expect(html.match(/<h1\b/g)).toHaveLength(1);
   });
 
+  it('marks English passages for pronunciation in the Japanese document', () => {
+    expect(html).toContain('<html lang="ja">');
+    for (const className of ['tagline', 'profile-role', 'profile-note', 'panel-footnote', 'footer-command']) {
+      expect(html).toContain(`<p class="${className}" lang="en">`);
+    }
+    expect(html).toContain('<p class="eyebrow" lang="en">About me</p>');
+  });
+
   it('uses the actual GitHub avatar with alternative text and dimensions', () => {
     const avatar = html.match(/<img\b[^>]*>/)?.[0] ?? '';
     expect(avatar).toContain('https://avatars.githubusercontent.com/u/155234749');
