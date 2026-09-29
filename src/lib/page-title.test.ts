@@ -8,7 +8,7 @@ describe('getPageTitle', () => {
   });
 
   it('combines a page title with the site name', () => {
-    expect(getPageTitle('記事')).toBe(`unexpected | ${site.name}`);
+    expect(getPageTitle('記事')).toBe(`記事 | ${site.name}`);
   });
 
   it('uses the site name when the page title is empty', () => {
