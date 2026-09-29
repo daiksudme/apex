@@ -8,15 +8,15 @@ import { navigation, profile, site, topics } from '../config/site';
 <SiteLayout>
   <div class="dashboard">
     <section class="panel welcome-panel" aria-labelledby="welcome-heading">
-      <p class="command-line"><TerminalPrompt /> <span class="command">cat welcome.txt</span></p>
+      <p class="command-line" lang="en"><TerminalPrompt /> <span class="command">cat welcome.txt</span></p>
       <h1 id="welcome-heading">つくる。<wbr />試す。<wbr />書き残す。</h1>
       <p class="welcome-description">{site.description}</p>
       <p class="tagline" lang="en">{site.tagline}</p>
       <div class="welcome-links">
-        <p class="command-line"><TerminalPrompt /> <span class="command">ls</span></p>
+        <p class="command-line" lang="en"><TerminalPrompt /> <span class="command">ls</span></p>
         <nav aria-label="ホームのセクション">
           {navigation.slice(1).map((item) => (
-            <a href={item.href}><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
+            <a href={item.href} lang="en"><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
           ))}
         </nav>
       </div>
@@ -27,41 +27,41 @@ import { navigation, profile, site, topics } from '../config/site';
       <div class="profile-top">
         <img class="avatar" src={profile.avatarUrl} alt="daiksudのGitHubアバター" width="160" height="160" decoding="async" referrerpolicy="no-referrer" />
         <div>
-          <p class="eyebrow">About me</p>
+          <p class="eyebrow" lang="en">About me</p>
           <h2 id="profile-heading">{profile.name}</h2>
           <p class="profile-role" lang="en">{profile.role}</p>
         </div>
       </div>
-      <dl class="profile-details">
+      <dl class="profile-details" lang="en">
         <div><dt><Icon name="location" /><span>Location</span></dt><dd>{profile.location}</dd></div>
         <div><dt><Icon name="github" /><span>GitHub</span></dt><dd><a href={profile.githubUrl}>{profile.githubLabel}</a></dd></div>
         <div><dt><Icon name="link" /><span>Website</span></dt><dd><a href="/">{site.name}</a></dd></div>
       </dl>
       <p class="profile-bio">{profile.bio}</p>
-      <p class="profile-note"><span class="topic-dot" aria-hidden="true"></span>Building in public</p>
+      <p class="profile-note" lang="en"><span class="topic-dot" aria-hidden="true"></span>Building in public</p>
     </section>
 
     <section id="posts" class="panel posts-panel" aria-labelledby="posts-heading" tabindex="-1">
-      <header class="panel-heading">
+      <header class="panel-heading" lang="en">
         <h2 id="posts-heading"><span class="chevron" aria-hidden="true">›</span>Latest Posts</h2>
         <span class="panel-label">0 posts</span>
       </header>
       <div class="empty-state">
         <span class="empty-icon"><Icon name="terminal" size={32} /></span>
-        <p class="empty-command"><span class="chevron" aria-hidden="true">›</span> ls posts/</p>
+        <p class="empty-command" lang="en"><span class="chevron" aria-hidden="true">›</span> ls posts/</p>
         <h3>まだ記事はありません。</h3>
         <p>つくったもの、学んだこと、考えたこと。<br />ここから少しずつ書き残していきます。</p>
       </div>
-      <p class="panel-footnote"><span aria-hidden="true">// </span>Small steps. Continuous learning.</p>
+      <p class="panel-footnote" lang="en"><span aria-hidden="true">// </span>Small steps. Continuous learning.</p>
     </section>
 
     <div class="metadata-panels">
       <section id="tags" class="panel tags-panel" aria-labelledby="tags-heading" tabindex="-1">
-        <header class="panel-heading">
+        <header class="panel-heading" lang="en">
           <h2 id="tags-heading"><span class="chevron" aria-hidden="true">›</span>Tags</h2>
           <span class="panel-label">interests</span>
         </header>
-        <ul class="tag-list">
+        <ul class="tag-list" lang="en">
           {topics.map((topic) => (
             <li><span id={`topic-${topic.slug}`} class="tag" data-tone={topic.tone} tabindex="-1">#{topic.slug}</span></li>
           ))}
@@ -69,7 +69,7 @@ import { navigation, profile, site, topics } from '../config/site';
         <p class="tags-note">これから書いていきたいテーマ。</p>
       </section>
       <section class="panel commits-panel" aria-labelledby="commits-heading">
-        <header class="panel-heading">
+        <header class="panel-heading" lang="en">
           <h2 id="commits-heading"><span class="chevron" aria-hidden="true">›</span>Recent Commits</h2>
           <a class="panel-link" href={site.commitsUrl}>GitHub <Icon name="arrow" size={16} /></a>
         </header>
