@@ -10,7 +10,8 @@ beforeAll(async () => {
   html = await container.renderToString(Home, {
     request: new Request('https://example.test/'),
   });
-  text = html.replace(/<[^>]*>/g, '');
+  // Collect text runs for assertions only. This is not an HTML sanitizer.
+  text = [...html.matchAll(/>([^<]+)</g)].map((match) => match[1]).join('');
 });
 
 describe('home', () => {
