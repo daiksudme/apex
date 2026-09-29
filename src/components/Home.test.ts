@@ -1,6 +1,6 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { beforeAll, describe, expect, it } from 'vitest';
-import Home from './index.astro';
+import Home from './Home.astro';
 
 let html: string;
 let text: string;
@@ -54,7 +54,9 @@ describe('home', () => {
     for (const href of hrefs.filter((value) => value.startsWith('#'))) {
       expect(ids.has(href.slice(1)), `Missing target: ${href}`).toBe(true);
     }
-    expect(hrefs).not.toEqual(expect.arrayContaining(['/posts', '/tags', '/about', '/rss.xml']));
+    for (const href of ['/posts', '/tags', '/about', '/rss.xml']) {
+      expect(hrefs).not.toContain(href);
+    }
     expect(html).not.toContain('<button');
   });
 });
