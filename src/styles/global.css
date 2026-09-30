@@ -90,6 +90,8 @@ ul { list-style: none; padding: 0; }
 .brand {
   display: inline-grid;
   grid-auto-flow: column;
+  justify-self: start;
+  width: max-content;
   align-items: center;
   gap: 0.45rem;
   color: var(--text);
@@ -270,11 +272,21 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
   .site-header { min-height: 72px; grid-template-columns: minmax(0, 1fr); padding: 1.2rem; }
   .brand { font-size: 1.6rem; }
   .header-nav { display: none; }
-  .pane.sidebar-pane { grid-template-rows: auto; border-right: 0; border-bottom: 1px solid var(--border); padding: 0.5rem 0.75rem; }
-  .sidebar-nav { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 0.1rem; }
-  .sidebar-nav a { grid-template-columns: auto auto; justify-content: center; gap: 0.35rem; padding: 0.45rem 0.6rem; border-left: 0; border-bottom: 2px solid transparent; font-size: 0.76rem; }
+  .pane.sidebar-pane { grid-template-rows: auto; padding: 0.5rem 0.75rem; }
+  .sidebar-nav { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.1rem; }
+  .sidebar-nav a {
+    grid-template-columns: auto auto;
+    justify-content: center;
+    min-width: 0;
+    gap: 0.2rem;
+    padding: 0.45rem 0.2rem;
+    border-left: 0;
+    border-bottom: 2px solid transparent;
+    font-size: clamp(0.62rem, 2.7vw, 0.76rem);
+    white-space: nowrap;
+  }
   .sidebar-nav a[aria-current='page'] { border-bottom-color: var(--blue); }
-  .sidebar-nav .icon { width: 16px; height: 16px; }
+  .sidebar-nav .icon { width: 14px; height: 14px; }
   .sidebar-topics, .sidebar-note { display: none; }
   .pane { padding: 1.1rem; }
   .command-line { font-size: 0.78rem; }
