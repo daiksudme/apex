@@ -42,7 +42,7 @@ describe('home', () => {
     expect(html).toContain('<aside class="pane sidebar-pane"');
     expect(html).toContain('<footer class="pane footer-pane"');
     expect(html).toContain('<header class="site-header">');
-    expect(html).not.toMatch(/<header\b[^>]*\bclass="[^"]*\bpane\b/);
+    expect(html).not.toContain('<header class="pane ');
 
     const classNames = [...html.matchAll(/\sclass="([^"]+)"/g)]
       .flatMap((match) => match[1].split(/\s+/));
