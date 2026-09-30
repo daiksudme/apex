@@ -175,7 +175,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 .profile-note { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.75rem; color: var(--green); margin-top: 1rem; font-size: 0.8rem; }
 
 .pane-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.85rem; }
-.pane-heading h2 { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.65rem; font-size: 1.08rem; line-height: 1.4; }
+.pane-title { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.65rem; font-size: 1.08rem; line-height: 1.4; }
 .chevron { color: var(--pink); font-size: 1.65rem; font-weight: 400; line-height: 1; }
 .pane-label { color: var(--muted); font-size: 0.72rem; }
 .pane-link { display: inline-grid; grid-auto-flow: column; align-items: center; gap: 0.5rem; min-height: 28px; font-size: 0.72rem; text-decoration: underline; }
@@ -301,7 +301,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
   .profile-details > div { grid-template-columns: 100px minmax(0, 1fr); gap: 0.35rem; }
   .profile-details { font-size: 0.72rem; }
   .profile-bio { font-size: 0.85rem; }
-  .pane-heading h2 { font-size: 1rem; }
+  .pane-title { font-size: 1rem; }
   .posts-pane { min-height: 340px; }
   .empty-state { padding-inline: 0; }
   .pane.footer-pane {
