@@ -126,11 +126,12 @@ main { grid-area: main; min-width: 0; padding: 1.5rem 1.75rem 0; }
   gap: 1.25rem;
   align-items: start;
 }
-.pane { display: grid; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.4rem; }
+.pane { display: grid; align-content: start; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1.4rem; }
 
 .welcome-pane {
   grid-area: welcome;
   grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+  align-content: stretch;
   min-height: 420px;
 }
 .command-line { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 0.65rem; row-gap: 0.2rem; font-size: 0.95rem; }
@@ -164,7 +165,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 .chevron { color: var(--pink); font-size: 1.65rem; font-weight: 400; line-height: 1; }
 .pane-label { color: var(--muted); font-size: 0.72rem; }
 .pane-link { display: inline-grid; grid-auto-flow: column; align-items: center; gap: 0.5rem; min-height: 28px; font-size: 0.72rem; text-decoration: underline; }
-.posts-pane { grid-area: posts; grid-template-rows: auto minmax(0, 1fr) auto; align-self: stretch; min-height: 364px; }
+.posts-pane { grid-area: posts; grid-template-rows: auto minmax(0, 1fr) auto; align-content: stretch; align-self: stretch; min-height: 364px; }
 .empty-state { display: grid; align-content: center; justify-items: start; padding: 1.75rem 0.65rem; }
 .empty-icon { display: inline-grid; place-items: center; color: var(--blue); padding: 0.65rem; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 1rem; }
 .empty-command { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.65rem; color: var(--muted); font-size: 0.85rem; }
@@ -280,4 +281,11 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
     margin: 1.5rem 1rem 1rem;
   }
   .footer-meta { justify-self: start; }
+}
+
+@media (max-width: 420px) {
+  .command-line:not(.idle-prompt),
+  .footer-command {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
