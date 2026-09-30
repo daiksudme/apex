@@ -1,15 +1,16 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Icon from './Icon.astro';
+import Pane from './Pane.astro';
 import TerminalPrompt from './TerminalPrompt.astro';
 import { navigation, profile, site, topics } from '../config/site';
 ---
 
 <SiteLayout>
   <div class="dashboard">
-    <section class="pane welcome-pane" aria-labelledby="welcome-heading">
+    <Pane class="welcome-pane" title="Welcome" headingId="welcome-heading">
       <p class="command-line" lang="en"><TerminalPrompt /> <span class="command">cat welcome.txt</span></p>
-      <h1 id="welcome-heading">つくる。<wbr />試す。<wbr />書き残す。</h1>
+      <h1>つくる。<wbr />試す。<wbr />書き残す。</h1>
       <p class="welcome-description">{site.description}</p>
       <p class="tagline" lang="en">{site.tagline}</p>
       <div class="welcome-links">
@@ -21,14 +22,14 @@ import { navigation, profile, site, topics } from '../config/site';
         </nav>
       </div>
       <p class="command-line idle-prompt" aria-hidden="true"><TerminalPrompt /> <span class="cursor"></span></p>
-    </section>
+    </Pane>
 
-    <section id="about" class="pane profile-pane" aria-labelledby="profile-heading" tabindex="-1">
+    <Pane id="about" class="profile-pane" title="Profile" headingId="profile-heading" tabindex={-1}>
       <div class="profile-top">
         <img class="avatar" src={profile.avatarUrl} alt="daiksudのGitHubアバター" width="160" height="160" decoding="async" referrerpolicy="no-referrer" />
         <div>
           <p class="eyebrow" lang="en">About me</p>
-          <h2 id="profile-heading">{profile.name}</h2>
+          <h3>{profile.name}</h3>
           <p class="profile-role" lang="en">{profile.role}</p>
         </div>
       </div>
@@ -39,47 +40,39 @@ import { navigation, profile, site, topics } from '../config/site';
       </dl>
       <p class="profile-bio">{profile.bio}</p>
       <p class="profile-note" lang="en"><span class="topic-dot" aria-hidden="true"></span>Building in public</p>
-    </section>
+    </Pane>
 
-    <section id="posts" class="pane posts-pane" aria-labelledby="posts-heading" tabindex="-1">
-      <header class="pane-heading" lang="en">
-        <h2 id="posts-heading"><span class="chevron" aria-hidden="true">›</span>Latest Posts</h2>
-        <span class="pane-label">0 posts</span>
-      </header>
+    <Pane id="posts" class="posts-pane" title="Latest Posts" headingId="posts-heading" tabindex={-1}>
+      <span slot="meta" class="pane-label" lang="en">0 posts</span>
       <div class="empty-state">
         <span class="empty-icon"><Icon name="terminal" size={32} /></span>
         <p class="empty-command" lang="en"><span class="chevron" aria-hidden="true">›</span> ls posts/</p>
         <h3>まだ記事はありません。</h3>
         <p>つくったもの、学んだこと、考えたこと。<br />ここから少しずつ書き残していきます。</p>
       </div>
-      <p class="pane-footnote" lang="en"><span aria-hidden="true">// </span>Small steps. Continuous learning.</p>
-    </section>
+      <p slot="footer" class="pane-footnote" lang="en"><span aria-hidden="true">// </span>Small steps. Continuous learning.</p>
+    </Pane>
 
-    <section id="tags" class="pane tags-pane" aria-labelledby="tags-heading" tabindex="-1">
-        <header class="pane-heading" lang="en">
-          <h2 id="tags-heading"><span class="chevron" aria-hidden="true">›</span>Tags</h2>
-          <span class="pane-label">interests</span>
-        </header>
-        <ul class="tag-list" lang="en">
-          {topics.map((topic) => (
-            <li><span id={`topic-${topic.slug}`} class="tag" data-tone={topic.tone} tabindex="-1">#{topic.slug}</span></li>
-          ))}
-        </ul>
-        <p class="tags-note">これから書いていきたいテーマ。</p>
-    </section>
-    <section class="pane commits-pane" aria-labelledby="commits-heading">
-        <header class="pane-heading" lang="en">
-          <h2 id="commits-heading"><span class="chevron" aria-hidden="true">›</span>Recent Commits</h2>
-          <a class="pane-link" href={site.commitsUrl}>GitHub <Icon name="arrow" size={16} /></a>
-        </header>
-        <div class="repository-summary">
-          <span class="repository-icon"><Icon name="branch" size={26} /></span>
-          <div>
-            <p class="repository-name">{site.name}</p>
-            <p class="repository-description">このサイトも、少しずつ育てています。</p>
-          </div>
+    <Pane id="tags" class="tags-pane" title="Tags" headingId="tags-heading" tabindex={-1}>
+      <span slot="meta" class="pane-label" lang="en">interests</span>
+      <ul class="tag-list" lang="en">
+        {topics.map((topic) => (
+          <li><span id={`topic-${topic.slug}`} class="tag" data-tone={topic.tone} tabindex="-1">#{topic.slug}</span></li>
+        ))}
+      </ul>
+      <p class="tags-note">これから書いていきたいテーマ。</p>
+    </Pane>
+
+    <Pane class="commits-pane" title="Recent Commits" headingId="commits-heading">
+      <a slot="meta" class="pane-link" href={site.commitsUrl} lang="en">GitHub <Icon name="arrow" size={16} /></a>
+      <div class="repository-summary">
+        <span class="repository-icon"><Icon name="branch" size={26} /></span>
+        <div>
+          <p class="repository-name">{site.name}</p>
+          <p class="repository-description">このサイトも、少しずつ育てています。</p>
         </div>
-        <a class="text-link" href={site.commitsUrl}>GitHubで更新履歴を見る <Icon name="arrow" size={16} /></a>
-    </section>
+      </div>
+      <a class="text-link" href={site.commitsUrl}>GitHubで更新履歴を見る <Icon name="arrow" size={16} /></a>
+    </Pane>
   </div>
 </SiteLayout>
