@@ -1,5 +1,6 @@
 ---
 import Icon from '../components/Icon.astro';
+import Pane from '../components/Pane.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
 import { getPageTitle } from '../lib/page-title';
 import { navigation, profile, site, topics } from '../config/site';
@@ -34,7 +35,7 @@ const year = new Date().getFullYear();
       <p class="header-tagline" lang="en">{site.tagline}</p>
     </header>
 
-    <aside class="pane sidebar-pane" aria-label="サイトメニュー">
+    <Pane as="aside" class="sidebar-pane" ariaLabel="サイトメニュー">
       <nav class="sidebar-nav" aria-label="ページナビゲーション">
         {navigation.map((item) => (
           <a href={item.href} lang="en" aria-current={item.href === Astro.url.pathname ? 'page' : undefined}>
@@ -51,18 +52,18 @@ const year = new Date().getFullYear();
         </ul>
       </nav>
       <p class="sidebar-note" lang="en">A personal blog about technology, creativity, and a better tomorrow.</p>
-    </aside>
+    </Pane>
 
     <main id="main-content" tabindex="-1">
       <slot />
     </main>
 
-    <footer class="pane footer-pane">
+    <Pane as="footer" class="footer-pane">
       <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
       <div class="footer-meta">
         <a href={profile.githubUrl} aria-label="daiksudのGitHub"><Icon name="github" size={22} /></a>
         <p>&copy; {year} {site.name}</p>
       </div>
-    </footer>
+    </Pane>
   </body>
 </html>
