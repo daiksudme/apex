@@ -315,3 +315,15 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+@media (max-width: 360px) {
+  .sidebar-nav a {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding-inline: 0.1rem;
+  }
+
+  .sidebar-nav .icon {
+    display: none;
+  }
+}
