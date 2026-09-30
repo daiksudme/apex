@@ -33,37 +33,36 @@ const year = new Date().getFullYear();
       </nav>
       <p class="header-tagline" lang="en">{site.tagline}</p>
     </header>
-    <div class="site-frame">
-      <aside class="sidebar" aria-label="サイトメニュー">
-        <nav class="sidebar-nav" aria-label="ページナビゲーション">
-          {navigation.map((item) => (
-            <a href={item.href} lang="en" aria-current={item.href === Astro.url.pathname ? 'page' : undefined}>
-              <Icon name={item.icon} /><span>{item.label}</span>
-            </a>
+
+    <aside class="sidebar" aria-label="サイトメニュー">
+      <nav class="sidebar-nav" aria-label="ページナビゲーション">
+        {navigation.map((item) => (
+          <a href={item.href} lang="en" aria-current={item.href === Astro.url.pathname ? 'page' : undefined}>
+            <Icon name={item.icon} /><span>{item.label}</span>
+          </a>
+        ))}
+      </nav>
+      <nav class="sidebar-topics" aria-label="トピック">
+        <h2 class="eyebrow" lang="en"><span aria-hidden="true">// </span>Topics</h2>
+        <ul lang="en">
+          {topics.map((topic) => (
+            <li><a href={`#topic-${topic.slug}`} data-tone={topic.tone}><span class="topic-dot" aria-hidden="true"></span>#{topic.slug}</a></li>
           ))}
-        </nav>
-        <nav class="sidebar-topics" aria-label="トピック">
-          <h2 class="eyebrow" lang="en"><span aria-hidden="true">// </span>Topics</h2>
-          <ul lang="en">
-            {topics.map((topic) => (
-              <li><a href={`#topic-${topic.slug}`} data-tone={topic.tone}><span class="topic-dot" aria-hidden="true"></span>#{topic.slug}</a></li>
-            ))}
-          </ul>
-        </nav>
-        <p class="sidebar-note" lang="en">A personal blog about technology, creativity, and a better tomorrow.</p>
-      </aside>
-      <div class="main-column">
-        <main id="main-content" tabindex="-1">
-          <slot />
-        </main>
-        <footer class="site-footer">
-          <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
-          <div class="footer-meta">
-            <a href={profile.githubUrl} aria-label="daiksudのGitHub"><Icon name="github" size={22} /></a>
-            <p>&copy; {year} {site.name}</p>
-          </div>
-        </footer>
+        </ul>
+      </nav>
+      <p class="sidebar-note" lang="en">A personal blog about technology, creativity, and a better tomorrow.</p>
+    </aside>
+
+    <main id="main-content" tabindex="-1">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
+      <div class="footer-meta">
+        <a href={profile.githubUrl} aria-label="daiksudのGitHub"><Icon name="github" size={22} /></a>
+        <p>&copy; {year} {site.name}</p>
       </div>
-    </div>
+    </footer>
   </body>
 </html>

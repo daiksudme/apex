@@ -55,8 +55,7 @@ import { navigation, profile, site, topics } from '../config/site';
       <p class="pane-footnote" lang="en"><span aria-hidden="true">// </span>Small steps. Continuous learning.</p>
     </section>
 
-    <div class="metadata-panes">
-      <section id="tags" class="pane tags-pane" aria-labelledby="tags-heading" tabindex="-1">
+    <section id="tags" class="pane tags-pane" aria-labelledby="tags-heading" tabindex="-1">
         <header class="pane-heading" lang="en">
           <h2 id="tags-heading"><span class="chevron" aria-hidden="true">›</span>Tags</h2>
           <span class="pane-label">interests</span>
@@ -67,8 +66,8 @@ import { navigation, profile, site, topics } from '../config/site';
           ))}
         </ul>
         <p class="tags-note">これから書いていきたいテーマ。</p>
-      </section>
-      <section class="pane commits-pane" aria-labelledby="commits-heading">
+    </section>
+    <section class="pane commits-pane" aria-labelledby="commits-heading">
         <header class="pane-heading" lang="en">
           <h2 id="commits-heading"><span class="chevron" aria-hidden="true">›</span>Recent Commits</h2>
           <a class="pane-link" href={site.commitsUrl}>GitHub <Icon name="arrow" size={16} /></a>
@@ -81,7 +80,6 @@ import { navigation, profile, site, topics } from '../config/site';
           </div>
         </div>
         <a class="text-link" href={site.commitsUrl}>GitHubで更新履歴を見る <Icon name="arrow" size={16} /></a>
-      </section>
-    </div>
+    </section>
   </div>
 </SiteLayout>
