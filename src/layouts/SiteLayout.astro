@@ -44,7 +44,7 @@ const year = new Date().getFullYear();
         ))}
       </nav>
       <nav class="sidebar-topics" aria-label="トピック">
-        <h2 class="eyebrow" lang="en"><span aria-hidden="true">// </span>Topics</h2>
+        <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Topics</p>
         <ul lang="en">
           {topics.map((topic) => (
             <li><a href={`#topic-${topic.slug}`} data-tone={topic.tone}><span class="topic-dot" aria-hidden="true"></span>#{topic.slug}</a></li>
