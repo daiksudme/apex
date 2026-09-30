@@ -126,7 +126,9 @@ ul { list-style: none; padding: 0; }
 main { grid-area: main; min-width: 0; }
 .dashboard {
   display: grid;
+  height: 100%;
   grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(auto, 1fr);
   grid-template-areas:
     "welcome profile"
     "posts tags"
@@ -192,7 +194,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 [data-tone='cyan'] { --tone: var(--cyan); }
 [data-tone='muted'] { --tone: var(--muted); }
 .tags-note { margin-top: 0.85rem; color: var(--muted); font-family: var(--sans); font-size: 0.75rem; }
-.commits-pane { grid-area: commits; }
+.commits-pane { grid-area: commits; align-self: stretch; }
 .repository-summary { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 0.8rem; margin-block: 1.1rem; }
 .repository-icon { color: var(--green); padding-top: 0.1rem; }
 .repository-name { color: var(--blue); font-size: 0.95rem; font-weight: 600; }
@@ -227,6 +229,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 @media (max-width: 960px) {
   .dashboard {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(auto, 1fr) auto auto;
     grid-template-areas:
       "welcome"
       "profile"
@@ -234,6 +237,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
       "tags"
       "commits";
   }
+  .commits-pane { align-self: start; }
   .welcome-pane, .profile-pane { min-height: 0; }
   .profile-top { grid-template-columns: 112px minmax(0, 1fr); }
   .profile-details > div { grid-template-columns: 110px minmax(0, 1fr); }
