@@ -197,7 +197,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
   align-items: center;
   gap: 1rem;
   padding: 1.2rem 1.4rem;
-  margin: var(--pane-gap) 1.75rem 1.5rem;
+  margin: var(--pane-gap) 1.75rem 1.5rem var(--pane-gap);
   font-size: 0.78rem;
 }
 .footer-command { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.65rem; row-gap: 0.3rem; }
@@ -213,7 +213,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
   body { --sidebar-width: 176px; }
   .pane.sidebar-pane { padding-inline: 1rem; margin-block: 1.25rem; }
   main { padding: 1.25rem 1.25rem 0 var(--pane-gap); }
-  .pane.footer-pane { margin: var(--pane-gap) 1.25rem 1.25rem; }
+  .pane.footer-pane { margin: var(--pane-gap) 1.25rem 1.25rem var(--pane-gap); }
   .dashboard { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: var(--pane-gap); }
   .pane { padding: 1.2rem; }
   .profile-top { grid-template-columns: 88px minmax(0, 1fr); gap: 1rem; }
