@@ -16,13 +16,15 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 | 名称 | 役割 | CSSクラス |
 | --- | --- | --- |
+| Sidebar pane | サイトナビゲーションとTopics | `sidebar-pane` |
 | Welcome pane | ターミナル風の導入、サイト紹介、セクションへの導線 | `welcome-pane` |
 | Profile pane | アバター、名前、所在地、プロフィール | `profile-pane` |
 | Posts pane | 最新記事。未公開時は空状態を表示 | `posts-pane` |
 | Tags pane | 今後扱いたいテーマ | `tags-pane` |
 | Commits pane | GitHubの更新履歴への導線 | `commits-pane` |
+| Footer pane | 終端プロンプト、GitHub導線、copyright | `footer-pane` |
 
-共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。5つのpaneは `dashboard` の直接のGrid Itemとして配置し、各paneを `welcome` / `profile` / `posts` / `tags` / `commits` のGrid Areaに対応させます。ヘッダー・サイドバー・フッターはpaneと区別します。
+共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。ホームは合計7つのpaneで構成します。Sidebar paneとFooter paneはサイトシェルの `sidebar` / `footer` Grid Area、残る5つのpaneは `dashboard` の直接のGrid Itemとして `welcome` / `profile` / `posts` / `tags` / `commits` のGrid Areaに対応させます。Headerはトップバーとしてpaneと区別します。
 
 これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
 

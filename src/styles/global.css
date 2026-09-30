@@ -95,15 +95,13 @@ ul { list-style: none; padding: 0; }
 .header-nav a span { color: var(--muted); }
 .header-tagline { max-width: 8rem; border-left: 1px solid var(--border); padding-left: 1.5rem; font-size: 0.72rem; color: var(--muted); }
 
-.sidebar {
+.pane.sidebar-pane {
   grid-area: sidebar;
-  display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
+  align-content: stretch;
   align-items: start;
   gap: 2rem;
   padding: 2rem 1.25rem;
-  border-right: 1px solid var(--border);
-  background: var(--surface);
 }
 .sidebar-nav { display: grid; gap: 0.4rem; }
 .sidebar-nav a { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.8rem; min-height: 44px; padding: 0.6rem 0.75rem; color: var(--muted); border-left: 3px solid transparent; border-radius: 3px; font-size: 0.95rem; }
@@ -191,14 +189,12 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 .repository-description { margin-top: 0.25rem; font-family: var(--sans); font-size: 0.78rem; color: var(--muted); }
 .text-link { display: inline-grid; grid-auto-flow: column; justify-content: start; align-items: center; gap: 0.5rem; font-family: var(--sans); font-size: 0.82rem; min-height: 32px; text-decoration: underline; }
 
-.site-footer {
+.pane.footer-pane {
   grid-area: footer;
-  display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem;
-  border-top: 1px solid var(--border);
-  padding-top: 1.2rem;
+  padding: 1.2rem 1.4rem;
   margin: 2rem 1.75rem 1.5rem;
   font-size: 0.78rem;
 }
@@ -213,9 +209,9 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 }
 @media (max-width: 1180px) {
   body { --sidebar-width: 176px; }
-  .sidebar { padding-inline: 1rem; }
+  .pane.sidebar-pane { padding-inline: 1rem; }
   main { padding: 1.25rem 1.25rem 0; }
-  .site-footer { margin-inline: 1.25rem; margin-bottom: 1.25rem; }
+  .pane.footer-pane { margin-inline: 1.25rem; margin-bottom: 1.25rem; }
   .dashboard { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 1rem; }
   .pane { padding: 1.2rem; }
   .profile-top { grid-template-columns: 88px minmax(0, 1fr); gap: 1rem; }
@@ -254,7 +250,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
   .site-header { min-height: 72px; grid-template-columns: minmax(0, 1fr); padding: 1.2rem; }
   .brand { font-size: 1.6rem; }
   .header-nav { display: none; }
-  .sidebar { grid-template-rows: auto; border-right: 0; border-bottom: 1px solid var(--border); padding: 0.5rem 0.75rem; }
+  .pane.sidebar-pane { grid-template-rows: auto; border-right: 0; border-bottom: 1px solid var(--border); padding: 0.5rem 0.75rem; }
   .sidebar-nav { grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 0.1rem; }
   .sidebar-nav a { grid-template-columns: auto auto; justify-content: center; gap: 0.35rem; padding: 0.45rem 0.6rem; border-left: 0; border-bottom: 2px solid transparent; font-size: 0.76rem; }
   .sidebar-nav a[aria-current='page'] { border-bottom-color: var(--blue); }
@@ -275,7 +271,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
   .pane-heading h2 { font-size: 1rem; }
   .posts-pane { min-height: 340px; }
   .empty-state { padding-inline: 0; }
-  .site-footer {
+  .pane.footer-pane {
     grid-template-columns: minmax(0, 1fr);
     font-size: 0.72rem;
     margin: 1.5rem 1rem 1rem;
