@@ -41,8 +41,19 @@ describe('home', () => {
     }
     const classNames = [...html.matchAll(/\sclass="([^"]+)"/g)]
       .flatMap((match) => match[1].split(/\s+/));
-    expect(classNames).toContain('metadata-panes');
+    expect(classNames).not.toContain('metadata-panes');
+    expect(classNames).not.toContain('site-frame');
+    expect(classNames).not.toContain('main-column');
     expect(classNames.some((name) => name.includes('panel'))).toBe(false);
+  });
+
+  it('keeps the site shell and panes as direct layout regions', () => {
+    expect(html).toMatch(/<body>.*<header class="site-header">.*<aside class="sidebar".*<main id="main-content".*<footer class="site-footer">.*<\/body>/s);
+    expect(html).toMatch(/<div class="dashboard">\s*<section class="pane welcome-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section id="about" class="pane profile-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section id="posts" class="pane posts-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section id="tags" class="pane tags-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section class="pane commits-pane"/);
   });
 
   it('marks English passages for pronunciation in the Japanese document', () => {
