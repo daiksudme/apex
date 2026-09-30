@@ -1,0 +1,26 @@
+---
+interface Props {
+  id?: string;
+  class?: string;
+  title: string;
+  headingId: string;
+  tabindex?: number;
+}
+
+const {
+  id,
+  class: className,
+  title,
+  headingId,
+  tabindex,
+} = Astro.props;
+---
+
+<section id={id} class:list={['pane', className]} aria-labelledby={headingId} tabindex={tabindex}>
+  <header class="pane-heading" lang="en">
+    <h2 id={headingId}><span class="chevron" aria-hidden="true">›</span>{title}</h2>
+    <slot name="meta" />
+  </header>
+  <slot />
+  <slot name="footer" />
+</section>
