@@ -43,10 +43,10 @@ describe('home', () => {
     expect(html).toContain('<footer class="pane footer-pane"');
     expect(html).toContain('<header class="site-header">');
     expect(html).not.toMatch(/<header\b[^>]*\bclass="[^"]*\bpane\b/);
-    expect(html.match(/\bclass="[^"]*(?:^|\s)pane(?:\s|$)[^"]*"/g)).toHaveLength(7);
 
     const classNames = [...html.matchAll(/\sclass="([^"]+)"/g)]
       .flatMap((match) => match[1].split(/\s+/));
+    expect(classNames.filter((name) => name === 'pane')).toHaveLength(7);
     expect(classNames).not.toContain('metadata-panes');
     expect(classNames).not.toContain('site-frame');
     expect(classNames).not.toContain('main-column');
