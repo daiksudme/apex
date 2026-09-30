@@ -25,10 +25,18 @@ describe('home', () => {
   it('renders the welcome, profile, posts, tags and repository panes', () => {
     expect(text).toContain('つくる。試す。書き残す。');
     expect(text).toContain('Build. Learn. Write. Repeat.');
-    expect(text).toContain('Latest Posts');
-    expect(text).toContain('Tags');
-    expect(text).toContain('Recent Commits');
+    for (const heading of ['Welcome', 'Profile', 'Latest Posts', 'Tags', 'Recent Commits']) {
+      expect(text).toContain(heading);
+    }
     expect(html.match(/<h1\b/g)).toHaveLength(1);
+  });
+
+  it('uses the shared pane header for every main content pane', () => {
+    expect(html.match(/class="pane-heading"/g)).toHaveLength(5);
+    for (const id of ['welcome-heading', 'profile-heading', 'posts-heading', 'tags-heading', 'commits-heading']) {
+      expect(html).toContain(`id="${id}"`);
+      expect(html).toContain(`aria-labelledby="${id}"`);
+    }
   });
 
   it('uses pane terminology for all seven pane regions', () => {
