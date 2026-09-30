@@ -10,6 +10,22 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 公開中のサイトは <https://apex.daiksud-a1f.workers.dev/> で確認できます。
 
+### ホームの設計用語
+
+[tmuxのpane](https://github.com/tmux/tmux/wiki/Getting-Started#sessions-windows-and-panes) と [herdrのpane](https://herdr.dev/docs/concepts/#pane) に着想を得て、ホームの分割された内容領域を **pane（ペイン）** と呼びます。画面説明・設計・CSS・テストでこの呼び方に統一します。
+
+| 名称 | 役割 | CSSクラス |
+| --- | --- | --- |
+| Welcome pane | ターミナル風の導入、サイト紹介、セクションへの導線 | `welcome-pane` |
+| Profile pane | アバター、名前、所在地、プロフィール | `profile-pane` |
+| Posts pane | 最新記事。未公開時は空状態を表示 | `posts-pane` |
+| Tags pane | 今後扱いたいテーマ | `tags-pane` |
+| Commits pane | GitHubの更新履歴への導線 | `commits-pane` |
+
+共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。`metadata-panes` はTags paneとCommits paneを配置するコンテナで、独立したpaneではありません。ヘッダー・サイドバー・フッターはpaneと区別します。
+
+これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
+
 ### テストとビルド
 
 Node.js `26.10.0` と pnpm `12.6.0` を使用します。バージョンは [mise.toml](mise.toml) と [package.json](package.json) で固定しています。Cloudflare Workers Builds が参照する [.node-version](.node-version) も、同じ Node.js バージョンに揃えます。

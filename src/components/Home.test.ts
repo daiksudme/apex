@@ -22,7 +22,7 @@ describe('home', () => {
     expect(text).not.toMatch(/apex|daiksud@daiksud\.me|daiksud@tokyo/);
   });
 
-  it('renders the welcome, profile, posts, tags and repository panels', () => {
+  it('renders the welcome, profile, posts, tags and repository panes', () => {
     expect(text).toContain('つくる。試す。書き残す。');
     expect(text).toContain('Build. Learn. Write. Repeat.');
     expect(text).toContain('Latest Posts');
@@ -31,9 +31,23 @@ describe('home', () => {
     expect(html.match(/<h1\b/g)).toHaveLength(1);
   });
 
+  it('uses pane terminology for each content region', () => {
+    const sectionClasses = [...html.matchAll(/<section\b[^>]*\sclass="([^"]+)"/g)]
+      .map((match) => match[1].split(/\s+/));
+    const paneNames = ['welcome', 'profile', 'posts', 'tags', 'commits'];
+    expect(sectionClasses).toHaveLength(paneNames.length);
+    for (const name of paneNames) {
+      expect(sectionClasses).toContainEqual(expect.arrayContaining(['pane', `${name}-pane`]));
+    }
+    const classNames = [...html.matchAll(/\sclass="([^"]+)"/g)]
+      .flatMap((match) => match[1].split(/\s+/));
+    expect(classNames).toContain('metadata-panes');
+    expect(classNames.some((name) => name.includes('panel'))).toBe(false);
+  });
+
   it('marks English passages for pronunciation in the Japanese document', () => {
     expect(html).toContain('<html lang="ja">');
-    for (const className of ['tagline', 'profile-role', 'profile-note', 'panel-footnote', 'footer-command']) {
+    for (const className of ['tagline', 'profile-role', 'profile-note', 'pane-footnote', 'footer-command']) {
       expect(html).toContain(`<p class="${className}" lang="en">`);
     }
     expect(html).toContain('<p class="eyebrow" lang="en">About me</p>');
