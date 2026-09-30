@@ -22,7 +22,7 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 | Tags pane | 今後扱いたいテーマ | `tags-pane` |
 | Commits pane | GitHubの更新履歴への導線 | `commits-pane` |
 
-共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。`metadata-panes` はTags paneとCommits paneを配置するコンテナで、独立したpaneではありません。ヘッダー・サイドバー・フッターはpaneと区別します。
+共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。5つのpaneは `dashboard` の直接のGrid Itemとして配置し、各paneを `welcome` / `profile` / `posts` / `tags` / `commits` のGrid Areaに対応させます。ヘッダー・サイドバー・フッターはpaneと区別します。
 
 これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
 
