@@ -37,29 +37,47 @@ h1, h2, h3, p, ul, dl, dd { margin: 0; }
 ul { list-style: none; padding: 0; }
 [id] { scroll-margin-block: 1.5rem; }
 
-
 .cursor { display: inline-block; width: 0.65em; height: 1.1em; background: var(--blue); vertical-align: text-bottom; }
-
 .eyebrow { color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.7rem; font-weight: 400; }
 .topic-dot { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--tone, var(--green)); }
 
-.command-line { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 0.65rem; row-gap: 0.2rem; font-size: 0.95rem; }
-.command { color: var(--blue); }
-h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weight: 750; letter-spacing: 0.02em; line-height: 1.5; margin-block: 1.6rem 1.25rem; }
+.command-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 0.65rem;
+  row-gap: 0.2rem;
+  font-size: 0.95rem;
 
+  @media (max-width: 640px) {
+    font-size: 0.78rem;
+  }
 
-h1 {
-  font-feature-settings: "palt";
-  text-wrap: balance;
+  @media (max-width: 420px) {
+    &:not(.idle-prompt) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
 }
 
+.command { color: var(--blue); }
+
 h1 {
+  font-family: var(--sans);
+  font-size: clamp(2rem, 3.05vw, 3.2rem);
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  margin-block: 1.6rem 1.25rem;
+  font-feature-settings: "palt";
+  text-wrap: balance;
   word-break: normal;
   word-break: auto-phrase;
 }
 
 .chevron { color: var(--pink); font-size: 1.65rem; font-weight: 400; line-height: 1; }
 .pane-label { color: var(--muted); font-size: 0.72rem; }
+
 [data-tone='blue'] { --tone: var(--blue); }
 [data-tone='purple'] { --tone: var(--purple); }
 [data-tone='green'] { --tone: var(--green); }
@@ -68,25 +86,3 @@ h1 {
 [data-tone='orange'] { --tone: var(--orange); }
 [data-tone='cyan'] { --tone: var(--cyan); }
 [data-tone='muted'] { --tone: var(--muted); }
-
-
-
-
-
-
-@media (max-width: 1180px) {
-}
-@media (max-width: 960px) {
-}
-@media (max-width: 640px) {
-  .command-line { font-size: 0.78rem; }
-}
-
-@media (max-width: 420px) {
-  .command-line:not(.idle-prompt) {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 360px) {
-}
