@@ -169,6 +169,7 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
   font-size: 0.95rem;
   white-space: nowrap;
 }
+.welcome-links a:last-child { margin-inline-end: 0; }
 .idle-prompt { margin-top: 0.25rem; }
 .welcome-pane > .pane-heading + .command-line,
 .profile-pane > .pane-heading + .profile-top { margin-top: 1rem; }
