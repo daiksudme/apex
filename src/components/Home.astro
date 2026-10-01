@@ -1,20 +1,19 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { navigation, profile, site, topics } from '../config/site';
 import SiteLayout from '../layouts/SiteLayout.astro';
+import { sortPostsByPublishedAt } from '../lib/posts';
 import Icon from './Icon.astro';
 import Pane from './Pane.astro';
 import PostList from './PostList.astro';
 import TerminalPrompt from './TerminalPrompt.astro';
-import { navigation, profile, site, topics } from '../config/site';
 
 interface Props {
   posts: CollectionEntry<'posts'>[];
 }
 
 const { posts } = Astro.props;
-const latestPosts = [...posts]
-  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
-  .slice(0, 3);
+const latestPosts = sortPostsByPublishedAt(posts).slice(0, 3);
 ---
 
 <SiteLayout>
