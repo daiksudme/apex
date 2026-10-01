@@ -65,7 +65,7 @@ describe('home', () => {
 
   it('renders the welcome, profile, posts, tags and repository panes', () => {
     expect(text).toContain('つくる。試す。書き残す。');
-    expect(html).toContain('つくる。<wbr>試す。<wbr>書き残す。');
+    expect(html).toMatch(/つくる。<wbr\b[^>]*>試す。<wbr\b[^>]*>書き残す。/);
     expect(text).toContain('Build. Learn. Write. Repeat.');
     for (const heading of ['Welcome', 'Profile', 'Latest Posts', 'Tags', 'Recent Commits']) {
       expect(text).toContain(heading);
@@ -106,7 +106,7 @@ describe('home', () => {
 
   it('keeps the site shell and panes as direct layout regions', () => {
     expect(html).toMatch(/<body>.*<header class="site-header">.*<aside\b[^>]*class="pane sidebar-pane".*<main id="main-content".*<footer\b[^>]*class="pane footer-pane".*<\/body>/s);
-    expect(html).toMatch(/<div class="dashboard">\s*<section\b[^>]*class="pane welcome-pane"/);
+    expect(html).toMatch(/<div\b[^>]*class="dashboard"[^>]*>\s*<section\b[^>]*class="pane welcome-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane profile-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane posts-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane tags-pane"/);
@@ -116,9 +116,9 @@ describe('home', () => {
   it('marks English passages for pronunciation in the Japanese document', () => {
     expect(html).toContain('<html lang="ja">');
     for (const className of ['tagline', 'profile-role', 'profile-note', 'pane-footnote', 'footer-command']) {
-      expect(html).toContain(`<p class="${className}" lang="en">`);
+      expect(html).toMatch(new RegExp(`<p\\b(?=[^>]*class="${className}")(?=[^>]*lang="en")[^>]*>`));
     }
-    expect(html).toContain('<p class="eyebrow" lang="en">About me</p>');
+    expect(html).toMatch(/<p\b(?=[^>]*class="eyebrow")(?=[^>]*lang="en")[^>]*>About me<\/p>/);
   });
 
   it('uses the actual GitHub avatar with alternative text and dimensions', () => {
