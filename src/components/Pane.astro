@@ -26,6 +26,7 @@ const {
   tabindex,
   ariaLabel,
   ariaLabelledBy,
+  ...rest
 } = Astro.props;
 
 const Tag = as;
@@ -38,6 +39,7 @@ const Title = titleElement;
   aria-labelledby={ariaLabelledBy ?? headingId}
   aria-label={ariaLabel}
   tabindex={tabindex}
+  {...rest}
 >
   {title && headingId && (
     <header class="pane-heading" lang="en">
@@ -48,3 +50,47 @@ const Title = titleElement;
   <slot />
   <slot name="footer" />
 </Tag>
+
+<style>
+  :where(.pane) {
+    display: grid;
+    align-content: start;
+    min-width: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.4rem;
+
+    @media (max-width: 1180px) {
+      padding: 1.2rem;
+    }
+
+    @media (max-width: 640px) {
+      padding: 1.1rem;
+    }
+  }
+
+  .pane-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.85rem;
+
+    .pane-title {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 0.65rem;
+      font-size: 1.08rem;
+      line-height: 1.4;
+      font-feature-settings: "palt";
+      text-wrap: balance;
+
+      @media (max-width: 640px) {
+        font-size: 1rem;
+      }
+    }
+  }
+</style>
