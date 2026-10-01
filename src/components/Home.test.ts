@@ -156,7 +156,7 @@ describe('home', () => {
     });
 
     expect(emptyHtml).toContain('0 posts');
-    expect(emptyHtml).toContain('<h3 class="empty-state-title">まだ記事はありません。</h3>');
+    expect(emptyHtml).toMatch(/<h3 class="empty-state-title"[^>]*>まだ記事はありません。<\/h3>/);
     expect(emptyHtml).toContain('ls posts/');
   });
 
