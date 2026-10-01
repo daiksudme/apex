@@ -25,7 +25,7 @@ describe('post layout', () => {
     expect(article).toContain('class="pane post-pane"');
     expect(article).toContain('aria-labelledby="post-title"');
     expect(html).toContain('cat posts/example-post.md');
-    expect(html).toContain('<h1 id="post-title">記事タイトル</h1>');
+    expect(html).toMatch(/<h1 id="post-title"[^>]*>記事タイトル<\/h1>/);
     expect(html).toContain('記事の概要です。');
     expect(html).toContain('datetime="2026-10-01"');
     expect(html).toContain('datetime="2026-10-02"');
