@@ -10,11 +10,7 @@ const { title, description = site.description } = Astro.props;
 const pageTitle = getPageTitle(title);
 const year = new Date().getFullYear();
 const pathname = Astro.url.pathname;
-const isCurrentNavigationItem = (href: string) => {
-  if (href === '/') return pathname === '/';
-  if (href === '/#posts') return pathname === '/posts' || pathname.startsWith('/posts/');
-  return false;
-};
+const isCurrentNavigationItem = (href: string) => href === '/' && pathname === '/';
 ---
 
 <!doctype html>
