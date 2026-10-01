@@ -1,0 +1,76 @@
+name: approve codex review
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: write
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  approve:
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'chatgpt-codex-connector[bot]' &&
+      startsWith(github.event.comment.body, 'Codex Review: Didn''t find any major issues.')
+    runs-on: ubuntu-slim
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.issue.number }}
+    steps:
+      - name: Verify reviewed commit
+        id: review
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          reviewed_commit="$(
+            printf '%s\n' "$COMMENT_BODY" |
+              sed -n 's/^\*\*Reviewed commit:\*\* `\([0-9a-f]\{7,40\}\)`.*/\1/p' |
+              head -n 1
+          )"
+
+          if [[ -z "$reviewed_commit" ]]; then
+            echo "Could not extract the reviewed commit."
+            exit 1
+          fi
+
+          head_sha="$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq '.headRefOid')"
+
+          if [[ "$head_sha" != "$reviewed_commit"* ]]; then
+            echo "Codex reviewed $reviewed_commit, but the current HEAD is $head_sha."
+            echo "matched=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "matched=true" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for Codex reaction
+        if: steps.review.outputs.matched == 'true'
+        run: sleep 5
+
+      - name: Check Codex approval reaction
+        id: reaction
+        if: steps.review.outputs.matched == 'true'
+        run: |
+          reaction_id="$(
+            gh api --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions"               -f content='+1'               -F per_page=100               --jq '.[] | select(.user.login == "chatgpt-codex-connector[bot]") | .id' |
+              head -n 1
+          )"
+
+          if [[ -z "$reaction_id" ]]; then
+            echo "Codex approval reaction was not found."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "found=true" >> "$GITHUB_OUTPUT"
+
+      - name: Approve pull request
+        if: steps.reaction.outputs.found == 'true'
+        run: gh pr review "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --approve
