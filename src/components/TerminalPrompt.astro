@@ -9,3 +9,19 @@ const { path = '~' } = Astro.props;
 ---
 
 <span class="prompt"><span class="prompt-user">{profile.name}</span>@<span class="prompt-host">{profile.host}</span>:{path}$</span>
+
+<style>
+  .prompt {
+    white-space: nowrap;
+    color: var(--muted);
+
+    .prompt-user {
+      color: var(--green);
+      font-weight: 600;
+    }
+
+    .prompt-host {
+      color: var(--blue);
+    }
+  }
+</style>
