@@ -26,86 +26,6 @@ const isActiveNavigationItem = (href: string) =>
     <meta name="theme-color" content="#1a1b26" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{pageTitle}</title>
-    <!-- First-paint header CSS: keep colocated here so header geometry is stable before bundled CSS arrives. -->
-    <style is:inline>
-      body { margin: 0; }
-      .site-header,
-      .site-header * { box-sizing: border-box; }
-      .skip-link {
-        position: absolute;
-        z-index: 10;
-        top: 0.75rem;
-        left: 1rem;
-        padding: 0.75rem 1rem;
-        color: var(--bg);
-        background: var(--cyan);
-        transform: translateY(-180%);
-      }
-      .skip-link:focus { transform: translateY(0); }
-      .site-header {
-        grid-area: header;
-        font-family: var(--mono, 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace);
-        line-height: 1.65;
-        min-height: 84px;
-        display: grid;
-        grid-template-columns: max-content minmax(0, 1fr) auto;
-        align-items: center;
-        gap: 2rem;
-        padding: 1.25rem 2rem;
-        border-bottom: 1px solid var(--border);
-        background: var(--surface);
-      }
-      .brand {
-        display: inline-grid;
-        grid-auto-flow: column;
-        justify-self: start;
-        width: max-content;
-        align-items: center;
-        gap: 0.45rem;
-        color: var(--text);
-        font-size: 1.9rem;
-        font-weight: 700;
-        letter-spacing: -0.04em;
-        line-height: 1.2;
-      }
-      .brand:hover { text-decoration: none; color: var(--blue); }
-      .header-nav {
-        display: grid;
-        grid-auto-flow: column;
-        justify-content: end;
-        gap: 1.25rem;
-        font-size: 0.9rem;
-      }
-      .header-nav a { white-space: nowrap; }
-      .header-nav a span { color: var(--muted); }
-      .header-nav a[aria-current='page'],
-      .header-nav a.is-active { color: var(--cyan); text-decoration: underline; }
-      .header-nav a[aria-current='page'] span,
-      .header-nav a.is-active span { color: var(--cyan); }
-      .header-tagline {
-        max-width: 8rem;
-        margin: 0;
-        border-left: 1px solid var(--border);
-        padding-left: 1.5rem;
-        font-size: 0.72rem;
-        color: var(--muted);
-      }
-      @media (max-width: 1180px) {
-        .header-tagline { display: none; }
-      }
-      @media (max-width: 960px) {
-        .header-nav { gap: 0.75rem; font-size: 0.8rem; }
-      }
-      @media (max-width: 640px) {
-        .site-header {
-          min-height: 72px;
-          grid-template-columns: minmax(0, 1fr);
-          padding: 1.2rem;
-        }
-        .brand { font-size: 1.6rem; }
-        .header-nav { display: none; }
-      }
-    </style>
   </head>
   <body>
     <a class="skip-link" href="#main-content">本文へスキップ</a>
@@ -218,6 +138,108 @@ const isActiveNavigationItem = (href: string) =>
     }
   }
 
+  .skip-link {
+    position: absolute;
+    z-index: 10;
+    top: 0.75rem;
+    left: 1rem;
+    padding: 0.75rem 1rem;
+    color: var(--bg);
+    background: var(--cyan);
+    transform: translateY(-180%);
+
+    &:focus {
+      transform: translateY(0);
+    }
+  }
+
+  .site-header {
+    grid-area: header;
+    min-height: 84px;
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.25rem 2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+
+    @media (max-width: 640px) {
+      min-height: 72px;
+      grid-template-columns: minmax(0, 1fr);
+      padding: 1.2rem;
+    }
+  }
+
+  .brand {
+    display: inline-grid;
+    grid-auto-flow: column;
+    justify-self: start;
+    width: max-content;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--text);
+    font-size: 1.9rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+
+    &:hover {
+      text-decoration: none;
+      color: var(--blue);
+    }
+
+    @media (max-width: 640px) {
+      font-size: 1.6rem;
+    }
+  }
+
+  .header-nav {
+    display: grid;
+    grid-auto-flow: column;
+    justify-content: end;
+    gap: 1.25rem;
+    font-size: 0.9rem;
+
+    a {
+      white-space: nowrap;
+
+      span {
+        color: var(--muted);
+      }
+
+      &[aria-current='page'],
+      &.is-active {
+        color: var(--cyan);
+        text-decoration: underline;
+
+        span {
+          color: var(--cyan);
+        }
+      }
+    }
+
+    @media (max-width: 960px) {
+      gap: 0.75rem;
+      font-size: 0.8rem;
+    }
+
+    @media (max-width: 640px) {
+      display: none;
+    }
+  }
+
+  .header-tagline {
+    max-width: 8rem;
+    border-left: 1px solid var(--border);
+    padding-left: 1.5rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+
+    @media (max-width: 1180px) {
+      display: none;
+    }
+  }
   .sidebar-pane {
     grid-area: sidebar;
     grid-template-rows: auto auto minmax(0, 1fr);
