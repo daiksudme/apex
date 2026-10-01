@@ -361,7 +361,6 @@ h1,
   .sidebar-nav a.is-active { border-bottom-color: var(--blue); }
   .sidebar-nav .icon { width: 14px; height: 14px; }
   .sidebar-topics, .sidebar-note { display: none; }
-  .pane { padding: 1.1rem; }
   .command-line { font-size: 0.78rem; }
   h1 { font-size: 2rem; margin-block: 1.35rem 1rem; }
   .welcome-description { font-size: 0.95rem; }
