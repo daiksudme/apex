@@ -248,32 +248,6 @@ h1,
 
 
 
-.posts-index-page {
-  min-width: 0;
-  min-height: 100%;
-}
-.posts-index-pane { min-height: 100%; }
-.posts-index-intro {
-  padding-block: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border);
-}
-.posts-index-commands {
-  display: grid;
-  gap: 0.35rem;
-}
-.posts-index-intro h1 {
-  margin-block: 1.4rem 0.65rem;
-  font-size: clamp(2rem, 4vw, 3rem);
-}
-.posts-index-description {
-  max-inline-size: 70ch;
-  color: var(--muted);
-  font-family: var(--sans);
-  font-size: 1rem;
-  line-height: 1.85;
-  word-break: normal;
-  word-break: auto-phrase;
-}
 
 .post-pane { min-height: 100%; }
 
