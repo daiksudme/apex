@@ -105,6 +105,8 @@ ul { list-style: none; padding: 0; }
 .header-nav { display: grid; grid-auto-flow: column; justify-content: end; gap: 1.25rem; font-size: 0.9rem; }
 .header-nav a { white-space: nowrap; }
 .header-nav a span { color: var(--muted); }
+.header-nav a[aria-current='page'] { color: var(--cyan); text-decoration: underline; }
+.header-nav a[aria-current='page'] span { color: var(--cyan); }
 .header-tagline { max-width: 8rem; border-left: 1px solid var(--border); padding-left: 1.5rem; font-size: 0.72rem; color: var(--muted); }
 
 .pane.sidebar-pane {
@@ -207,7 +209,8 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 h1,
 .pane-title,
 .profile-top h3,
-.empty-state h3 {
+.empty-state h3,
+.empty-state-title {
   font-feature-settings: "palt";
   text-wrap: balance;
 }
@@ -216,6 +219,7 @@ h1,
 .welcome-description,
 .profile-bio,
 .empty-state h3,
+.empty-state-title,
 .empty-state > p:last-child,
 .tags-note,
 .repository-description,
@@ -233,7 +237,7 @@ h1,
 .empty-state { display: grid; align-content: center; justify-items: start; padding: 1.75rem 0.65rem; }
 .empty-icon { display: inline-grid; place-items: center; color: var(--blue); padding: 0.65rem; border: 1px solid var(--border); border-radius: 4px; margin-bottom: 1rem; }
 .empty-command { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.65rem; color: var(--muted); font-size: 0.85rem; }
-.empty-state h3 { font-family: var(--sans); font-size: 1.1rem; font-weight: 500; margin-block: 0.65rem; }
+.empty-state h3, .empty-state-title { font-family: var(--sans); font-size: 1.1rem; font-weight: 500; margin-block: 0.65rem; }
 .empty-state > p:last-child { font-family: var(--sans); font-size: 0.88rem; line-height: 1.9; color: var(--muted); }
 .pane-footnote { padding-top: 0.85rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.7rem; }
 .tags-pane { grid-area: tags; }
