@@ -14,3 +14,26 @@ const { tags, class: className } = Astro.props;
     ))}
   </ul>
 )}
+
+<style>
+  .post-summary-tags {
+    margin-top: 0.15rem;
+  }
+
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+
+    .post-tag {
+      display: inline-block;
+      border: 1px solid var(--blue);
+      border-radius: 4px;
+      padding: 0.2rem 0.55rem;
+      color: var(--blue);
+      background: color-mix(in srgb, var(--blue) 8%, transparent);
+      font-size: 0.75rem;
+    }
+  }
+</style>
