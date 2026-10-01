@@ -59,7 +59,10 @@ jobs:
         if: steps.review.outputs.matched == 'true'
         run: |
           reaction_id="$(
-            gh api --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions"               -f content='+1'               -F per_page=100               --jq '.[] | select(.user.login == "chatgpt-codex-connector[bot]") | .id' |
+            gh api --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions" \
+              -f content='+1' \
+              -F per_page=100 \
+              --jq '.[] | select(.user.login == "chatgpt-codex-connector[bot]") | .id' |
               head -n 1
           )"
 
