@@ -325,19 +325,37 @@ h1,
 .post-content > :first-child { margin-top: 0; }
 .post-content > * + * { margin-top: 1.25rem; }
 .post-content h2,
-.post-content h3 {
+.post-content h3,
+.post-content h4,
+.post-content h5,
+.post-content h6 {
   font-feature-settings: "palt";
   text-wrap: balance;
 }
 .post-content h2 {
-  margin-top: 2.8rem;
+  margin-block: 2.8rem 0;
   font-size: 1.55rem;
   line-height: 1.5;
 }
 .post-content h3 {
-  margin-top: 2.2rem;
+  margin-block: 2.2rem 0;
   font-size: 1.25rem;
   line-height: 1.55;
+}
+.post-content h4 {
+  margin-block: 1.9rem 0;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+.post-content h5 {
+  margin-block: 1.7rem 0;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+.post-content h6 {
+  margin-block: 1.5rem 0;
+  font-size: 0.95rem;
+  line-height: 1.65;
 }
 .post-content ul,
 .post-content ol { padding-left: 1.6rem; }
@@ -365,11 +383,13 @@ h1,
   background: var(--selection);
   font-family: var(--mono);
   font-size: 0.9em;
+  overflow-wrap: anywhere;
 }
 .post-content pre code {
   padding: 0;
   background: transparent;
   font-size: inherit;
+  overflow-wrap: normal;
 }
 .post-content a { text-decoration: underline; }
 .post-content img {
