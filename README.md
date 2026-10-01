@@ -26,7 +26,43 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。ホームは合計7つのpaneで構成し、すべて `src/components/Pane.astro` を使います。Sidebar paneとFooter paneは `aside` / `footer` としてサイトシェルの `sidebar` / `footer` Grid Areaに配置し、残る5つは `section` として `dashboard` の直接のGrid Itemになります。共通headerはmain側5 paneで表示し、各pane固有の内容だけをslotで渡します。Headerはトップバーとしてpaneと区別します。
 
-これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
+これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~---
+type: Guide
+title: apex site build
+description: Astroで作る静的サイトの概要とチェック・テスト・ビルド方法。
+---
+
+## apex
+
+Astroで構築した静的サイトです。出力先は `dist/` です。Cloudflareの配信設定は [wrangler.jsonc](wrangler.jsonc) で管理します。
+
+公開中のサイトは <https://apex.daiksud-a1f.workers.dev/> で確認できます。
+
+### ホームの設計用語
+
+[tmuxのpane](https://github.com/tmux/tmux/wiki/Getting-Started#sessions-windows-and-panes) と [herdrのpane](https://herdr.dev/docs/concepts/#pane) に着想を得て、ホームの分割された内容領域を **pane（ペイン）** と呼びます。画面説明・設計・CSS・テストでこの呼び方に統一します。
+
+| 名称 | 役割 | CSSクラス |
+| --- | --- | --- |
+| Sidebar pane | サイトナビゲーションとTopics | `sidebar-pane` |
+| Welcome pane | ターミナル風の導入、サイト紹介、セクションへの導線 | `welcome-pane` |
+| Profile pane | アバター、名前、所在地、プロフィール | `profile-pane` |
+| Posts pane | 最新記事。未公開時は空状態を表示 | `posts-pane` |
+| Tags pane | 今後扱いたいテーマ | `tags-pane` |
+| Commits pane | GitHubの更新履歴への導線 | `commits-pane` |
+| Footer pane | 終端プロンプト、GitHub導線、copyright | `footer-pane` |
+
+共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。ホームは合計7つのpaneで構成し、すべて `src/components/Pane.astro` を使います。Sidebar paneとFooter paneは `aside` / `footer` としてサイトシェルの `sidebar` / `footer` Grid Areaに配置し、残る5つは `section` として `dashboard` の直接のGrid Itemになります。共通headerはmain側5 paneで表示し、各pane固有の内容だけをslotで渡します。Headerはトップバーとしてpaneと区別します。
+
+、所在地 `Kawasaki, Japan` は変更しません。
+
+### 日本語タイポグラフィ
+
+日本語本文は `word-break: auto-phrase` を使い、未対応ブラウザ向けに `word-break: normal` を先に指定します。機械的な文節判定だけに依存せず、意図した改行候補がある箇所では `<wbr>` を明示的に使います。
+
+見出しは `font-feature-settings: "palt"` で字間を詰め、`text-wrap: balance` を使います。`balance` は本文には適用しません。通常の本文はpaneの利用可能幅をそのまま使い、意図がない限り固定的な `max-width` を設けません。
+
+参考: https://developer.chrome.com/blog/css-i18n-features
 
 ### テストとビルド
 
