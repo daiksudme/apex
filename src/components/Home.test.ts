@@ -1,6 +1,46 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
+import type { CollectionEntry } from 'astro:content';
 import { beforeAll, describe, expect, it } from 'vitest';
 import Home from './Home.astro';
+
+const posts = [
+  {
+    id: 'oldest-post',
+    data: {
+      title: '一番古い記事',
+      description: '一番古い記事の概要です。',
+      publishedAt: new Date('2026-09-28T00:00:00.000Z'),
+      tags: ['oldest'],
+    },
+  },
+  {
+    id: 'newest-post',
+    data: {
+      title: '最新の記事',
+      description: '最新の記事の概要です。',
+      publishedAt: new Date('2026-10-01T00:00:00.000Z'),
+      tags: ['latest'],
+    },
+  },
+  {
+    id: 'third-post',
+    data: {
+      title: '3番目の記事',
+      description: '3番目の記事の概要です。',
+      publishedAt: new Date('2026-09-29T00:00:00.000Z'),
+      tags: ['third'],
+    },
+  },
+  {
+    id: 'second-post',
+    data: {
+      title: '2番目の記事',
+      description: '2番目の記事の概要です。',
+      publishedAt: new Date('2026-09-30T00:00:00.000Z'),
+      tags: ['second'],
+    },
+  },
+] as CollectionEntry<'posts'>[];
 
 let html: string;
 let text: string;
@@ -9,6 +49,7 @@ beforeAll(async () => {
   const container = await AstroContainer.create();
   html = await container.renderToString(Home, {
     request: new Request('https://example.test/'),
+    props: { posts },
   });
   // Collect text runs for assertions only. This is not an HTML sanitizer.
   text = [...html.matchAll(/>([^<]+)</g)].map((match) => match[1]).join('');
@@ -88,10 +129,35 @@ describe('home', () => {
     expect(avatar).toMatch(/height="\d+"/);
   });
 
-  it('shows an honest empty state instead of fabricated posts or activity', () => {
-    expect(text).toContain('まだ記事はありません。');
-    expect(html).toContain('https://github.com/daiksudme/apex/commits/main/');
-    expect(text).not.toMatch(/2025-03-10|a1b2c3d|\bOnline\b/);
+  it('shows the latest three posts in descending publish-date order', () => {
+    expect(text).toContain('4 posts');
+    expect(text).toContain('最新の記事');
+    expect(text).toContain('2番目の記事');
+    expect(text).toContain('3番目の記事');
+    expect(text).not.toContain('一番古い記事');
+
+    const newest = html.indexOf('href="/posts/newest-post"');
+    const second = html.indexOf('href="/posts/second-post"');
+    const third = html.indexOf('href="/posts/third-post"');
+    expect(newest).toBeGreaterThan(-1);
+    expect(newest).toBeLessThan(second);
+    expect(second).toBeLessThan(third);
+
+    const postsPane = html.match(/<section\b[^>]*class="pane posts-pane"[^>]*>.*?<\/section>/s)?.[0] ?? '';
+    expect(postsPane.match(/<h3\b/g)).toHaveLength(3);
+    expect(postsPane).not.toMatch(/<h2\b[^>]*class="post-summary-title"/);
+  });
+
+  it('keeps the empty state when no posts exist', async () => {
+    const container = await AstroContainer.create();
+    const emptyHtml = await container.renderToString(Home, {
+      request: new Request('https://example.test/'),
+      props: { posts: [] },
+    });
+
+    expect(emptyHtml).toContain('0 posts');
+    expect(emptyHtml).toContain('<h3 class="empty-state-title">まだ記事はありません。</h3>');
+    expect(emptyHtml).toContain('ls posts/');
   });
 
   it('links only to existing home sections and external destinations', () => {
