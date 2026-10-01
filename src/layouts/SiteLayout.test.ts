@@ -3,6 +3,31 @@ import { describe, expect, it } from 'vitest';
 import SiteLayout from './SiteLayout.astro';
 
 describe('site layout navigation', () => {
+  it('inlines shell-critical header styles in the document head', async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(SiteLayout, {
+      request: new Request('https://example.test/'),
+      slots: { default: '<h1>ホーム</h1>' },
+    });
+
+    const headStart = html.indexOf('<head>');
+    const headEnd = html.indexOf('</head>');
+    expect(headStart).toBeGreaterThanOrEqual(0);
+    expect(headEnd).toBeGreaterThan(headStart);
+
+    const head = html.slice(headStart, headEnd);
+    expect(head).toContain('.site-header {');
+    expect(head).toContain('min-height: 84px');
+    expect(head).toContain('min-height: 72px');
+    expect(head).toContain('.site-header * { box-sizing: border-box; }');
+    expect(head).toContain("font-family: var(--mono, 'SFMono-Regular'");
+    const taglineStart = head.indexOf('.header-tagline {');
+    const taglineEnd = head.indexOf('}', taglineStart);
+    expect(taglineStart).toBeGreaterThanOrEqual(0);
+    expect(head.slice(taglineStart, taglineEnd)).toContain('margin: 0');
+    expect(html.indexOf('.site-header {')).toBeLessThan(html.indexOf('<body'));
+  });
+
   it('marks the posts index as current and active in both navigation landmarks', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(SiteLayout, {
