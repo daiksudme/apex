@@ -21,7 +21,9 @@ describe('post layout', () => {
     });
 
     expect(html).toContain('<title>記事タイトル | daiksud.me</title>');
-    expect(html).toMatch(/<article\b[^>]*class="pane post-pane"[^>]*aria-labelledby="post-title"/);
+    const article = html.match(/<article\b[^>]*>/)?.[0] ?? '';
+    expect(article).toContain('class="pane post-pane"');
+    expect(article).toContain('aria-labelledby="post-title"');
     expect(html).toContain('cat posts/example-post.md');
     expect(html).toContain('<h1 id="post-title">記事タイトル</h1>');
     expect(html).toContain('記事の概要です。');
