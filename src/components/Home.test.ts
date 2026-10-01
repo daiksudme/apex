@@ -92,7 +92,7 @@ describe('home', () => {
     }
     expect(html).toMatch(/<aside\b[^>]*class="pane sidebar-pane"/);
     expect(html).toMatch(/<footer\b[^>]*class="pane footer-pane"/);
-    expect(html).toContain('<header class="site-header">');
+    expect(html).toMatch(/<header\b[^>]*class="site-header"[^>]*>/);
     expect(html).not.toContain('<header class="pane ');
 
     const classNames = [...html.matchAll(/\sclass="([^"]+)"/g)]
@@ -105,7 +105,7 @@ describe('home', () => {
   });
 
   it('keeps the site shell and panes as direct layout regions', () => {
-    expect(html).toMatch(/<body>.*<header class="site-header">.*<aside\b[^>]*class="pane sidebar-pane".*<main id="main-content".*<footer\b[^>]*class="pane footer-pane".*<\/body>/s);
+    expect(html).toMatch(/<body>.*<header\b[^>]*class="site-header"[^>]*>.*<aside\b[^>]*class="pane sidebar-pane".*<main id="main-content".*<footer\b[^>]*class="pane footer-pane".*<\/body>/s);
     expect(html).toMatch(/<div\b[^>]*class="dashboard"[^>]*>\s*<section\b[^>]*class="pane welcome-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane profile-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane posts-pane"/);
