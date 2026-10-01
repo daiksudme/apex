@@ -57,3 +57,200 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
     </Pane>
   </div>
 </SiteLayout>
+
+<style>
+  .post-page {
+    min-width: 0;
+    min-height: 100%;
+  }
+
+  .post-header {
+    display: grid;
+    width: 100%;
+    max-inline-size: 72ch;
+    margin-inline: auto;
+    padding-block: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+
+    .post-command {
+      margin-bottom: 0.25rem;
+    }
+
+    h1 {
+      margin-block: 1.4rem 0.65rem;
+      font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    .post-description {
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 1rem;
+      line-height: 1.85;
+      word-break: normal;
+      word-break: auto-phrase;
+    }
+
+    .post-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+      margin-top: 1.25rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+
+      p {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+      }
+
+      .post-meta-label {
+        color: var(--green);
+      }
+    }
+  }
+
+  .post-content {
+    width: 100%;
+    max-inline-size: 72ch;
+    margin-inline: auto;
+    padding-block: 2rem 1rem;
+    font-family: var(--sans);
+    font-size: 1rem;
+    line-height: 1.95;
+    word-break: normal;
+    word-break: auto-phrase;
+
+    & > :global(:first-child) {
+      margin-top: 0;
+    }
+
+    & > :global(* + *) {
+      margin-top: 1.25rem;
+    }
+
+    & :global(h2),
+    & :global(h3),
+    & :global(h4),
+    & :global(h5),
+    & :global(h6) {
+      font-feature-settings: "palt";
+      text-wrap: balance;
+    }
+
+    & :global(h2) {
+      margin-block: 2.8rem 0;
+      font-size: 1.55rem;
+      line-height: 1.5;
+    }
+
+    & :global(h3) {
+      margin-block: 2.2rem 0;
+      font-size: 1.25rem;
+      line-height: 1.55;
+    }
+
+    & :global(h4) {
+      margin-block: 1.9rem 0;
+      font-size: 1.1rem;
+      line-height: 1.6;
+    }
+
+    & :global(h5) {
+      margin-block: 1.7rem 0;
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    & :global(h6) {
+      margin-block: 1.5rem 0;
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    & :global(ul),
+    & :global(ol) {
+      padding-left: 1.6rem;
+    }
+
+    & :global(ul) {
+      list-style: disc;
+    }
+
+    & :global(ol) {
+      list-style: decimal;
+    }
+
+    & :global(li + li) {
+      margin-top: 0.35rem;
+    }
+
+    & :global(blockquote) {
+      margin-inline: 0;
+      border-left: 3px solid var(--purple);
+      padding-left: 1rem;
+      color: var(--muted);
+    }
+
+    & :global(pre) {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 1rem;
+      background: var(--bg);
+      font-family: var(--mono);
+      line-height: 1.7;
+    }
+
+    & :global(code) {
+      border-radius: 3px;
+      padding: 0.1em 0.35em;
+      background: var(--selection);
+      font-family: var(--mono);
+      font-size: 0.9em;
+      overflow-wrap: anywhere;
+    }
+
+    & :global(pre code) {
+      padding: 0;
+      background: transparent;
+      font-size: inherit;
+      overflow-wrap: normal;
+    }
+
+    & :global(a) {
+      text-decoration: underline;
+    }
+
+    & :global(img) {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    & :global(hr) {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin-block: 2rem;
+    }
+
+    & :global(table) {
+      display: block;
+      width: max-content;
+      max-width: 100%;
+      overflow-x: auto;
+      border-collapse: collapse;
+    }
+
+    & :global(th),
+    & :global(td) {
+      border: 1px solid var(--border);
+      padding: 0.55rem 0.75rem;
+      text-align: left;
+    }
+
+    & :global(th) {
+      background: var(--selection);
+    }
+  }
+</style>
