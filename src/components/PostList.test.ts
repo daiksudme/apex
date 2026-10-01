@@ -25,7 +25,7 @@ const posts = [
 ] as CollectionEntry<'posts'>[];
 
 describe('post list', () => {
-  it('renders post metadata and links without introducing another page heading', async () => {
+  it('renders post metadata and links with h2 headings by default', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(PostList, { props: { posts } });
 
@@ -39,11 +39,23 @@ describe('post list', () => {
     expect(html.match(/<h2\b/g)).toHaveLength(2);
   });
 
-  it('renders the empty state when there are no posts', async () => {
+  it('can render post headings as h3 for embedded lists', async () => {
     const container = await AstroContainer.create();
-    const html = await container.renderToString(PostList, { props: { posts: [] } });
+    const html = await container.renderToString(PostList, {
+      props: { posts, headingLevel: 'h3' },
+    });
 
-    expect(html).toContain('まだ記事はありません。');
+    expect(html.match(/<h2\b/g)).toBeNull();
+    expect(html.match(/<h3\b/g)).toHaveLength(2);
+  });
+
+  it('uses the requested heading level for the empty state', async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(PostList, {
+      props: { posts: [], headingLevel: 'h3' },
+    });
+
+    expect(html).toContain('<h3 class="empty-state-title">まだ記事はありません。</h3>');
     expect(html).toContain('ls posts/');
     expect(html).not.toContain('class="post-list"');
   });

@@ -4,9 +4,11 @@ import Icon from './Icon.astro';
 
 interface Props {
   posts: CollectionEntry<'posts'>[];
+  headingLevel?: 'h2' | 'h3';
 }
 
-const { posts } = Astro.props;
+const { posts, headingLevel = 'h2' } = Astro.props;
+const Heading = headingLevel;
 const dateFormatter = new Intl.DateTimeFormat('ja-JP', {
   dateStyle: 'long',
   timeZone: 'Asia/Tokyo',
@@ -18,7 +20,7 @@ const dateTime = (date: Date) => date.toISOString().slice(0, 10);
   <div class="empty-state post-list-empty">
     <span class="empty-icon"><Icon name="terminal" size={32} /></span>
     <p class="empty-command" lang="en"><span class="chevron" aria-hidden="true">›</span> ls posts/</p>
-    <h2 class="empty-state-title">まだ記事はありません。</h2>
+    <Heading class="empty-state-title">まだ記事はありません。</Heading>
     <p>つくったもの、学んだこと、考えたこと。<br />ここから少しずつ書き残していきます。</p>
   </div>
 ) : (
@@ -31,12 +33,12 @@ const dateTime = (date: Date) => date.toISOString().slice(0, 10);
             <time class="post-summary-date" datetime={dateTime(post.data.publishedAt)}>
               {dateFormatter.format(post.data.publishedAt)}
             </time>
-            <h2 id={titleId} class="post-summary-title">
+            <Heading id={titleId} class="post-summary-title">
               <a href={`/posts/${post.id}`}>
                 <span>{post.data.title}</span>
                 <Icon name="arrow" size={18} />
               </a>
-            </h2>
+            </Heading>
             <p class="post-summary-description">{post.data.description}</p>
             {post.data.tags.length > 0 && (
               <ul class="post-tags post-summary-tags" aria-label="タグ" lang="en">

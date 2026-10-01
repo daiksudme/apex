@@ -1,5 +1,8 @@
 ---
+import { getCollection } from 'astro:content';
 import Home from '../components/Home.astro';
+
+const posts = await getCollection('posts');
 ---
 
-<Home />
+<Home posts={posts} />
