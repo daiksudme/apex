@@ -154,8 +154,21 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 .welcome-description { inline-size: 100%; max-inline-size: none; font-family: var(--sans); font-size: 1.05rem; line-height: 1.95; }
 .tagline { color: var(--muted); font-size: 1rem; margin-top: 1.2rem; }
 .welcome-links { align-self: end; padding-top: 1.4rem; }
-.welcome-links nav { display: grid; grid-auto-flow: column; grid-auto-columns: max-content; justify-content: start; column-gap: 1.1rem; margin-block: 0.15rem; }
-.welcome-links a { display: inline-grid; grid-auto-flow: column; align-items: center; min-height: 44px; gap: 0.25rem; font-size: 0.95rem; }
+.welcome-links nav {
+  display: block;
+  margin-block: 0.15rem;
+  line-height: 1;
+}
+.welcome-links a {
+  display: inline-grid;
+  grid-auto-flow: column;
+  align-items: center;
+  min-height: 44px;
+  margin-inline-end: 1ch;
+  gap: 0.25rem;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
 .idle-prompt { margin-top: 0.25rem; }
 .welcome-pane > .pane-heading + .command-line,
 .profile-pane > .pane-heading + .profile-top { margin-top: 1rem; }
@@ -315,7 +328,6 @@ h1,
   h1 { font-size: 2rem; margin-block: 1.35rem 1rem; }
   .welcome-description { font-size: 0.95rem; }
   .tagline { font-size: 0.78rem; }
-  .welcome-links nav { grid-auto-flow: row; grid-template-columns: repeat(2, max-content); }
   .welcome-links a { font-size: 0.85rem; }
   .profile-top { grid-template-columns: 96px minmax(0, 1fr); }
   .profile-details > div { grid-template-columns: 100px minmax(0, 1fr); gap: 0.35rem; }
