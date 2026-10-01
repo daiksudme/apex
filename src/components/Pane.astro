@@ -1,0 +1,48 @@
+---
+type PaneElement = 'section' | 'aside' | 'footer';
+
+type PaneTitleElement = 'h2' | 'div';
+
+type HeadingProps =
+  | { title: string; headingId: string; titleElement?: PaneTitleElement }
+  | { title?: never; headingId?: never; titleElement?: never };
+
+type Props = HeadingProps & {
+  as?: PaneElement;
+  id?: string;
+  class?: string;
+  tabindex?: number;
+  ariaLabel?: string;
+};
+
+const {
+  as = 'section',
+  id,
+  class: className,
+  title,
+  headingId,
+  titleElement = 'h2',
+  tabindex,
+  ariaLabel,
+} = Astro.props;
+
+const Tag = as;
+const Title = titleElement;
+---
+
+<Tag
+  id={id}
+  class:list={['pane', className]}
+  aria-labelledby={headingId}
+  aria-label={ariaLabel}
+  tabindex={tabindex}
+>
+  {title && headingId && (
+    <header class="pane-heading" lang="en">
+      <Title id={headingId} class="pane-title"><span class="chevron" aria-hidden="true">›</span>{title}</Title>
+      <slot name="meta" />
+    </header>
+  )}
+  <slot />
+  <slot name="footer" />
+</Tag>

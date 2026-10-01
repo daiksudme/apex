@@ -24,7 +24,7 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 | Commits pane | GitHubの更新履歴への導線 | `commits-pane` |
 | Footer pane | 終端プロンプト、GitHub導線、copyright | `footer-pane` |
 
-共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。ホームは合計7つのpaneで構成します。Sidebar paneとFooter paneはサイトシェルの `sidebar` / `footer` Grid Area、残る5つのpaneは `dashboard` の直接のGrid Itemとして `welcome` / `profile` / `posts` / `tags` / `commits` のGrid Areaに対応させます。Headerはトップバーとしてpaneと区別します。
+共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。ホームは合計7つのpaneで構成し、すべて `src/components/Pane.astro` を使います。Sidebar paneとFooter paneは `aside` / `footer` としてサイトシェルの `sidebar` / `footer` Grid Areaに配置し、残る5つは `section` として `dashboard` の直接のGrid Itemになります。共通headerはmain側5 paneで表示し、各pane固有の内容だけをslotで渡します。Headerはトップバーとしてpaneと区別します。
 
 これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
 

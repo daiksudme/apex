@@ -25,10 +25,19 @@ describe('home', () => {
   it('renders the welcome, profile, posts, tags and repository panes', () => {
     expect(text).toContain('つくる。試す。書き残す。');
     expect(text).toContain('Build. Learn. Write. Repeat.');
-    expect(text).toContain('Latest Posts');
-    expect(text).toContain('Tags');
-    expect(text).toContain('Recent Commits');
+    for (const heading of ['Welcome', 'Profile', 'Latest Posts', 'Tags', 'Recent Commits']) {
+      expect(text).toContain(heading);
+    }
     expect(html.match(/<h1\b/g)).toHaveLength(1);
+    expect(html.indexOf('<h1')).toBeLessThan(html.indexOf('<h2'));
+  });
+
+  it('uses the shared pane header for every main content pane', () => {
+    expect(html.match(/class="pane-heading"/g)).toHaveLength(5);
+    for (const id of ['welcome-heading', 'profile-heading', 'posts-heading', 'tags-heading', 'commits-heading']) {
+      expect(html).toContain(`id="${id}"`);
+      expect(html).toContain(`aria-labelledby="${id}"`);
+    }
   });
 
   it('uses pane terminology for all seven pane regions', () => {
@@ -39,8 +48,8 @@ describe('home', () => {
     for (const name of paneNames) {
       expect(sectionClasses).toContainEqual(expect.arrayContaining(['pane', `${name}-pane`]));
     }
-    expect(html).toContain('<aside class="pane sidebar-pane"');
-    expect(html).toContain('<footer class="pane footer-pane"');
+    expect(html).toMatch(/<aside\b[^>]*class="pane sidebar-pane"/);
+    expect(html).toMatch(/<footer\b[^>]*class="pane footer-pane"/);
     expect(html).toContain('<header class="site-header">');
     expect(html).not.toContain('<header class="pane ');
 
@@ -54,12 +63,12 @@ describe('home', () => {
   });
 
   it('keeps the site shell and panes as direct layout regions', () => {
-    expect(html).toMatch(/<body>.*<header class="site-header">.*<aside class="pane sidebar-pane".*<main id="main-content".*<footer class="pane footer-pane">.*<\/body>/s);
-    expect(html).toMatch(/<div class="dashboard">\s*<section class="pane welcome-pane"/);
-    expect(html).toMatch(/<\/section>\s*<section id="about" class="pane profile-pane"/);
-    expect(html).toMatch(/<\/section>\s*<section id="posts" class="pane posts-pane"/);
-    expect(html).toMatch(/<\/section>\s*<section id="tags" class="pane tags-pane"/);
-    expect(html).toMatch(/<\/section>\s*<section class="pane commits-pane"/);
+    expect(html).toMatch(/<body>.*<header class="site-header">.*<aside\b[^>]*class="pane sidebar-pane".*<main id="main-content".*<footer\b[^>]*class="pane footer-pane".*<\/body>/s);
+    expect(html).toMatch(/<div class="dashboard">\s*<section\b[^>]*class="pane welcome-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane profile-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane posts-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane tags-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane commits-pane"/);
   });
 
   it('marks English passages for pronunciation in the Japanese document', () => {
