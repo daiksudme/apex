@@ -21,9 +21,9 @@ describe('post layout', () => {
     });
 
     expect(html).toContain('<title>記事タイトル | daiksud.me</title>');
-    expect(html).toMatch(/<article\b[^>]*class="pane post-pane"/);
+    expect(html).toMatch(/<article\b[^>]*class="pane post-pane"[^>]*aria-labelledby="post-title"/);
     expect(html).toContain('cat posts/example-post.md');
-    expect(html).toContain('<h1 id=\"post-title\">記事タイトル</h1>');
+    expect(html).toContain('<h1 id="post-title">記事タイトル</h1>');
     expect(html).toContain('記事の概要です。');
     expect(html).toContain('datetime="2026-10-01"');
     expect(html).toContain('datetime="2026-10-02"');
@@ -44,6 +44,7 @@ describe('post layout', () => {
       },
     });
 
-    expect(html).toMatch(/<a href="\/#posts"[^>]*aria-current="page"[^>]*>.*Posts.*<\/a>/s);
+    expect(html).toContain('href="/#posts"');
+    expect(html).not.toMatch(/<a href="\/#posts"[^>]*aria-current="page"/);
   });
 });
