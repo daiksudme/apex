@@ -31,7 +31,7 @@ const isCurrentNavigationItem = (href: string) => href === pathname;
       </a>
       <nav class="header-nav" aria-label="メインナビゲーション">
         {navigation.slice(1).map((item) => (
-          <a href={item.href} lang="en"><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
+          <a href={item.href} lang="en" aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
         ))}
       </nav>
       <p class="header-tagline" lang="en">{site.tagline}</p>
