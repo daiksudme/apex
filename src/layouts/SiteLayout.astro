@@ -11,6 +11,10 @@ const pageTitle = getPageTitle(title);
 const year = new Date().getFullYear();
 const pathname = Astro.url.pathname;
 const isCurrentNavigationItem = (href: string) => href === pathname;
+const isActiveNavigationItem = (href: string) =>
+  href === '/posts'
+    ? pathname === '/posts' || pathname.startsWith('/posts/')
+    : isCurrentNavigationItem(href);
 ---
 
 <!doctype html>
@@ -31,7 +35,12 @@ const isCurrentNavigationItem = (href: string) => href === pathname;
       </a>
       <nav class="header-nav" aria-label="メインナビゲーション">
         {navigation.slice(1).map((item) => (
-          <a href={item.href} lang="en" aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
+          <a
+            href={item.href}
+            lang="en"
+            class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
+            aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
+          ><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
         ))}
       </nav>
       <p class="header-tagline" lang="en">{site.tagline}</p>
@@ -40,7 +49,12 @@ const isCurrentNavigationItem = (href: string) => href === pathname;
     <Pane as="aside" class="sidebar-pane" ariaLabel="サイトメニュー">
       <nav class="sidebar-nav" aria-label="ページナビゲーション">
         {navigation.map((item) => (
-          <a href={item.href} lang="en" aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}>
+          <a
+            href={item.href}
+            lang="en"
+            class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
+            aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
+          >
             <Icon name={item.icon} /><span>{item.label}</span>
           </a>
         ))}

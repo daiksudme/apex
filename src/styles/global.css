@@ -105,8 +105,10 @@ ul { list-style: none; padding: 0; }
 .header-nav { display: grid; grid-auto-flow: column; justify-content: end; gap: 1.25rem; font-size: 0.9rem; }
 .header-nav a { white-space: nowrap; }
 .header-nav a span { color: var(--muted); }
-.header-nav a[aria-current='page'] { color: var(--cyan); text-decoration: underline; }
-.header-nav a[aria-current='page'] span { color: var(--cyan); }
+.header-nav a[aria-current='page'],
+.header-nav a.is-active { color: var(--cyan); text-decoration: underline; }
+.header-nav a[aria-current='page'] span,
+.header-nav a.is-active span { color: var(--cyan); }
 .header-tagline { max-width: 8rem; border-left: 1px solid var(--border); padding-left: 1.5rem; font-size: 0.72rem; color: var(--muted); }
 
 .pane.sidebar-pane {
@@ -120,7 +122,8 @@ ul { list-style: none; padding: 0; }
 .sidebar-nav { display: grid; gap: 0.4rem; }
 .sidebar-nav a { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.8rem; min-height: 44px; padding: 0.6rem 0.75rem; color: var(--muted); border-left: 3px solid transparent; border-radius: 3px; font-size: 0.95rem; }
 .sidebar-nav a:hover { color: var(--blue); background: var(--selection); text-decoration: none; }
-.sidebar-nav a[aria-current='page'] { border-left-color: var(--blue); background: var(--selection); color: var(--blue); }
+.sidebar-nav a[aria-current='page'],
+.sidebar-nav a.is-active { border-left-color: var(--blue); background: var(--selection); color: var(--blue); }
 .sidebar-topics { padding-top: 1.75rem; border-top: 1px solid var(--border); }
 .eyebrow { color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.7rem; font-weight: 400; }
 .sidebar-topics ul { display: grid; margin-top: 0.7rem; }
@@ -269,6 +272,10 @@ h1,
 .posts-index-intro {
   padding-block: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
+}
+.posts-index-commands {
+  display: grid;
+  gap: 0.35rem;
 }
 .posts-index-intro h1 {
   margin-block: 1.4rem 0.65rem;
@@ -567,7 +574,8 @@ h1,
     font-size: clamp(0.62rem, 2.7vw, 0.76rem);
     white-space: nowrap;
   }
-  .sidebar-nav a[aria-current='page'] { border-bottom-color: var(--blue); }
+  .sidebar-nav a[aria-current='page'],
+  .sidebar-nav a.is-active { border-bottom-color: var(--blue); }
   .sidebar-nav .icon { width: 14px; height: 14px; }
   .sidebar-topics, .sidebar-note { display: none; }
   .pane { padding: 1.1rem; }

@@ -22,10 +22,16 @@ const description = 'つくったもの、学んだこと、考えたことを�
     >
       <span slot="meta" class="pane-label" lang="en">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
       <header class="posts-index-intro">
-        <p class="command-line" lang="en">
-          <TerminalPrompt />
-          <span class="command">ls posts/</span>
-        </p>
+        <div class="posts-index-commands" lang="en">
+          <p class="command-line">
+            <TerminalPrompt />
+            <span class="command">cd posts/</span>
+          </p>
+          <p class="command-line">
+            <TerminalPrompt path="~/posts" />
+            <span class="command">ls</span>
+          </p>
+        </div>
         <h1 id="posts-index-title">記事</h1>
         <p class="posts-index-description">{description}</p>
       </header>
