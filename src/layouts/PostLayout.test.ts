@@ -34,7 +34,7 @@ describe('post layout', () => {
     expect(html).toContain('記事本文');
   });
 
-  it('does not mark a home-section link as the current post page', async () => {
+  it('does not mark the posts index as the current article page', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(PostLayout, {
       request: new Request('https://example.test/posts/example-post'),
@@ -46,7 +46,7 @@ describe('post layout', () => {
       },
     });
 
-    expect(html).toContain('href="/#posts"');
-    expect(html).not.toMatch(/<a href="\/#posts"[^>]*aria-current="page"/);
+    expect(html).toContain('href="/posts"');
+    expect(html).not.toMatch(/<a href="\/posts"[^>]*aria-current="page"/);
   });
 });

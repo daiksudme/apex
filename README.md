@@ -30,7 +30,7 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 ### 記事ページ
 
-記事は `src/content/posts/<slug>.md` に置き、AstroのContent Collectionから `/posts/<slug>` を静的生成します。一覧ページはまだ持たず、記事ページだけを提供します。
+記事は `src/content/posts/<slug>.md` に置き、AstroのContent Collectionから `/posts/<slug>` を静的生成します。`/posts` では全記事を `publishedAt` の新しい順に一覧表示します。
 
 Frontmatterは次の形式です。
 

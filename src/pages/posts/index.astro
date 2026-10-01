@@ -1,0 +1,35 @@
+---
+import { getCollection } from 'astro:content';
+import Pane from '../../components/Pane.astro';
+import PostList from '../../components/PostList.astro';
+import TerminalPrompt from '../../components/TerminalPrompt.astro';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+
+const posts = (await getCollection('posts')).sort(
+  (a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime(),
+);
+const description = 'つくったもの、学んだこと、考えたことを書き残した記事の一覧です。';
+---
+
+<SiteLayout title="記事" description={description}>
+  <div class="posts-index-page">
+    <Pane
+      class="posts-index-pane"
+      title="Posts"
+      headingId="posts-index-pane-heading"
+      titleElement="div"
+      ariaLabelledBy="posts-index-title"
+    >
+      <span slot="meta" class="pane-label" lang="en">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
+      <header class="posts-index-intro">
+        <p class="command-line" lang="en">
+          <TerminalPrompt />
+          <span class="command">ls posts/</span>
+        </p>
+        <h1 id="posts-index-title">記事</h1>
+        <p class="posts-index-description">{description}</p>
+      </header>
+      <PostList posts={posts} />
+    </Pane>
+  </div>
+</SiteLayout>
