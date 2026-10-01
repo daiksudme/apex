@@ -1,5 +1,6 @@
 ---
 import Pane from '../components/Pane.astro';
+import PostTags from '../components/PostTags.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
 import { formatDate, formatIsoDate } from '../lib/date';
 import SiteLayout from './SiteLayout.astro';
@@ -48,13 +49,7 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
             </p>
           )}
         </div>
-        {tags.length > 0 && (
-          <ul class="post-tags" aria-label="タグ" lang="en">
-            {tags.map((tag) => (
-              <li><span class="post-tag">#{tag}</span></li>
-            ))}
-          </ul>
-        )}
+        <PostTags tags={tags} />
       </header>
       <div class="post-content">
         <slot />
