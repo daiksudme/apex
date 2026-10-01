@@ -1,9 +1,20 @@
 ---
+import type { CollectionEntry } from 'astro:content';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Icon from './Icon.astro';
 import Pane from './Pane.astro';
+import PostList from './PostList.astro';
 import TerminalPrompt from './TerminalPrompt.astro';
 import { navigation, profile, site, topics } from '../config/site';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+}
+
+const { posts } = Astro.props;
+const latestPosts = [...posts]
+  .sort((a, b) => b.data.publishedAt.getTime() - a.data.publishedAt.getTime())
+  .slice(0, 3);
 ---
 
 <SiteLayout>
@@ -43,13 +54,8 @@ import { navigation, profile, site, topics } from '../config/site';
     </Pane>
 
     <Pane id="posts" class="posts-pane" title="Latest Posts" headingId="posts-heading" tabindex={-1}>
-      <span slot="meta" class="pane-label" lang="en">0 posts</span>
-      <div class="empty-state">
-        <span class="empty-icon"><Icon name="terminal" size={32} /></span>
-        <p class="empty-command" lang="en"><span class="chevron" aria-hidden="true">›</span> ls posts/</p>
-        <h3>まだ記事はありません。</h3>
-        <p>つくったもの、学んだこと、考えたこと。<br />ここから少しずつ書き残していきます。</p>
-      </div>
+      <span slot="meta" class="pane-label" lang="en">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
+      <PostList posts={latestPosts} headingLevel="h3" />
       <p slot="footer" class="pane-footnote" lang="en"><span aria-hidden="true">// </span>Small steps. Continuous learning.</p>
     </Pane>
 
