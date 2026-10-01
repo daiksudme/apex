@@ -105,7 +105,7 @@ describe('home', () => {
   });
 
   it('keeps the site shell and panes as direct layout regions', () => {
-    expect(html).toMatch(/<body>.*<header\b[^>]*class="site-header"[^>]*>.*<aside\b[^>]*class="pane sidebar-pane".*<main id="main-content".*<footer\b[^>]*class="pane footer-pane".*<\/body>/s);
+    expect(html).toMatch(/<body\b[^>]*>.*<header\b[^>]*class="site-header"[^>]*>.*<aside\b[^>]*class="pane sidebar-pane".*<main id="main-content".*<footer\b[^>]*class="pane footer-pane".*<\/body>/s);
     expect(html).toMatch(/<div\b[^>]*class="dashboard"[^>]*>\s*<section\b[^>]*class="pane welcome-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane profile-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane posts-pane"/);
@@ -114,7 +114,7 @@ describe('home', () => {
   });
 
   it('marks English passages for pronunciation in the Japanese document', () => {
-    expect(html).toContain('<html lang="ja">');
+    expect(html).toMatch(/<html\b(?=[^>]*lang="ja")[^>]*>/);
     for (const className of ['tagline', 'profile-role', 'profile-note', 'pane-footnote', 'footer-command']) {
       expect(html).toMatch(new RegExp(`<p\\b(?=[^>]*class="${className}")(?=[^>]*lang="en")[^>]*>`));
     }
