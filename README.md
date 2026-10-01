@@ -28,6 +28,14 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
 
+### 日本語タイポグラフィ
+
+日本語本文は `word-break: auto-phrase` を使い、未対応ブラウザ向けに `word-break: normal` を先に指定します。機械的な文節判定だけに依存せず、意図した改行候補がある箇所では `<wbr>` を明示的に使います。
+
+見出しは `font-feature-settings: "palt"` で字間を詰め、`text-wrap: balance` を使います。`balance` は本文には適用しません。通常の本文はpaneの利用可能幅をそのまま使い、意図がない限り固定的な `max-width` を設けません。
+
+参考: https://developer.chrome.com/blog/css-i18n-features
+
 ### テストとビルド
 
 Node.js `26.10.0` と pnpm `12.6.0` を使用します。バージョンは [mise.toml](mise.toml) と [package.json](package.json) で固定しています。Cloudflare Workers Builds が参照する [.node-version](.node-version) も、同じ Node.js バージョンに揃えます。
