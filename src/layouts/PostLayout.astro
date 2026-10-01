@@ -32,7 +32,7 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
 
 <SiteLayout title={title} description={description}>
   <div class="post-page">
-    <Pane as="article" class="post-pane" title="Post" headingId="post-pane-heading">
+    <Pane as="article" class="post-pane" title="Post" headingId="post-pane-heading" titleElement="div">
       <header class="post-header">
         <p class="command-line post-command" lang="en">
           <TerminalPrompt />
