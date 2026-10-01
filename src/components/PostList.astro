@@ -44,3 +44,113 @@ const Heading = headingLevel;
     })}
   </ul>
 )}
+
+<style>
+  .post-list {
+    display: grid;
+
+    .post-list-item {
+      border-bottom: 1px solid var(--border);
+
+      &:last-child {
+        border-bottom: 0;
+      }
+    }
+  }
+
+  .post-summary {
+    display: grid;
+    gap: 0.65rem;
+    padding-block: 1.5rem;
+
+    .post-summary-date {
+      color: var(--muted);
+      font-size: 0.75rem;
+    }
+
+    .post-summary-title {
+      font-family: var(--sans);
+      font-size: clamp(1.15rem, 2vw, 1.4rem);
+      line-height: 1.5;
+      font-feature-settings: "palt";
+      text-wrap: balance;
+
+      a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 44px;
+        color: var(--text);
+
+        &:hover {
+          color: var(--blue);
+          text-decoration: none;
+        }
+      }
+    }
+
+    .post-summary-description {
+      max-inline-size: 70ch;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      line-height: 1.85;
+      word-break: normal;
+      word-break: auto-phrase;
+    }
+  }
+
+  .empty-state {
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    padding: 1.75rem 0.65rem;
+
+    .empty-icon {
+      display: inline-grid;
+      place-items: center;
+      color: var(--blue);
+      padding: 0.65rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 1rem;
+    }
+
+    .empty-command {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 0.65rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .empty-state-title {
+      font-family: var(--sans);
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-block: 0.65rem;
+      font-feature-settings: "palt";
+      text-wrap: balance;
+      word-break: normal;
+      word-break: auto-phrase;
+    }
+
+    > p:last-child {
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      line-height: 1.9;
+      color: var(--muted);
+      word-break: normal;
+      word-break: auto-phrase;
+    }
+
+    @media (max-width: 640px) {
+      padding-inline: 0;
+    }
+  }
+
+  .post-list-empty {
+    min-height: 300px;
+  }
+</style>
