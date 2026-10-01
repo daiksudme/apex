@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { navigation, profile, site, topics } from '../config/site';
+import { navigation, profile, site, tags } from '../config/site';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { sortPostsByPublishedAt } from '../lib/posts';
 import Icon from './Icon.astro';
@@ -49,7 +49,7 @@ const latestPosts = sortPostsByPublishedAt(posts).slice(0, 3);
         <div><dt><Icon name="link" /><span>Website</span></dt><dd><a href="/">{site.name}</a></dd></div>
       </dl>
       <p class="profile-bio">{profile.bio}</p>
-      <p class="profile-note" lang="en"><span class="topic-dot" aria-hidden="true"></span>Building in public</p>
+      <p class="profile-note" lang="en"><span class="tag-dot" aria-hidden="true"></span>Building in public</p>
     </Pane>
 
     <Pane id="posts" class="posts-pane" title="Latest Posts" headingId="posts-heading" tabindex={-1}>
@@ -61,8 +61,8 @@ const latestPosts = sortPostsByPublishedAt(posts).slice(0, 3);
     <Pane id="tags" class="tags-pane" title="Tags" headingId="tags-heading" tabindex={-1}>
       <span slot="meta" class="pane-label" lang="en">interests</span>
       <ul class="tag-list" lang="en">
-        {topics.map((topic) => (
-          <li><span id={`topic-${topic.slug}`} class="tag" data-tone={topic.tone} tabindex="-1">#{topic.slug}</span></li>
+        {tags.map((tag) => (
+          <li><span id={`tag-${tag.slug}`} class="tag" data-tone={tag.tone} tabindex="-1">#{tag.slug}</span></li>
         ))}
       </ul>
       <p class="tags-note">これから書いていきたいテーマ。</p>
