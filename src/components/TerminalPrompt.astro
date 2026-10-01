@@ -1,5 +1,11 @@
 ---
 import { profile } from '../config/site';
+
+interface Props {
+  path?: string;
+}
+
+const { path = '~' } = Astro.props;
 ---
 
-<span class="prompt"><span class="prompt-user">{profile.name}</span>@<span class="prompt-host">{profile.host}</span>:~$</span>
+<span class="prompt"><span class="prompt-user">{profile.name}</span>@<span class="prompt-host">{profile.host}</span>:{path}$</span>
