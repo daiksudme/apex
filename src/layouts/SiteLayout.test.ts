@@ -19,6 +19,12 @@ describe('site layout navigation', () => {
     expect(head).toContain('.site-header {');
     expect(head).toContain('min-height: 84px');
     expect(head).toContain('min-height: 72px');
+    expect(head).toContain('.site-header * { box-sizing: border-box; }');
+    expect(head).toContain("font-family: var(--mono, 'SFMono-Regular'");
+    const taglineStart = head.indexOf('.header-tagline {');
+    const taglineEnd = head.indexOf('}', taglineStart);
+    expect(taglineStart).toBeGreaterThanOrEqual(0);
+    expect(head.slice(taglineStart, taglineEnd)).toContain('margin: 0');
     expect(html.indexOf('.site-header {')).toBeLessThan(html.indexOf('<body'));
   });
 
