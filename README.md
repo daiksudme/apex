@@ -28,6 +28,26 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
 
+### 記事ページ
+
+記事は `src/content/posts/<slug>.md` に置き、AstroのContent Collectionから `/posts/<slug>` を静的生成します。一覧ページはまだ持たず、記事ページだけを提供します。
+
+Frontmatterは次の形式です。
+
+```yaml
+---
+title: 記事タイトル
+description: 記事の概要
+publishedAt: 2026-10-01
+updatedAt: 2026-10-02 # optional
+tags:
+  - astro
+  - development
+---
+```
+
+`slug` はFrontmatterで重複管理せず、Markdownのファイル名をそのまま使います。記事タイトルはレイアウトが `h1` として出力するため、Markdown本文には `#` 見出しを書かず、本文の見出しは `##` から始めます。
+
 ### 日本語タイポグラフィ
 
 日本語本文は `word-break: auto-phrase` を使い、未対応ブラウザ向けに `word-break: normal` を先に指定します。機械的な文節判定だけに依存せず、意図した改行候補がある箇所では `<wbr>` を明示的に使います。

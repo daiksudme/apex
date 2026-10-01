@@ -17,12 +17,12 @@ export const profile = {
   bio: 'よりよい明日をつくるために、技術と創造の力を探求しています。',
 } as const;
 
-// Until article pages exist, navigation points to real sections on the home page.
+// Section navigation remains anchored on the home page until dedicated index pages exist.
 export const navigation = [
   { label: 'Home', href: '/', icon: 'home' },
-  { label: 'Posts', href: '#posts', icon: 'posts' },
-  { label: 'Tags', href: '#tags', icon: 'tags' },
-  { label: 'About', href: '#about', icon: 'about' },
+  { label: 'Posts', href: '/#posts', icon: 'posts' },
+  { label: 'Tags', href: '/#tags', icon: 'tags' },
+  { label: 'About', href: '/#about', icon: 'about' },
   { label: 'GitHub', href: profile.githubUrl, icon: 'github' },
 ] as const;
 

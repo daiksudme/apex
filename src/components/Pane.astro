@@ -1,5 +1,5 @@
 ---
-type PaneElement = 'section' | 'aside' | 'footer';
+type PaneElement = 'section' | 'aside' | 'footer' | 'article';
 
 type PaneTitleElement = 'h2' | 'div';
 
@@ -13,6 +13,7 @@ type Props = HeadingProps & {
   class?: string;
   tabindex?: number;
   ariaLabel?: string;
+  ariaLabelledBy?: string;
 };
 
 const {
@@ -24,6 +25,7 @@ const {
   titleElement = 'h2',
   tabindex,
   ariaLabel,
+  ariaLabelledBy,
 } = Astro.props;
 
 const Tag = as;
@@ -33,7 +35,7 @@ const Title = titleElement;
 <Tag
   id={id}
   class:list={['pane', className]}
-  aria-labelledby={headingId}
+  aria-labelledby={ariaLabelledBy ?? headingId}
   aria-label={ariaLabel}
   tabindex={tabindex}
 >

@@ -9,6 +9,8 @@ interface Props { title?: string; description?: string }
 const { title, description = site.description } = Astro.props;
 const pageTitle = getPageTitle(title);
 const year = new Date().getFullYear();
+const pathname = Astro.url.pathname;
+const isCurrentNavigationItem = (href: string) => href === '/' && pathname === '/';
 ---
 
 <!doctype html>
@@ -38,7 +40,7 @@ const year = new Date().getFullYear();
     <Pane as="aside" class="sidebar-pane" ariaLabel="サイトメニュー">
       <nav class="sidebar-nav" aria-label="ページナビゲーション">
         {navigation.map((item) => (
-          <a href={item.href} lang="en" aria-current={item.href === Astro.url.pathname ? 'page' : undefined}>
+          <a href={item.href} lang="en" aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}>
             <Icon name={item.icon} /><span>{item.label}</span>
           </a>
         ))}
@@ -47,7 +49,7 @@ const year = new Date().getFullYear();
         <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Topics</p>
         <ul lang="en">
           {topics.map((topic) => (
-            <li><a href={`#topic-${topic.slug}`} data-tone={topic.tone}><span class="topic-dot" aria-hidden="true"></span>#{topic.slug}</a></li>
+            <li><a href={`/#topic-${topic.slug}`} data-tone={topic.tone}><span class="topic-dot" aria-hidden="true"></span>#{topic.slug}</a></li>
           ))}
         </ul>
       </nav>
