@@ -55,7 +55,7 @@ describe('post list', () => {
       props: { posts: [], headingLevel: 'h3' },
     });
 
-    expect(html).toContain('<h3 class="empty-state-title">まだ記事はありません。</h3>');
+    expect(html).toMatch(/<h3 class="empty-state-title"[^>]*>まだ記事はありません。<\/h3>/);
     expect(html).toContain('ls posts/');
     expect(html).not.toContain('class="post-list"');
   });
