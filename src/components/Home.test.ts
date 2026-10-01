@@ -24,6 +24,7 @@ describe('home', () => {
 
   it('renders the welcome, profile, posts, tags and repository panes', () => {
     expect(text).toContain('つくる。試す。書き残す。');
+    expect(html).toContain('つくる。<wbr>試す。<wbr>書き残す。');
     expect(text).toContain('Build. Learn. Write. Repeat.');
     for (const heading of ['Welcome', 'Profile', 'Latest Posts', 'Tags', 'Recent Commits']) {
       expect(text).toContain(heading);
