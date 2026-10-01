@@ -22,7 +22,7 @@
   color: var(--text);
   background: var(--bg);
   line-height: 1.65;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
 }
 
 * { box-sizing: border-box; }
@@ -150,8 +150,8 @@ main { grid-area: main; min-width: 0; }
 .prompt { white-space: nowrap; color: var(--muted); }
 .prompt-user { color: var(--green); font-weight: 600; }
 .prompt-host, .command { color: var(--blue); }
-h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weight: 750; letter-spacing: 0.02em; line-height: 1.5; margin-block: 1.6rem 1.25rem; word-break: keep-all; overflow-wrap: normal; }
-.welcome-description { font-family: var(--sans); font-size: 1.05rem; line-height: 1.95; max-width: 39rem; text-wrap: pretty; }
+h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weight: 750; letter-spacing: 0.02em; line-height: 1.5; margin-block: 1.6rem 1.25rem; }
+.welcome-description { inline-size: 100%; max-inline-size: none; font-family: var(--sans); font-size: 1.05rem; line-height: 1.95; }
 .tagline { color: var(--muted); font-size: 1rem; margin-top: 1.2rem; }
 .welcome-links { align-self: end; padding-top: 1.4rem; }
 .welcome-links nav { display: grid; grid-auto-flow: column; grid-auto-columns: max-content; justify-content: start; column-gap: 1.1rem; margin-block: 0.15rem; }
@@ -173,6 +173,26 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 .profile-details a { text-decoration: underline; }
 .profile-bio { border-top: 1px solid var(--border); padding-top: 1rem; margin-top: 1.25rem; font-family: var(--sans); font-size: 0.9rem; line-height: 1.8; }
 .profile-note { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.75rem; color: var(--green); margin-top: 1rem; font-size: 0.8rem; }
+
+h1,
+.pane-title,
+.profile-top h3,
+.empty-state h3 {
+  font-feature-settings: "palt";
+  text-wrap: balance;
+}
+
+h1,
+.welcome-description,
+.profile-bio,
+.empty-state h3,
+.empty-state > p:last-child,
+.tags-note,
+.repository-description,
+.text-link {
+  word-break: normal;
+  word-break: auto-phrase;
+}
 
 .pane-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.85rem; }
 .pane-title { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 0.65rem; font-size: 1.08rem; line-height: 1.4; }
