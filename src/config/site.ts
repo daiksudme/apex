@@ -26,8 +26,8 @@ export const navigation = [
   { label: 'GitHub', href: profile.githubUrl, icon: 'github' },
 ] as const;
 
-// Topics describe interests, not published article categories or counts.
-export const topics = [
+// Tags shown in the site navigation and home page.
+export const tags = [
   { slug: 'astro', tone: 'blue' },
   { slug: 'cloudflare', tone: 'purple' },
   { slug: 'github', tone: 'green' },

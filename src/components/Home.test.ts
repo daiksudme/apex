@@ -74,6 +74,16 @@ describe('home', () => {
     expect(html.indexOf('<h1')).toBeLessThan(html.indexOf('<h2'));
   });
 
+  it('uses tag terminology consistently', () => {
+    expect(html).toContain('class="sidebar-tags"');
+    expect(html).toContain('aria-label="タグ"');
+    expect(html).toContain('id="tag-astro"');
+    expect(html).toContain('class="tag-dot"');
+    expect(text).not.toContain('Topics');
+    expect(html).not.toContain('sidebar-topics');
+    expect(html).not.toContain('topic-');
+  });
+
   it('uses the shared pane header for every main content pane', () => {
     expect(html.match(/class="pane-heading"/g)).toHaveLength(5);
     for (const id of ['welcome-heading', 'profile-heading', 'posts-heading', 'tags-heading', 'commits-heading']) {

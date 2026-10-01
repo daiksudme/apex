@@ -39,7 +39,7 @@ ul { list-style: none; padding: 0; }
 
 .cursor { display: inline-block; width: 0.65em; height: 1.1em; background: var(--blue); vertical-align: text-bottom; }
 .eyebrow { color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.7rem; font-weight: 400; }
-.topic-dot { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--tone, var(--green)); }
+.tag-dot { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--tone, var(--green)); }
 
 .command-line {
   display: grid;
