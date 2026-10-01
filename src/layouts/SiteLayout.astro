@@ -3,7 +3,7 @@ import Icon from '../components/Icon.astro';
 import Pane from '../components/Pane.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
 import { getPageTitle } from '../lib/page-title';
-import { navigation, profile, site, topics } from '../config/site';
+import { navigation, profile, site, tags } from '../config/site';
 import '../styles/global.css';
 interface Props { title?: string; description?: string }
 const { title, description = site.description } = Astro.props;
@@ -59,11 +59,11 @@ const isActiveNavigationItem = (href: string) =>
           </a>
         ))}
       </nav>
-      <nav class="sidebar-topics" aria-label="トピック">
-        <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Topics</p>
+      <nav class="sidebar-tags" aria-label="タグ">
+        <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Tags</p>
         <ul lang="en">
-          {topics.map((topic) => (
-            <li><a href={`/#topic-${topic.slug}`} data-tone={topic.tone}><span class="topic-dot" aria-hidden="true"></span>#{topic.slug}</a></li>
+          {tags.map((tag) => (
+            <li><a href={`/#tag-${tag.slug}`} data-tone={tag.tone}><span class="tag-dot" aria-hidden="true"></span>#{tag.slug}</a></li>
           ))}
         </ul>
       </nav>
@@ -328,7 +328,7 @@ const isActiveNavigationItem = (href: string) =>
     }
   }
 
-  .sidebar-topics {
+  .sidebar-tags {
     padding-top: 1.75rem;
     border-top: 1px solid var(--border);
 
