@@ -18,7 +18,7 @@ const dateTime = (date: Date) => date.toISOString().slice(0, 10);
   <div class="empty-state post-list-empty">
     <span class="empty-icon"><Icon name="terminal" size={32} /></span>
     <p class="empty-command" lang="en"><span class="chevron" aria-hidden="true">›</span> ls posts/</p>
-    <h2>まだ記事はありません。</h2>
+    <h2 class="empty-state-title">まだ記事はありません。</h2>
     <p>つくったもの、学んだこと、考えたこと。<br />ここから少しずつ書き残していきます。</p>
   </div>
 ) : (
