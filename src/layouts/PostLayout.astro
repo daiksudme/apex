@@ -1,0 +1,68 @@
+---
+import Pane from '../components/Pane.astro';
+import TerminalPrompt from '../components/TerminalPrompt.astro';
+import SiteLayout from './SiteLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  slug: string;
+  publishedAt: Date;
+  updatedAt?: Date;
+  tags?: string[];
+}
+
+const {
+  title,
+  description,
+  slug,
+  publishedAt,
+  updatedAt,
+  tags = [],
+} = Astro.props;
+
+const dateFormatter = new Intl.DateTimeFormat('ja-JP', {
+  dateStyle: 'long',
+  timeZone: 'Asia/Tokyo',
+});
+const dateTime = (date: Date) => date.toISOString().slice(0, 10);
+const sourcePath = `posts/${slug}.md`;
+const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
+---
+
+<SiteLayout title={title} description={description}>
+  <div class="post-page">
+    <Pane as="article" class="post-pane" title="Post" headingId="post-pane-heading">
+      <header class="post-header">
+        <p class="command-line post-command" lang="en">
+          <TerminalPrompt />
+          <span class="command">cat {sourcePath}</span>
+        </p>
+        <h1>{title}</h1>
+        <p class="post-description">{description}</p>
+        <div class="post-meta">
+          <p>
+            <span class="post-meta-label" lang="en">Published</span>
+            <time datetime={dateTime(publishedAt)}>{dateFormatter.format(publishedAt)}</time>
+          </p>
+          {hasUpdatedAt && updatedAt && (
+            <p>
+              <span class="post-meta-label" lang="en">Updated</span>
+              <time datetime={dateTime(updatedAt)}>{dateFormatter.format(updatedAt)}</time>
+            </p>
+          )}
+        </div>
+        {tags.length > 0 && (
+          <ul class="post-tags" aria-label="タグ" lang="en">
+            {tags.map((tag) => (
+              <li><span class="post-tag">#{tag}</span></li>
+            ))}
+          </ul>
+        )}
+      </header>
+      <div class="post-content">
+        <slot />
+      </div>
+    </Pane>
+  </div>
+</SiteLayout>
