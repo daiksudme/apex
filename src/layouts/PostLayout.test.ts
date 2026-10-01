@@ -47,6 +47,7 @@ describe('post layout', () => {
     });
 
     expect(html).toContain('href="/posts"');
-    expect(html).not.toMatch(/<a href="\/posts"[^>]*aria-current="page"/);
+    expect(html).toMatch(/<a\b[^>]*href="\/posts"[^>]*class="is-active"/);
+    expect(html).not.toMatch(/<a\b[^>]*href="\/posts"[^>]*aria-current="page"/);
   });
 });
