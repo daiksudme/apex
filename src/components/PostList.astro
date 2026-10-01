@@ -1,0 +1,53 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import Icon from './Icon.astro';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+}
+
+const { posts } = Astro.props;
+const dateFormatter = new Intl.DateTimeFormat('ja-JP', {
+  dateStyle: 'long',
+  timeZone: 'Asia/Tokyo',
+});
+const dateTime = (date: Date) => date.toISOString().slice(0, 10);
+---
+
+{posts.length === 0 ? (
+  <div class="empty-state post-list-empty">
+    <span class="empty-icon"><Icon name="terminal" size={32} /></span>
+    <p class="empty-command" lang="en"><span class="chevron" aria-hidden="true">›</span> ls posts/</p>
+    <h2>まだ記事はありません。</h2>
+    <p>つくったもの、学んだこと、考えたこと。<br />ここから少しずつ書き残していきます。</p>
+  </div>
+) : (
+  <ul class="post-list">
+    {posts.map((post) => {
+      const titleId = `post-${post.id}-title`;
+      return (
+        <li class="post-list-item">
+          <article class="post-summary" aria-labelledby={titleId}>
+            <time class="post-summary-date" datetime={dateTime(post.data.publishedAt)}>
+              {dateFormatter.format(post.data.publishedAt)}
+            </time>
+            <h2 id={titleId} class="post-summary-title">
+              <a href={`/posts/${post.id}`}>
+                <span>{post.data.title}</span>
+                <Icon name="arrow" size={18} />
+              </a>
+            </h2>
+            <p class="post-summary-description">{post.data.description}</p>
+            {post.data.tags.length > 0 && (
+              <ul class="post-tags post-summary-tags" aria-label="タグ" lang="en">
+                {post.data.tags.map((tag) => (
+                  <li><span class="post-tag">#{tag}</span></li>
+                ))}
+              </ul>
+            )}
+          </article>
+        </li>
+      );
+    })}
+  </ul>
+)}
