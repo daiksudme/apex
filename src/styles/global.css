@@ -155,7 +155,9 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
 .tagline { color: var(--muted); font-size: 1rem; margin-top: 1.2rem; }
 .welcome-links { align-self: end; padding-top: 1.4rem; }
 .welcome-links nav {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1ch;
   margin-block: 0.15rem;
   line-height: 1;
 }
@@ -164,12 +166,10 @@ h1 { font-family: var(--sans); font-size: clamp(2rem, 3.05vw, 3.2rem); font-weig
   grid-auto-flow: column;
   align-items: center;
   min-height: 44px;
-  margin-inline-end: 1ch;
   gap: 0.25rem;
   font-size: 0.95rem;
   white-space: nowrap;
 }
-.welcome-links a:last-child { margin-inline-end: 0; }
 .idle-prompt { margin-top: 0.25rem; }
 .welcome-pane > .pane-heading + .command-line,
 .profile-pane > .pane-heading + .profile-top { margin-top: 1rem; }
