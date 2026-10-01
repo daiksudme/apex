@@ -61,7 +61,6 @@ a:focus-visible, [tabindex='-1']:focus-visible {
 ::selection { background: var(--selection); color: var(--cyan); }
 h1, h2, h3, p, ul, dl, dd { margin: 0; }
 ul { list-style: none; padding: 0; }
-.icon { display: inline-block; vertical-align: middle; }
 [id] { scroll-margin-block: 1.5rem; }
 
 .skip-link {
