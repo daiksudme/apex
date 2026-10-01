@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
+import { formatDate, formatIsoDate } from '../lib/date';
 import Icon from './Icon.astro';
 
 interface Props {
@@ -9,11 +10,6 @@ interface Props {
 
 const { posts, headingLevel = 'h2' } = Astro.props;
 const Heading = headingLevel;
-const dateFormatter = new Intl.DateTimeFormat('ja-JP', {
-  dateStyle: 'long',
-  timeZone: 'Asia/Tokyo',
-});
-const dateTime = (date: Date) => date.toISOString().slice(0, 10);
 ---
 
 {posts.length === 0 ? (
@@ -30,8 +26,8 @@ const dateTime = (date: Date) => date.toISOString().slice(0, 10);
       return (
         <li class="post-list-item">
           <article class="post-summary" aria-labelledby={titleId}>
-            <time class="post-summary-date" datetime={dateTime(post.data.publishedAt)}>
-              {dateFormatter.format(post.data.publishedAt)}
+            <time class="post-summary-date" datetime={formatIsoDate(post.data.publishedAt)}>
+              {formatDate(post.data.publishedAt)}
             </time>
             <Heading id={titleId} class="post-summary-title">
               <a href={`/posts/${post.id}`}>

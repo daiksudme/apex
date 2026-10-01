@@ -1,6 +1,7 @@
 ---
 import Pane from '../components/Pane.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
+import { formatDate, formatIsoDate } from '../lib/date';
 import SiteLayout from './SiteLayout.astro';
 
 interface Props {
@@ -21,11 +22,6 @@ const {
   tags = [],
 } = Astro.props;
 
-const dateFormatter = new Intl.DateTimeFormat('ja-JP', {
-  dateStyle: 'long',
-  timeZone: 'Asia/Tokyo',
-});
-const dateTime = (date: Date) => date.toISOString().slice(0, 10);
 const sourcePath = `posts/${slug}.md`;
 const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
 ---
@@ -43,12 +39,12 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
         <div class="post-meta">
           <p>
             <span class="post-meta-label" lang="en">Published</span>
-            <time datetime={dateTime(publishedAt)}>{dateFormatter.format(publishedAt)}</time>
+            <time datetime={formatIsoDate(publishedAt)}>{formatDate(publishedAt)}</time>
           </p>
           {hasUpdatedAt && updatedAt && (
             <p>
               <span class="post-meta-label" lang="en">Updated</span>
-              <time datetime={dateTime(updatedAt)}>{dateFormatter.format(updatedAt)}</time>
+              <time datetime={formatIsoDate(updatedAt)}>{formatDate(updatedAt)}</time>
             </p>
           )}
         </div>
