@@ -49,7 +49,7 @@ describe('post layout', () => {
       },
     });
 
-    expect(html).toContain('<a href="https://example.com/article" rel="ugc noopener noreferrer" target="_blank">External</a>');
+    expect(html).toContain('<a href="https://example.com/article" rel="ugc noopener" target="_blank">External</a>');
     expect(html).toContain('<a href="/posts/internal">Internal</a>');
   });
 
