@@ -309,7 +309,7 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
     }
 
     @media (max-width: 640px) {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.1rem;
 
       a {
@@ -449,7 +449,14 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
     }
 
     @media (max-width: 640px) {
+      grid-auto-flow: row;
       justify-self: start;
+      gap: 0.4rem;
+
+      p {
+        border-left: 0;
+        padding-left: 0;
+      }
     }
   }
 </style>
