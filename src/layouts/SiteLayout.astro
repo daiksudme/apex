@@ -1,4 +1,5 @@
 ---
+import BrandLogo from '../components/BrandLogo.astro';
 import Icon from '../components/Icon.astro';
 import Pane from '../components/Pane.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
@@ -16,6 +17,12 @@ const isActiveNavigationItem = (href: string) =>
     ? pathname === '/posts' || pathname.startsWith('/posts/')
     : isCurrentNavigationItem(href);
 const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
+const socialBrands = {
+  GitHub: 'github',
+  X: 'x',
+  Zenn: 'zenn',
+} as const;
+const getSocialBrand = (label: string) => socialBrands[label as keyof typeof socialBrands];
 ---
 
 <!doctype html>
@@ -51,18 +58,21 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
 
     <Pane as="aside" class="sidebar-pane" ariaLabel="サイトメニュー">
       <nav class="sidebar-nav" aria-label="ページナビゲーション">
-        {navigation.map((item) => (
-          <a
-            href={item.href}
-            lang="en"
-            class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
-            aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
-            target={isExternalHref(item.href) ? '_blank' : undefined}
-            rel={isExternalHref(item.href) ? 'noopener' : undefined}
-          >
-            <Icon name={item.icon} /><span>{item.label}</span>
-          </a>
-        ))}
+        {navigation.map((item) => {
+          const socialBrand = getSocialBrand(item.label);
+          return (
+            <a
+              href={item.href}
+              lang="en"
+              class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
+              aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
+              target={isExternalHref(item.href) ? '_blank' : undefined}
+              rel={isExternalHref(item.href) ? 'noopener' : undefined}
+            >
+              {socialBrand ? <BrandLogo name={socialBrand} /> : <Icon name={item.icon} />}<span>{item.label}</span>
+            </a>
+          );
+        })}
       </nav>
       <nav class="sidebar-tags" aria-label="タグ">
         <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Tags</p>
@@ -83,9 +93,9 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
       <div class="footer-meta">
         <div class="footer-links" lang="en">
-          <a href={profile.githubUrl} target="_blank" rel="noopener" aria-label="daiksud on GitHub"><Icon name="github" size={20} /><span>GitHub</span></a>
-          <a href={profile.xUrl} target="_blank" rel="noopener" aria-label="daiksud on X"><Icon name="x" size={20} /><span>X</span></a>
-          <a href={profile.zennUrl} target="_blank" rel="noopener" aria-label="daiksud on Zenn"><Icon name="link" size={20} /><span>Zenn</span></a>
+          <a href={profile.githubUrl} target="_blank" rel="noopener" aria-label="daiksud on GitHub"><BrandLogo name="github" size={20} /><span>GitHub</span></a>
+          <a href={profile.xUrl} target="_blank" rel="noopener" aria-label="daiksud on X"><BrandLogo name="x" size={20} /><span>X</span></a>
+          <a href={profile.zennUrl} target="_blank" rel="noopener" aria-label="daiksud on Zenn"><BrandLogo name="zenn" size={20} /><span>Zenn</span></a>
         </div>
         <p>&copy; {year} {site.name}</p>
       </div>
@@ -314,7 +324,8 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
         }
       }
 
-      & :global(.icon) {
+      & :global(.icon),
+      & :global(.brand-logo) {
         width: 14px;
         height: 14px;
       }
@@ -327,7 +338,8 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
         padding-inline: 0.1rem;
       }
 
-      & :global(.icon) {
+      & :global(.icon),
+      & :global(.brand-logo) {
         display: none;
       }
     }

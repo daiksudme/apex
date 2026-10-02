@@ -131,11 +131,11 @@ describe('home', () => {
     expect(html).toMatch(/<p\b(?=[^>]*class="eyebrow")(?=[^>]*lang="en")[^>]*>Profile<\/p>/);
   });
 
-  it('uses brand logos for GitHub, X and Zenn', () => {
+  it('uses the shared original logos for GitHub, X and Zenn everywhere', () => {
     for (const brand of ['github', 'x', 'zenn']) {
-      expect(html).toContain(`data-brand="${brand}"`);
+      expect(html.match(new RegExp(`data-brand="${brand}"`, 'g'))).toHaveLength(3);
     }
-    expect(html.match(/class="brand-logo /g)).toHaveLength(3);
+    expect(html.match(/data-logo-style="original"/g)).toHaveLength(9);
   });
 
   it('uses the actual GitHub avatar with alternative text and dimensions', () => {
