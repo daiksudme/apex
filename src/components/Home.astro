@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { navigation, profile, site, tags } from '../config/site';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { sortPostsByPublishedAt } from '../lib/posts';
+import BrandLogo from './BrandLogo.astro';
 import Icon from './Icon.astro';
 import Pane from './Pane.astro';
 import PostList from './PostList.astro';
@@ -51,9 +52,9 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       </div>
       <dl class="profile-details" lang="en">
         <div><dt><Icon name="location" /><span>Location</span></dt><dd>{profile.location}</dd></div>
-        <div><dt><Icon name="github" /><span>GitHub</span></dt><dd><a href={profile.githubUrl} target="_blank" rel="noopener">{profile.githubLabel}</a></dd></div>
-        <div><dt><Icon name="x" /><span>X</span></dt><dd><a href={profile.xUrl} target="_blank" rel="noopener">{profile.xLabel}</a></dd></div>
-        <div><dt><Icon name="link" /><span>Zenn</span></dt><dd><a href={profile.zennUrl} target="_blank" rel="noopener">{profile.zennLabel}</a></dd></div>
+        <div><dt><BrandLogo name="github" /><span>GitHub</span></dt><dd><a href={profile.githubUrl} target="_blank" rel="noopener">{profile.githubLabel}</a></dd></div>
+        <div><dt><BrandLogo name="x" /><span>X</span></dt><dd><a href={profile.xUrl} target="_blank" rel="noopener">{profile.xLabel}</a></dd></div>
+        <div><dt><BrandLogo name="zenn" /><span>Zenn</span></dt><dd><a href={profile.zennUrl} target="_blank" rel="noopener">{profile.zennLabel}</a></dd></div>
         <div><dt><Icon name="link" /><span>Website</span></dt><dd><a href="/">{site.name}</a></dd></div>
       </dl>
       <p class="profile-bio">{profile.bio}</p>
@@ -282,7 +283,8 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       gap: 0.65rem;
       color: var(--muted);
 
-      :global(.icon) {
+      :global(.icon),
+      :global(.brand-logo) {
         width: 18px;
         height: 18px;
       }
