@@ -166,9 +166,15 @@ importers:
 
   .:
     dependencies:
+      '@astrojs/markdown-satteri':
+        specifier: 0.4.1
+        version: 0.4.1
       astro:
         specifier: 7.3.3
         version: 7.3.3(@emnapi/core@1.11.3)(@emnapi/runtime@1.11.3)(yaml@2.9.1)
+      satteri:
+        specifier: 0.10.5
+        version: 0.10.5
     devDependencies:
       '@astrojs/check':
         specifier: 0.9.10
