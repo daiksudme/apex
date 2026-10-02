@@ -97,6 +97,11 @@ const Heading = headingLevel;
       line-height: 1.85;
       word-break: normal;
       word-break: auto-phrase;
+
+      @media (min-width: 641px) {
+        max-inline-size: none;
+        white-space: nowrap;
+      }
     }
   }
 
