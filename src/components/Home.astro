@@ -16,7 +16,7 @@ interface Props {
 const { posts } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
 const latestPosts = sortedPosts.slice(0, 3);
-const configuredTagTones = new Map(configuredTags.map((tag) => [tag.slug, tag.tone]));
+const configuredTagTones = new Map<string, string>(configuredTags.map((tag) => [tag.slug, tag.tone]));
 const homeTags = [...new Set(sortedPosts.flatMap((post) => post.data.tags))].map((slug) => ({
   slug,
   tone: configuredTagTones.get(slug) ?? 'muted',
