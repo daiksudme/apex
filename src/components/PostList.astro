@@ -90,18 +90,13 @@ const Heading = headingLevel;
     }
 
     .post-summary-description {
-      max-inline-size: 70ch;
       color: var(--muted);
       font-family: var(--sans);
       font-size: 0.9rem;
       line-height: 1.85;
+      white-space: nowrap;
       word-break: normal;
       word-break: auto-phrase;
-
-      @media (min-width: 641px) {
-        max-inline-size: none;
-        white-space: nowrap;
-      }
     }
   }
 
