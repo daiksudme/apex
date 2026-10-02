@@ -140,7 +140,6 @@ jobs:
           blocking_review_ids="$(
             gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
               --jq ".[] |
-                select(.commit_id == \"$REVIEWED_HEAD\") |
                 select(
                   .user.login == \"chatgpt-codex-connector[bot]\"
                   or (
@@ -152,7 +151,7 @@ jobs:
           )"
 
           if [[ -n "$blocking_review_ids" ]]; then
-            echo "Earlier bot review findings exist on the reviewed HEAD."
+            echo "Earlier bot review findings exist in the pull request history."
             exit 0
           fi
 
