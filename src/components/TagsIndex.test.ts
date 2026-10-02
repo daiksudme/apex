@@ -73,13 +73,13 @@ describe('tags index', () => {
     expect(html.match(/<h1\b/g)).toHaveLength(1);
   });
 
-  it('shows configured tags and appends tags found only in content', () => {
-    expect(html).toContain('10 tags');
+  it('shows only tags used by posts and keeps content-only tags', () => {
+    expect(html).toContain('3 tags');
     expect(html).toContain('id="tag-astro"');
-    expect(html).toContain('id="tag-terminal"');
-    expect(html).toContain('id="tag-others"');
+    expect(html).toContain('id="tag-cloudflare"');
     expect(html).toContain('id="tag-testing"');
-    expect(html.indexOf('id="tag-others"')).toBeLessThan(html.indexOf('id="tag-testing"'));
+    expect(html).not.toContain('id="tag-terminal"');
+    expect(html).not.toContain('id="tag-others"');
   });
 
   it('shows the latest three posts for each tag in descending publish-date order', () => {
@@ -98,13 +98,9 @@ describe('tags index', () => {
     expect(second).toBeLessThan(third);
   });
 
-  it('keeps empty configured tags visible', () => {
-    const terminalStart = html.indexOf('id="tag-terminal"');
-    const toolingStart = html.indexOf('id="tag-tooling"');
-    const terminalHtml = html.slice(terminalStart, toolingStart);
-
-    expect(terminalHtml).toContain('0 posts');
-    expect(terminalHtml).toContain('No posts yet.');
+  it('does not render empty tag groups', () => {
+    expect(html).not.toContain('0 posts');
+    expect(html).not.toContain('No posts yet.');
   });
 
   it('marks Tags as the current navigation destination', () => {
