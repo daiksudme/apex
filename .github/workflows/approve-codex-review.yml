@@ -5,6 +5,7 @@ on:
     types: [created]
 
 permissions:
+  contents: read
   issues: read
   pull-requests: write
 
@@ -67,7 +68,11 @@ jobs:
           repo="${GITHUB_REPOSITORY#*/}"
 
           thread_state="$(
-            gh api graphql               -f owner="$owner"               -f name="$repo"               -F number="$PR_NUMBER"               -f query='
+            gh api graphql \
+              -f owner="$owner" \
+              -f name="$repo" \
+              -F number="$PR_NUMBER" \
+              -f query='
                 query($owner: String!, $name: String!, $number: Int!) {
                   repository(owner: $owner, name: $name) {
                     pullRequest(number: $number) {
@@ -78,7 +83,8 @@ jobs:
                     }
                   }
                 }
-              '               --jq '
+              ' \
+              --jq '
                 .data.repository.pullRequest.reviewThreads
                 | if .pageInfo.hasNextPage then "incomplete"
                   elif any(.nodes[]; .isResolved == false) then "blocking"
@@ -94,7 +100,8 @@ jobs:
           fi
 
           blocking_review_ids="$(
-            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews"               --jq ".[] |
+            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
+              --jq ".[] |
                 select(.commit_id == \"$REVIEWED_HEAD\") |
                 select(
                   .user.login == \"chatgpt-codex-connector[bot]\"
@@ -125,7 +132,10 @@ jobs:
           # Codex adds 👍 after the clean-review comment, so allow a short propagation window.
           for attempt in 1 2 3 4 5 6; do
             reaction_ids="$(
-              gh api --paginate --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions"                 -f content='+1'                 -F per_page=100                 --jq ".[] | select(.user.login == \"chatgpt-codex-connector[bot]\" and .created_at >= \"$COMMENT_CREATED_AT\") | .id"
+              gh api --paginate --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions" \
+                -f content='+1' \
+                -F per_page=100 \
+                --jq ".[] | select(.user.login == \"chatgpt-codex-connector[bot]\" and .created_at >= \"$COMMENT_CREATED_AT\") | .id"
             )"
 
             reaction_id=""
@@ -159,4 +169,6 @@ jobs:
           fi
 
           # gh pr review cannot bind an approval to a commit, so use the reviews API here.
-          gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews"             -f event=APPROVE             -f commit_id="$REVIEWED_HEAD"
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
+            -f event=APPROVE \
+            -f commit_id="$REVIEWED_HEAD"
