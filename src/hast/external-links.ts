@@ -6,7 +6,7 @@ export const hastExternalLinks = defineHastPlugin({
     filter: ['a'],
     visit(node, ctx) {
       const href = node.properties.href;
-      if (typeof href !== 'string' || (!href.startsWith('https://') && !href.startsWith('http://'))) {
+      if (typeof href !== 'string' || !/^https?:\/\//i.test(href)) {
         return;
       }
 
