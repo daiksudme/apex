@@ -34,11 +34,11 @@ const latestPosts = sortPostsByPublishedAt(posts).slice(0, 3);
       <p class="command-line idle-prompt" aria-hidden="true"><TerminalPrompt /> <span class="cursor"></span></p>
     </Pane>
 
-    <Pane id="about" class="profile-pane" title="Profile" headingId="profile-heading" tabindex={-1}>
+    <Pane id="profile" class="profile-pane" title="Profile" headingId="profile-heading" tabindex={-1}>
       <div class="profile-top">
         <img class="avatar" src={profile.avatarUrl} alt="daiksudのGitHubアバター" width="160" height="160" decoding="async" referrerpolicy="no-referrer" />
         <div>
-          <p class="eyebrow" lang="en">About me</p>
+          <p class="eyebrow" lang="en">Profile</p>
           <h3>{profile.name}</h3>
           <p class="profile-role" lang="en">{profile.role}</p>
         </div>
