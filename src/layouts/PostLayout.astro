@@ -26,7 +26,7 @@ const {
 
 const sourcePath = `posts/${slug}.md`;
 const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
-const renderedContent = externalizeHtmlLinks(await Astro.slots.render('default'));
+const renderedContent = externalizeHtmlLinks((await Astro.slots.render('default')) ?? '');
 ---
 
 <SiteLayout title={title} description={description}>
