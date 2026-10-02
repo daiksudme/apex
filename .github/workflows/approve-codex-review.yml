@@ -58,11 +58,10 @@ jobs:
         run: |
           for attempt in 1 2 3 4 5 6; do
             reaction_id="$(
-              gh api --paginate --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions" \
+              gh api --paginate --slurp --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions" \
                 -f content='+1' \
                 -F per_page=100 \
-                --jq ".[] | select(.user.login == \"chatgpt-codex-connector[bot]\" and .created_at >= \"$COMMENT_CREATED_AT\") | .id" |
-                head -n 1
+                --jq "[.[][] | select(.user.login == \"chatgpt-codex-connector[bot]\" and .created_at >= \"$COMMENT_CREATED_AT\")] | first | .id // empty"
             )"
 
             if [[ -n "$reaction_id" ]]; then
