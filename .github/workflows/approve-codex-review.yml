@@ -58,74 +58,9 @@ jobs:
           echo "matched=true" >> "$GITHUB_OUTPUT"
           echo "reviewed_head=$head_sha" >> "$GITHUB_OUTPUT"
 
-      - name: Check previous review findings
-        id: findings
-        if: steps.review.outputs.matched == 'true'
-        env:
-          REVIEWED_HEAD: ${{ steps.review.outputs.reviewed_head }}
-        run: |
-          owner="${GITHUB_REPOSITORY%%/*}"
-          repo="${GITHUB_REPOSITORY#*/}"
-
-          thread_state="$(
-            gh api graphql \
-              -f owner="$owner" \
-              -f name="$repo" \
-              -F number="$PR_NUMBER" \
-              -f query='
-                query($owner: String!, $name: String!, $number: Int!) {
-                  repository(owner: $owner, name: $name) {
-                    pullRequest(number: $number) {
-                      reviewThreads(first: 100) {
-                        nodes { isResolved }
-                        pageInfo { hasNextPage }
-                      }
-                    }
-                  }
-                }
-              ' \
-              --jq '
-                .data.repository.pullRequest.reviewThreads
-                | if .pageInfo.hasNextPage then "incomplete"
-                  elif any(.nodes[]; .isResolved == false) then "blocking"
-                  else "clear"
-                  end
-              '
-          )"
-
-          if [[ "$thread_state" != "clear" ]]; then
-            echo "Review threads are not clear: $thread_state."
-            echo "clear=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          blocking_review_ids="$(
-            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
-              --jq ".[] |
-                select(.commit_id == \"$REVIEWED_HEAD\") |
-                select(
-                  .user.login == \"chatgpt-codex-connector[bot]\"
-                  or (
-                    (.user.login | startswith(\"copilot-pull-request-reviewer\"))
-                    and (((.body // \"\") | test(\"unable to review\"; \"i\")) | not)
-                  )
-                ) |
-                .id"
-          )"
-
-          if [[ -n "$blocking_review_ids" ]]; then
-            echo "Earlier bot review findings exist on the reviewed HEAD."
-            echo "clear=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "clear=true" >> "$GITHUB_OUTPUT"
-
       - name: Check Codex approval reaction
         id: reaction
-        if: >-
-          steps.review.outputs.matched == 'true' &&
-          steps.findings.outputs.clear == 'true'
+        if: steps.review.outputs.matched == 'true'
         env:
           COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
         run: |
@@ -165,6 +100,59 @@ jobs:
 
           if [[ "$head_sha" != "$REVIEWED_HEAD" ]]; then
             echo "PR HEAD changed from $REVIEWED_HEAD to $head_sha after Codex review."
+            exit 0
+          fi
+
+          owner="${GITHUB_REPOSITORY%%/*}"
+          repo="${GITHUB_REPOSITORY#*/}"
+
+          thread_state="$(
+            gh api graphql \
+              -f owner="$owner" \
+              -f name="$repo" \
+              -F number="$PR_NUMBER" \
+              -f query='
+                query($owner: String!, $name: String!, $number: Int!) {
+                  repository(owner: $owner, name: $name) {
+                    pullRequest(number: $number) {
+                      reviewThreads(first: 100) {
+                        nodes { isResolved }
+                        pageInfo { hasNextPage }
+                      }
+                    }
+                  }
+                }
+              ' \
+              --jq '
+                .data.repository.pullRequest.reviewThreads
+                | if .pageInfo.hasNextPage then "incomplete"
+                  elif any(.nodes[]; .isResolved == false) then "blocking"
+                  else "clear"
+                  end
+              '
+          )"
+
+          if [[ "$thread_state" != "clear" ]]; then
+            echo "Review threads are not clear: $thread_state."
+            exit 0
+          fi
+
+          blocking_review_ids="$(
+            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
+              --jq ".[] |
+                select(.commit_id == \"$REVIEWED_HEAD\") |
+                select(
+                  .user.login == \"chatgpt-codex-connector[bot]\"
+                  or (
+                    (.user.login | startswith(\"copilot-pull-request-reviewer\"))
+                    and (((.body // \"\") | test(\"unable to review\"; \"i\")) | not)
+                  )
+                ) |
+                .id"
+          )"
+
+          if [[ -n "$blocking_review_ids" ]]; then
+            echo "Earlier bot review findings exist on the reviewed HEAD."
             exit 0
           fi
 
