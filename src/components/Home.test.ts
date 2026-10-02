@@ -177,12 +177,23 @@ describe('home', () => {
     expect(hrefs).toContain('/posts');
     expect(hrefs).toContain('/#tags');
     expect(hrefs).toContain('/#profile');
+    expect(hrefs).toContain('https://github.com/daiksud');
+    expect(hrefs).toContain('https://x.com/daiksud');
+    expect(hrefs).toContain('https://zenn.dev/daiksud');
     for (const href of hrefs.filter((value) => value.startsWith('/#'))) {
       expect(ids.has(href.slice(2)), `Missing target: ${href}`).toBe(true);
     }
     for (const href of ['/tags', '/profile', '/rss.xml']) {
       expect(hrefs).not.toContain(href);
     }
+
+    const externalLinks = [...html.matchAll(/<a\b[^>]*href="https?:\/\/[^"]+"[^>]*>/g)].map((match) => match[0]);
+    expect(externalLinks.length).toBeGreaterThan(0);
+    for (const link of externalLinks) {
+      expect(link).toContain('target="_blank"');
+      expect(link).toContain('rel="noopener noreferrer"');
+    }
+
     expect(html).not.toContain('<button');
   });
 });
