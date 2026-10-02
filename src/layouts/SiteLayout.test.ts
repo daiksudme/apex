@@ -18,7 +18,7 @@ describe('site layout navigation', () => {
     }
   });
 
-  it('opens social navigation and footer links in a new window', async () => {
+  it('opens social navigation and footer links in a new window with shared logos', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(SiteLayout, {
       request: new Request('https://example.test/'),
@@ -34,6 +34,11 @@ describe('site layout navigation', () => {
         expect(link).toContain('rel="noopener"');
       }
     }
+
+    for (const brand of ['github', 'x', 'zenn']) {
+      expect(html.match(new RegExp(`data-brand="${brand}"`, 'g'))).toHaveLength(2);
+    }
+    expect(html.match(/data-logo-style="original"/g)).toHaveLength(6);
   });
 
   it('keeps the posts section active on article pages without claiming the index is current', async () => {
