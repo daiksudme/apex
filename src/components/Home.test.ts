@@ -85,7 +85,9 @@ describe('home', () => {
   });
 
   it('shows only tags used by posts in the home tags pane', () => {
-    const tagsPane = html.match(/<section\\b[^>]*class="pane tags-pane"[^>]*>.*?<\\/section>/s)?.[0] ?? '';
+    const tagsPaneStart = html.indexOf('class="pane tags-pane"');
+    const tagsPaneEnd = html.indexOf('</section>', tagsPaneStart);
+    const tagsPane = html.slice(tagsPaneStart, tagsPaneEnd);
 
     expect(tagsPane).toContain('4 tags');
     for (const tag of ['latest', 'second', 'third', 'oldest']) {
@@ -96,7 +98,6 @@ describe('home', () => {
     expect(tagsPane).not.toContain('#essay');
     expect(tagsPane).toContain('記事で使っているタグ。');
   });
-
 
   it('uses the shared pane header for every main content pane', () => {
     expect(html.match(/class="pane-heading"/g)).toHaveLength(5);
