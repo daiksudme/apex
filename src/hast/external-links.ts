@@ -13,12 +13,10 @@ export const hastExternalLinks = defineHastPlugin({
       node.properties.target = '_blank';
 
       const rel = node.properties.rel;
-      const tokens = new Set(
+      const tokens = new Set<string>(
         Array.isArray(rel)
-          ? rel.map(String)
-          : typeof rel === 'string'
-            ? rel.split(/\s+/).filter(Boolean)
-            : [],
+          ? rel.filter((token): token is string => typeof token === 'string')
+          : [],
       );
       tokens.add('noopener');
       node.properties.rel = [...tokens];
