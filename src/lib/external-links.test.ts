@@ -6,7 +6,7 @@ describe('externalizeHtmlLinks', () => {
     const html = '<p><a href="https://example.com/article" rel="ugc">Example</a></p>';
 
     expect(externalizeHtmlLinks(html)).toContain(
-      '<a href="https://example.com/article" rel="ugc noopener noreferrer" target="_blank">',
+      '<a href="https://example.com/article" rel="ugc noopener" target="_blank">',
     );
   });
 
