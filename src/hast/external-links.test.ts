@@ -1,16 +1,20 @@
-import { experimental_AstroContainer as AstroContainer } from 'astro/container';
-import { getCollection, render } from 'astro:content';
+import { markdownToHtml } from 'satteri';
 import { describe, expect, it } from 'vitest';
+import { hastExternalLinks } from './external-links';
 
 describe('Markdown external links', () => {
-  it('renders article external links in a new window with noopener', async () => {
-    const posts = await getCollection('posts');
-    const post = posts.find((entry) => entry.id === 'hello-daiksud');
-    expect(post).toBeDefined();
-
-    const { Content } = await render(post!);
-    const container = await AstroContainer.create();
-    const html = await container.renderToString(Content);
+  it('renders external links in a new window with noopener', () => {
+    const { html } = markdownToHtml(
+      [
+        '[GitHub](https://github.com/daiksud)',
+        '[Zenn](https://zenn.dev/daiksud)',
+        '[X](https://x.com/daiksud)',
+        '[Internal](/posts/example)',
+      ].join('\n\n'),
+      {
+        hastPlugins: [hastExternalLinks],
+      },
+    );
 
     for (const href of [
       'https://github.com/daiksud',
@@ -25,5 +29,12 @@ describe('Markdown external links', () => {
       expect(anchor).toContain('rel="noopener"');
       expect(anchor).not.toContain('noreferrer');
     }
+
+    const internal = [...html.matchAll(/<a\b[^>]*>/g)]
+      .map((match) => match[0])
+      .find((tag) => tag.includes('href="/posts/example"'));
+    expect(internal).toBeDefined();
+    expect(internal).not.toContain('target="_blank"');
+    expect(internal).not.toContain('rel="noopener"');
   });
 });
