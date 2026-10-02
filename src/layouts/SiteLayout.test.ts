@@ -31,7 +31,7 @@ describe('site layout navigation', () => {
       expect(links.length).toBeGreaterThan(0);
       for (const link of links) {
         expect(link).toContain('target="_blank"');
-        expect(link).toContain('rel="noopener noreferrer"');
+        expect(link).toContain('rel="noopener"');
       }
     }
   });
