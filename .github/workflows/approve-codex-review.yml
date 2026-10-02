@@ -89,6 +89,7 @@ jobs:
             exit 0
           fi
 
+          # gh pr review cannot bind an approval to a commit, so use the reviews API here.
           gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
             -f event=APPROVE \
             -f commit_id="$REVIEWED_HEAD"
