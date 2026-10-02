@@ -1,18 +1,49 @@
 import { describe, expect, it } from 'vitest';
-import { externalizeHtmlLinks } from './external-links';
+import { externalizeDocumentLinks } from './external-links';
 
-describe('externalizeHtmlLinks', () => {
+describe('externalizeDocumentLinks', () => {
   it('opens external HTTP links in a new window and preserves existing rel tokens', () => {
-    const html = '<p><a href="https://example.com/article" rel="ugc">Example</a></p>';
+    const external = {
+      href: 'https://example.com/article',
+      target: '',
+      rel: 'ugc',
+    };
+    const internal = {
+      href: 'https://example.test/posts/example',
+      target: '',
+      rel: '',
+    };
+    const mail = {
+      href: 'mailto:hello@example.com',
+      target: '',
+      rel: '',
+    };
+    let selector = '';
 
-    expect(externalizeHtmlLinks(html)).toContain(
-      '<a href="https://example.com/article" rel="ugc noopener" target="_blank">',
-    );
-  });
+    const root = {
+      querySelectorAll(query: string) {
+        selector = query;
+        return [external, internal, mail] as unknown as NodeListOf<HTMLAnchorElement>;
+      },
+    } as Pick<ParentNode, 'querySelectorAll'>;
 
-  it('leaves internal and non-HTTP links unchanged', () => {
-    const html = '<a href="/posts/example">Internal</a><a href="mailto:hello@example.com">Mail</a>';
+    externalizeDocumentLinks(root, 'https://example.test');
 
-    expect(externalizeHtmlLinks(html)).toBe(html);
+    expect(selector).toBe('a[href]');
+    expect(external).toEqual({
+      href: 'https://example.com/article',
+      target: '_blank',
+      rel: 'ugc noopener',
+    });
+    expect(internal).toEqual({
+      href: 'https://example.test/posts/example',
+      target: '',
+      rel: '',
+    });
+    expect(mail).toEqual({
+      href: 'mailto:hello@example.com',
+      target: '',
+      rel: '',
+    });
   });
 });
