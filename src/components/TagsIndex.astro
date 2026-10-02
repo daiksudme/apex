@@ -15,12 +15,13 @@ const { posts } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
 const configuredTagSlugs = new Set<string>(configuredTags.map((tag) => tag.slug));
 const contentTagSlugs = [...new Set(sortedPosts.flatMap((post) => post.data.tags))];
+const contentTagSlugSet = new Set(contentTagSlugs);
 const extraTagSlugs = contentTagSlugs
   .filter((slug) => !configuredTagSlugs.has(slug))
   .sort((a, b) => a.localeCompare(b));
 
 const tagDefinitions = [
-  ...configuredTags,
+  ...configuredTags.filter((tag) => contentTagSlugSet.has(tag.slug)),
   ...extraTagSlugs.map((slug) => ({ slug, tone: 'muted' as const })),
 ];
 
