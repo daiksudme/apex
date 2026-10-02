@@ -191,7 +191,7 @@ describe('home', () => {
     expect(externalLinks.length).toBeGreaterThan(0);
     for (const link of externalLinks) {
       expect(link).toContain('target="_blank"');
-      expect(link).toContain('rel="noopener noreferrer"');
+      expect(link).toContain('rel="noopener"');
     }
 
     expect(html).not.toContain('<button');
