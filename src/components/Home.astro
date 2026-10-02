@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { navigation, profile, site, tags } from '../config/site';
+import { navigation, profile, site, tags as configuredTags } from '../config/site';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { sortPostsByPublishedAt } from '../lib/posts';
 import BrandLogo from './BrandLogo.astro';
@@ -14,7 +14,13 @@ interface Props {
 }
 
 const { posts } = Astro.props;
-const latestPosts = sortPostsByPublishedAt(posts).slice(0, 3);
+const sortedPosts = sortPostsByPublishedAt(posts);
+const latestPosts = sortedPosts.slice(0, 3);
+const configuredTagTones = new Map<string, string>(configuredTags.map((tag) => [tag.slug, tag.tone]));
+const homeTags = [...new Set(sortedPosts.flatMap((post) => post.data.tags))].map((slug) => ({
+  slug,
+  tone: configuredTagTones.get(slug) ?? 'muted',
+}));
 const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
 ---
 
@@ -68,13 +74,13 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
     </Pane>
 
     <Pane id="tags" class="tags-pane" title="Tags" headingId="tags-heading" tabindex={-1}>
-      <span slot="meta" class="pane-label" lang="en">interests</span>
+      <span slot="meta" class="pane-label" lang="en">{homeTags.length} {homeTags.length === 1 ? 'tag' : 'tags'}</span>
       <ul class="tag-list" lang="en">
-        {tags.map((tag) => (
-          <li><a href="/tags" class="tag" data-tone={tag.tone}>#{tag.slug}</a></li>
+        {homeTags.map((tag) => (
+          <li><a href={`/tags#tag-${tag.slug}`} class="tag" data-tone={tag.tone}>#{tag.slug}</a></li>
         ))}
       </ul>
-      <p class="tags-note">これから書いていきたいテーマ。</p>
+      <p class="tags-note">記事で使っているタグ。</p>
     </Pane>
 
     <Pane class="commits-pane" title="Recent Commits" headingId="commits-heading">
