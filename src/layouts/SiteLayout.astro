@@ -83,24 +83,14 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
       <div class="footer-meta">
         <div class="footer-links" lang="en">
-          <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksudのGitHub"><Icon name="github" size={20} /><span>GitHub</span></a>
-          <a href={profile.xUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksudのX"><Icon name="x" size={20} /><span>X</span></a>
-          <a href={profile.zennUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksudのZenn"><Icon name="link" size={20} /><span>Zenn</span></a>
+          <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksud on GitHub"><Icon name="github" size={20} /><span>GitHub</span></a>
+          <a href={profile.xUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksud on X"><Icon name="x" size={20} /><span>X</span></a>
+          <a href={profile.zennUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksud on Zenn"><Icon name="link" size={20} /><span>Zenn</span></a>
         </div>
         <p>&copy; {year} {site.name}</p>
       </div>
     </Pane>
 
-    <script>
-      for (const link of document.querySelectorAll('a[href]')) {
-        if (!(link instanceof HTMLAnchorElement)) continue;
-        const url = new URL(link.href);
-        if ((url.protocol === 'http:' || url.protocol === 'https:') && url.origin !== window.location.origin) {
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-        }
-      }
-    </script>
   </body>
 </html>
 
@@ -240,11 +230,6 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
     }
 
     @media (max-width: 960px) {
-      gap: 0.75rem;
-      font-size: 0.8rem;
-    }
-
-    @media (max-width: 640px) {
       display: none;
     }
   }
