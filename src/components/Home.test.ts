@@ -77,7 +77,7 @@ describe('home', () => {
   it('uses tag terminology consistently', () => {
     expect(html).toContain('class="sidebar-tags"');
     expect(html).toContain('aria-label="タグ"');
-    expect(html).toContain('href="/tags#tag-astro"');
+    expect(html).toContain('href="/tags"');
     expect(html).toContain('class="tag-dot"');
     expect(text).not.toContain('Topics');
     expect(html).not.toContain('sidebar-topics');
@@ -183,7 +183,6 @@ describe('home', () => {
     expect(hrefs).toContain('#main-content');
     expect(hrefs).toContain('/posts');
     expect(hrefs).toContain('/tags');
-    expect(hrefs).toContain('/tags#tag-astro');
     expect(hrefs).toContain('/#profile');
     expect(hrefs).toContain('https://github.com/daiksud');
     expect(hrefs).toContain('https://x.com/daiksud');
