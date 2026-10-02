@@ -131,6 +131,13 @@ describe('home', () => {
     expect(html).toMatch(/<p\b(?=[^>]*class="eyebrow")(?=[^>]*lang="en")[^>]*>Profile<\/p>/);
   });
 
+  it('uses brand logos for GitHub, X and Zenn', () => {
+    for (const brand of ['github', 'x', 'zenn']) {
+      expect(html).toContain(`data-brand="${brand}"`);
+    }
+    expect(html.match(/class="brand-logo /g)).toHaveLength(3);
+  });
+
   it('uses the actual GitHub avatar with alternative text and dimensions', () => {
     const avatar = html.match(/<img\b[^>]*>/)?.[0] ?? '';
     expect(avatar).toContain('https://avatars.githubusercontent.com/u/155234749');
