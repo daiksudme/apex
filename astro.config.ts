@@ -1,0 +1,11 @@
+import { satteri } from '@astrojs/markdown-satteri';
+import { defineConfig } from 'astro/config';
+import { hastExternalLinks } from './src/hast/external-links';
+
+export default defineConfig({
+  markdown: {
+    processor: satteri({
+      hastPlugins: [hastExternalLinks],
+    }),
+  },
+});
