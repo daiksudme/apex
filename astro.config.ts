@@ -5,6 +5,7 @@ import { hastExternalLinks } from './src/hast/external-links';
 export default defineConfig({
   markdown: {
     processor: satteri({
+      features: { rawHtml: true },
       hastPlugins: [hastExternalLinks],
     }),
   },
