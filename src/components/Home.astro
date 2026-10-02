@@ -71,7 +71,7 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       <span slot="meta" class="pane-label" lang="en">interests</span>
       <ul class="tag-list" lang="en">
         {tags.map((tag) => (
-          <li><a href={`/tags#tag-${tag.slug}`} class="tag" data-tone={tag.tone}>#{tag.slug}</a></li>
+          <li><a href="/tags" class="tag" data-tone={tag.tone}>#{tag.slug}</a></li>
         ))}
       </ul>
       <p class="tags-note">これから書いていきたいテーマ。</p>
