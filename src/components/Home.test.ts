@@ -128,7 +128,7 @@ describe('home', () => {
     for (const className of ['tagline', 'profile-role', 'profile-note', 'pane-footnote', 'footer-command']) {
       expect(html).toMatch(new RegExp(`<p\\b(?=[^>]*class="${className}")(?=[^>]*lang="en")[^>]*>`));
     }
-    expect(html).toMatch(/<p\b(?=[^>]*class="eyebrow")(?=[^>]*lang="en")[^>]*>About me<\/p>/);
+    expect(html).toMatch(/<p\b(?=[^>]*class="eyebrow")(?=[^>]*lang="en")[^>]*>Profile<\/p>/);
   });
 
   it('uses the actual GitHub avatar with alternative text and dimensions', () => {
@@ -176,11 +176,11 @@ describe('home', () => {
     expect(hrefs).toContain('#main-content');
     expect(hrefs).toContain('/posts');
     expect(hrefs).toContain('/#tags');
-    expect(hrefs).toContain('/#about');
+    expect(hrefs).toContain('/#profile');
     for (const href of hrefs.filter((value) => value.startsWith('/#'))) {
       expect(ids.has(href.slice(2)), `Missing target: ${href}`).toBe(true);
     }
-    for (const href of ['/tags', '/about', '/rss.xml']) {
+    for (const href of ['/tags', '/profile', '/rss.xml']) {
       expect(hrefs).not.toContain(href);
     }
     expect(html).not.toContain('<button');
