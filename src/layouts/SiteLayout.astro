@@ -42,7 +42,7 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
             class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
             aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
             target={isExternalHref(item.href) ? '_blank' : undefined}
-            rel={isExternalHref(item.href) ? 'noopener noreferrer' : undefined}
+            rel={isExternalHref(item.href) ? 'noopener' : undefined}
           ><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
         ))}
       </nav>
@@ -58,7 +58,7 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
             class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
             aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
             target={isExternalHref(item.href) ? '_blank' : undefined}
-            rel={isExternalHref(item.href) ? 'noopener noreferrer' : undefined}
+            rel={isExternalHref(item.href) ? 'noopener' : undefined}
           >
             <Icon name={item.icon} /><span>{item.label}</span>
           </a>
@@ -83,9 +83,9 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
       <div class="footer-meta">
         <div class="footer-links" lang="en">
-          <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksud on GitHub"><Icon name="github" size={20} /><span>GitHub</span></a>
-          <a href={profile.xUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksud on X"><Icon name="x" size={20} /><span>X</span></a>
-          <a href={profile.zennUrl} target="_blank" rel="noopener noreferrer" aria-label="daiksud on Zenn"><Icon name="link" size={20} /><span>Zenn</span></a>
+          <a href={profile.githubUrl} target="_blank" rel="noopener" aria-label="daiksud on GitHub"><Icon name="github" size={20} /><span>GitHub</span></a>
+          <a href={profile.xUrl} target="_blank" rel="noopener" aria-label="daiksud on X"><Icon name="x" size={20} /><span>X</span></a>
+          <a href={profile.zennUrl} target="_blank" rel="noopener" aria-label="daiksud on Zenn"><Icon name="link" size={20} /><span>Zenn</span></a>
         </div>
         <p>&copy; {year} {site.name}</p>
       </div>
