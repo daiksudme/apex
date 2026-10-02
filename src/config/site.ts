@@ -22,7 +22,7 @@ export const navigation = [
   { label: 'Home', href: '/', icon: 'home' },
   { label: 'Posts', href: '/posts', icon: 'posts' },
   { label: 'Tags', href: '/#tags', icon: 'tags' },
-  { label: 'About', href: '/#about', icon: 'about' },
+  { label: 'Profile', href: '/#profile', icon: 'profile' },
   { label: 'GitHub', href: profile.githubUrl, icon: 'github' },
 ] as const;
 
