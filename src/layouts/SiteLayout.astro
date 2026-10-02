@@ -91,6 +91,13 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       </div>
     </Pane>
 
+    <script>
+      import { openExternalHttpLink } from '../lib/external-links';
+
+      for (const link of document.querySelectorAll<HTMLAnchorElement>('a[href]')) {
+        openExternalHttpLink(link, window.location.origin);
+      }
+    </script>
   </body>
 </html>
 
