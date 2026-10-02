@@ -11,6 +11,7 @@ describe('Markdown external links', () => {
         '[X](https://x.com/daiksud)',
         '[Internal](/posts/example)',
         '<a href="https://example.com/raw" rel="ugc">Raw external</a>',
+        '[Uppercase scheme](HTTPS://example.com/uppercase)',
       ].join('\n\n'),
       {
         features: { rawHtml: true },
@@ -31,6 +32,14 @@ describe('Markdown external links', () => {
       expect(anchor).toContain('rel="noopener"');
       expect(anchor).not.toContain('noreferrer');
     }
+
+    const uppercaseScheme = [...html.matchAll(/<a\b[^>]*>/g)]
+      .map((match) => match[0])
+      .find((tag) => tag.includes('href="HTTPS://example.com/uppercase"'));
+    expect(uppercaseScheme).toBeDefined();
+    expect(uppercaseScheme).toContain('target="_blank"');
+    expect(uppercaseScheme).toContain('rel="noopener"');
+    expect(uppercaseScheme).not.toContain('noreferrer');
 
     const rawExternal = [...html.matchAll(/<a\b[^>]*>/g)]
       .map((match) => match[0])
