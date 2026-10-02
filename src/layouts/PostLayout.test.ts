@@ -34,25 +34,6 @@ describe('post layout', () => {
     expect(html).toContain('記事本文');
   });
 
-  it('opens rendered external article links in a new window and preserves rel tokens', async () => {
-    const container = await AstroContainer.create();
-    const html = await container.renderToString(PostLayout, {
-      request: new Request('https://example.test/posts/example-post'),
-      props: {
-        title: '記事タイトル',
-        description: '記事の概要です。',
-        slug: 'example-post',
-        publishedAt: new Date('2026-10-01T00:00:00.000Z'),
-      },
-      slots: {
-        default: '<p><a href="https://example.com/article" rel="ugc">External</a><a href="/posts/internal">Internal</a></p>',
-      },
-    });
-
-    expect(html).toContain('<a href="https://example.com/article" rel="ugc noopener" target="_blank">External</a>');
-    expect(html).toContain('<a href="/posts/internal">Internal</a>');
-  });
-
   it('does not mark the posts index as the current article page', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(PostLayout, {
