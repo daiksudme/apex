@@ -91,6 +91,11 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       </div>
     </Pane>
 
+    <script>
+      import { externalizeDocumentLinks } from '../lib/external-links';
+
+      externalizeDocumentLinks(document, window.location.origin);
+    </script>
   </body>
 </html>
 
