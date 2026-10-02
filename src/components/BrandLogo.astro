@@ -14,6 +14,12 @@ const logos = {
   ],
 } as const;
 
+const githubLineArt = {
+  // Match the optical bounds of the other social marks while preserving a 1.6-unit visible stroke.
+  transform: 'translate(3.912 3.84) scale(.674)',
+  strokeWidth: 2.374,
+} as const;
+
 interface Props {
   name: keyof typeof logos;
   size?: number;
@@ -37,7 +43,13 @@ const { name, size = 20 } = Astro.props;
   aria-hidden="true"
   focusable="false"
 >
-  {logos[name].map((path) => <path d={path} />)}
+  {logos[name].map((path) => (
+    <path
+      d={path}
+      transform={name === 'github' ? githubLineArt.transform : undefined}
+      stroke-width={name === 'github' ? githubLineArt.strokeWidth : undefined}
+    />
+  ))}
 </svg>
 
 <style>
