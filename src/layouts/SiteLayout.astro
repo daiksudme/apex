@@ -15,6 +15,7 @@ const isActiveNavigationItem = (href: string) =>
   href === '/posts'
     ? pathname === '/posts' || pathname.startsWith('/posts/')
     : isCurrentNavigationItem(href);
+const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
 ---
 
 <!doctype html>
@@ -40,6 +41,8 @@ const isActiveNavigationItem = (href: string) =>
             lang="en"
             class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
             aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
+            target={isExternalHref(item.href) ? '_blank' : undefined}
+            rel={isExternalHref(item.href) ? 'noopener' : undefined}
           ><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
         ))}
       </nav>
@@ -54,6 +57,8 @@ const isActiveNavigationItem = (href: string) =>
             lang="en"
             class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
             aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
+            target={isExternalHref(item.href) ? '_blank' : undefined}
+            rel={isExternalHref(item.href) ? 'noopener' : undefined}
           >
             <Icon name={item.icon} /><span>{item.label}</span>
           </a>
@@ -77,10 +82,15 @@ const isActiveNavigationItem = (href: string) =>
     <Pane as="footer" class="footer-pane">
       <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
       <div class="footer-meta">
-        <a href={profile.githubUrl} aria-label="daiksudのGitHub"><Icon name="github" size={22} /></a>
+        <div class="footer-links" lang="en">
+          <a href={profile.githubUrl} target="_blank" rel="noopener" aria-label="daiksud on GitHub"><Icon name="github" size={20} /><span>GitHub</span></a>
+          <a href={profile.xUrl} target="_blank" rel="noopener" aria-label="daiksud on X"><Icon name="x" size={20} /><span>X</span></a>
+          <a href={profile.zennUrl} target="_blank" rel="noopener" aria-label="daiksud on Zenn"><Icon name="link" size={20} /><span>Zenn</span></a>
+        </div>
         <p>&copy; {year} {site.name}</p>
       </div>
     </Pane>
+
   </body>
 </html>
 
@@ -220,11 +230,6 @@ const isActiveNavigationItem = (href: string) =>
     }
 
     @media (max-width: 960px) {
-      gap: 0.75rem;
-      font-size: 0.8rem;
-    }
-
-    @media (max-width: 640px) {
       display: none;
     }
   }
@@ -289,7 +294,7 @@ const isActiveNavigationItem = (href: string) =>
     }
 
     @media (max-width: 640px) {
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.1rem;
 
       a {
@@ -406,12 +411,21 @@ const isActiveNavigationItem = (href: string) =>
     gap: 1rem;
     color: var(--muted);
 
-    a {
-      display: grid;
-      place-items: center;
-      width: 44px;
-      height: 44px;
-      color: var(--text);
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+
+      a {
+        display: inline-grid;
+        grid-auto-flow: column;
+        align-items: center;
+        gap: 0.35rem;
+        min-height: 44px;
+        color: var(--text);
+        font-size: 0.72rem;
+      }
     }
 
     p {
@@ -420,7 +434,14 @@ const isActiveNavigationItem = (href: string) =>
     }
 
     @media (max-width: 640px) {
+      grid-auto-flow: row;
       justify-self: start;
+      gap: 0.4rem;
+
+      p {
+        border-left: 0;
+        padding-left: 0;
+      }
     }
   }
 </style>

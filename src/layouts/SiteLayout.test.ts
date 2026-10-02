@@ -18,6 +18,24 @@ describe('site layout navigation', () => {
     }
   });
 
+  it('opens social navigation and footer links in a new window', async () => {
+    const container = await AstroContainer.create();
+    const html = await container.renderToString(SiteLayout, {
+      request: new Request('https://example.test/'),
+      slots: { default: '<h1>ホーム</h1>' },
+    });
+
+    const anchors = [...html.matchAll(/<a\b[^>]*>/g)].map((match) => match[0]);
+    for (const href of ['https://github.com/daiksud', 'https://x.com/daiksud', 'https://zenn.dev/daiksud']) {
+      const links = anchors.filter((link) => link.includes(`href="${href}"`));
+      expect(links.length).toBeGreaterThan(0);
+      for (const link of links) {
+        expect(link).toContain('target="_blank"');
+        expect(link).toContain('rel="noopener"');
+      }
+    }
+  });
+
   it('keeps the posts section active on article pages without claiming the index is current', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(SiteLayout, {
