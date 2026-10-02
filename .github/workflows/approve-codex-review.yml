@@ -57,12 +57,42 @@ jobs:
           COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
         run: |
           for attempt in 1 2 3 4 5 6; do
-            reaction_id="$(
-              gh api --paginate --slurp --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions" \
+            reaction_ids="$(
+              gh api --paginate --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions" \
                 -f content='+1' \
                 -F per_page=100 \
-                --jq "[.[][] | select(.user.login == \"chatgpt-codex-connector[bot]\" and .created_at >= \"$COMMENT_CREATED_AT\")] | first | .id // empty"
+                --jq ".[] | select(.user.login == \"chatgpt-codex-connector[bot]\" and .created_at >= \"$COMMENT_CREATED_AT\") | .id"
             )"
+            reaction_id="${reaction_ids%%
+              echo "found=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            if [[ "$attempt" -lt 6 ]]; then
+              sleep 5
+            fi
+          done
+
+          echo "Codex approval reaction was not found."
+          echo "found=false" >> "$GITHUB_OUTPUT"
+
+      - name: Approve pull request
+        if: steps.reaction.outputs.found == 'true'
+        env:
+          REVIEWED_HEAD: ${{ steps.review.outputs.reviewed_head }}
+        run: |
+          head_sha="$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq '.headRefOid')"
+
+          if [[ "$head_sha" != "$REVIEWED_HEAD" ]]; then
+            echo "PR HEAD changed from $REVIEWED_HEAD to $head_sha after Codex review."
+            exit 0
+          fi
+
+          # gh pr review cannot bind an approval to a commit, so use the reviews API here.
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
+            -f event=APPROVE \
+            -f commit_id="$REVIEWED_HEAD"
+\n'*}"
 
             if [[ -n "$reaction_id" ]]; then
               echo "found=true" >> "$GITHUB_OUTPUT"
