@@ -13,6 +13,10 @@ export const profile = {
   role: 'Developer / Builder / Writer',
   githubUrl: 'https://github.com/daiksud',
   githubLabel: 'github.com/daiksud',
+  xUrl: 'https://x.com/daiksud',
+  xLabel: 'x.com/daiksud',
+  zennUrl: 'https://zenn.dev/daiksud',
+  zennLabel: 'zenn.dev/daiksud',
   avatarUrl: 'https://avatars.githubusercontent.com/u/155234749?v=4&s=320',
   bio: 'よりよい明日をつくるために、技術と創造の力を探求しています。',
 } as const;
@@ -24,6 +28,8 @@ export const navigation = [
   { label: 'Tags', href: '/#tags', icon: 'tags' },
   { label: 'Profile', href: '/#profile', icon: 'profile' },
   { label: 'GitHub', href: profile.githubUrl, icon: 'github' },
+  { label: 'X', href: profile.xUrl, icon: 'x' },
+  { label: 'Zenn', href: profile.zennUrl, icon: 'link' },
 ] as const;
 
 // Tags shown in the site navigation and home page.
