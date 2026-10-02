@@ -84,6 +84,20 @@ describe('home', () => {
     expect(html).not.toContain('topic-');
   });
 
+  it('shows only tags used by posts in the home tags pane', () => {
+    const tagsPane = html.match(/<section\\b[^>]*class="pane tags-pane"[^>]*>.*?<\\/section>/s)?.[0] ?? '';
+
+    expect(tagsPane).toContain('4 tags');
+    for (const tag of ['latest', 'second', 'third', 'oldest']) {
+      expect(tagsPane).toContain(`href="/tags#tag-${tag}"`);
+      expect(tagsPane).toContain(`#${tag}`);
+    }
+    expect(tagsPane).not.toContain('#astro');
+    expect(tagsPane).not.toContain('#essay');
+    expect(tagsPane).toContain('記事で使っているタグ。');
+  });
+
+
   it('uses the shared pane header for every main content pane', () => {
     expect(html.match(/class="pane-heading"/g)).toHaveLength(5);
     for (const id of ['welcome-heading', 'profile-heading', 'posts-heading', 'tags-heading', 'commits-heading']) {
