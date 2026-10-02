@@ -4,7 +4,6 @@ const isExternalHttpHref = (href: string) =>
 const withSecurityRel = (rel: string | undefined) => {
   const tokens = new Set((rel ?? '').split(/\s+/).filter(Boolean));
   tokens.add('noopener');
-  tokens.add('noreferrer');
   return [...tokens].join(' ');
 };
 
