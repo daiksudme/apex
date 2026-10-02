@@ -10,8 +10,10 @@ describe('Markdown external links', () => {
         '[Zenn](https://zenn.dev/daiksud)',
         '[X](https://x.com/daiksud)',
         '[Internal](/posts/example)',
+        '<a href="https://example.com/raw" rel="ugc">Raw external</a>',
       ].join('\n\n'),
       {
+        features: { rawHtml: true },
         hastPlugins: [hastExternalLinks],
       },
     );
@@ -29,6 +31,14 @@ describe('Markdown external links', () => {
       expect(anchor).toContain('rel="noopener"');
       expect(anchor).not.toContain('noreferrer');
     }
+
+    const rawExternal = [...html.matchAll(/<a\b[^>]*>/g)]
+      .map((match) => match[0])
+      .find((tag) => tag.includes('href="https://example.com/raw"'));
+    expect(rawExternal).toBeDefined();
+    expect(rawExternal).toContain('target="_blank"');
+    expect(rawExternal).toContain('rel="ugc noopener"');
+    expect(rawExternal).not.toContain('noreferrer');
 
     const internal = [...html.matchAll(/<a\b[^>]*>/g)]
       .map((match) => match[0])
