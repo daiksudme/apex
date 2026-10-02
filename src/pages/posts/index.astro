@@ -16,8 +16,7 @@ const description = 'つくったもの、学んだこと、考えたことを�
       class="posts-index-pane"
       title="Posts"
       headingId="posts-index-pane-heading"
-      titleElement="div"
-      ariaLabelledBy="posts-index-title"
+      titleElement="h1"
     >
       <span slot="meta" class="pane-label" lang="en">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
       <header class="posts-index-intro">
@@ -31,8 +30,6 @@ const description = 'つくったもの、学んだこと、考えたことを�
             <span class="command">ls</span>
           </p>
         </div>
-        <h1 id="posts-index-title">記事</h1>
-        <p class="posts-index-description">{description}</p>
       </header>
       <PostList posts={posts} />
     </Pane>
@@ -56,21 +53,6 @@ const description = 'つくったもの、学んだこと、考えたことを�
     .posts-index-commands {
       display: grid;
       gap: 0.35rem;
-    }
-
-    h1 {
-      margin-block: 1.4rem 0.65rem;
-      font-size: clamp(2rem, 4vw, 3rem);
-    }
-
-    .posts-index-description {
-      max-inline-size: 70ch;
-      color: var(--muted);
-      font-family: var(--sans);
-      font-size: 1rem;
-      line-height: 1.85;
-      word-break: normal;
-      word-break: auto-phrase;
     }
   }
 </style>
