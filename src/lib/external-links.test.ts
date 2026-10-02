@@ -1,39 +1,30 @@
 import { describe, expect, it } from 'vitest';
-import { externalLinks } from './external-links';
+import { openExternalHttpLink } from './external-links';
 
-describe('externalLinks', () => {
-  it('opens external HTTP links in a new window and preserves existing rel tokens', () => {
-    const external = {
-      type: 'element',
-      tagName: 'a',
-      properties: {
-        href: 'https://example.com/article',
-        rel: ['ugc'],
-      },
-      children: [],
-    };
-    const internal = {
-      type: 'element',
-      tagName: 'a',
-      properties: {
-        href: '/posts/example',
-      },
-      children: [],
-    };
-    const tree = {
-      type: 'root',
-      children: [external, internal],
+describe('openExternalHttpLink', () => {
+  it('opens an external HTTP link in a new window and preserves existing rel tokens', () => {
+    const link = {
+      href: 'https://example.com/article',
+      target: '',
+      rel: 'ugc',
     };
 
-    externalLinks()(tree);
+    openExternalHttpLink(link, 'https://example.test');
 
-    expect(external.properties).toEqual({
+    expect(link).toEqual({
       href: 'https://example.com/article',
       target: '_blank',
-      rel: ['ugc', 'noopener', 'noreferrer'],
+      rel: 'ugc noopener noreferrer',
     });
-    expect(internal.properties).toEqual({
-      href: '/posts/example',
-    });
+  });
+
+  it('leaves internal and non-HTTP links unchanged', () => {
+    for (const href of ['/posts/example', 'mailto:hello@example.com']) {
+      const link = { href, target: '', rel: '' };
+
+      openExternalHttpLink(link, 'https://example.test');
+
+      expect(link).toEqual({ href, target: '', rel: '' });
+    }
   });
 });
