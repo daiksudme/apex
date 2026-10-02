@@ -1,30 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { openExternalHttpLink } from './external-links';
+import { externalizeHtmlLinks } from './external-links';
 
-describe('openExternalHttpLink', () => {
-  it('opens an external HTTP link in a new window and preserves existing rel tokens', () => {
-    const link = {
-      href: 'https://example.com/article',
-      target: '',
-      rel: 'ugc',
-    };
+describe('externalizeHtmlLinks', () => {
+  it('opens external HTTP links in a new window and preserves existing rel tokens', () => {
+    const html = '<p><a href="https://example.com/article" rel="ugc">Example</a></p>';
 
-    openExternalHttpLink(link, 'https://example.test');
-
-    expect(link).toEqual({
-      href: 'https://example.com/article',
-      target: '_blank',
-      rel: 'ugc noopener noreferrer',
-    });
+    expect(externalizeHtmlLinks(html)).toContain(
+      '<a href="https://example.com/article" rel="ugc noopener noreferrer" target="_blank">',
+    );
   });
 
   it('leaves internal and non-HTTP links unchanged', () => {
-    for (const href of ['/posts/example', 'mailto:hello@example.com']) {
-      const link = { href, target: '', rel: '' };
+    const html = '<a href="/posts/example">Internal</a><a href="mailto:hello@example.com">Mail</a>';
 
-      openExternalHttpLink(link, 'https://example.test');
-
-      expect(link).toEqual({ href, target: '', rel: '' });
-    }
+    expect(externalizeHtmlLinks(html)).toBe(html);
   });
 });
