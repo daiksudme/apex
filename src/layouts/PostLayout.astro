@@ -3,7 +3,6 @@ import Pane from '../components/Pane.astro';
 import PostTags from '../components/PostTags.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
 import { formatDate, formatIsoDate } from '../lib/date';
-import { externalizeHtmlLinks } from '../lib/external-links';
 import SiteLayout from './SiteLayout.astro';
 
 interface Props {
@@ -26,7 +25,6 @@ const {
 
 const sourcePath = `posts/${slug}.md`;
 const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
-const renderedContent = externalizeHtmlLinks((await Astro.slots.render('default')) ?? '');
 ---
 
 <SiteLayout title={title} description={description}>
@@ -53,7 +51,9 @@ const renderedContent = externalizeHtmlLinks((await Astro.slots.render('default'
         </div>
         <PostTags tags={tags} />
       </header>
-      <div class="post-content" set:html={renderedContent}></div>
+      <div class="post-content">
+        <slot />
+      </div>
     </Pane>
   </div>
 </SiteLayout>
