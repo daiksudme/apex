@@ -10,7 +10,7 @@ const { tags, class: className } = Astro.props;
 {tags.length > 0 && (
   <ul class:list={['post-tags', className]} aria-label="タグ" lang="en">
     {tags.map((tag) => (
-      <li><span class="post-tag">#{tag}</span></li>
+      <li><a class="post-tag" href={`/tags#tag-${tag}`}>#{tag}</a></li>
     ))}
   </ul>
 )}

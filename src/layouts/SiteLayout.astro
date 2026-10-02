@@ -13,8 +13,8 @@ const year = new Date().getFullYear();
 const pathname = Astro.url.pathname;
 const isCurrentNavigationItem = (href: string) => href === pathname;
 const isActiveNavigationItem = (href: string) =>
-  href === '/posts'
-    ? pathname === '/posts' || pathname.startsWith('/posts/')
+  href === '/posts' || href === '/tags'
+    ? pathname === href || pathname.startsWith(`${href}/`)
     : isCurrentNavigationItem(href);
 const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
 const socialBrands = {
@@ -78,7 +78,7 @@ const getSocialBrand = (label: string) => socialBrands[label as keyof typeof soc
         <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Tags</p>
         <ul lang="en">
           {tags.map((tag) => (
-            <li><a href={`/#tag-${tag.slug}`} data-tone={tag.tone}><span class="tag-dot" aria-hidden="true"></span>#{tag.slug}</a></li>
+            <li><a href={`/tags#tag-${tag.slug}`} data-tone={tag.tone}><span class="tag-dot" aria-hidden="true"></span>#{tag.slug}</a></li>
           ))}
         </ul>
       </nav>

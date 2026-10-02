@@ -77,7 +77,7 @@ describe('home', () => {
   it('uses tag terminology consistently', () => {
     expect(html).toContain('class="sidebar-tags"');
     expect(html).toContain('aria-label="タグ"');
-    expect(html).toContain('id="tag-astro"');
+    expect(html).toContain('href="/tags#tag-astro"');
     expect(html).toContain('class="tag-dot"');
     expect(text).not.toContain('Topics');
     expect(html).not.toContain('sidebar-topics');
@@ -177,12 +177,13 @@ describe('home', () => {
     expect(emptyHtml).toContain('ls posts/');
   });
 
-  it('links only to existing home sections and external destinations', () => {
+  it('links to dedicated pages, existing home sections and external destinations', () => {
     const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
     const hrefs = [...html.matchAll(/\shref="([^"]+)"/g)].map((match) => match[1]);
     expect(hrefs).toContain('#main-content');
     expect(hrefs).toContain('/posts');
-    expect(hrefs).toContain('/#tags');
+    expect(hrefs).toContain('/tags');
+    expect(hrefs).toContain('/tags#tag-astro');
     expect(hrefs).toContain('/#profile');
     expect(hrefs).toContain('https://github.com/daiksud');
     expect(hrefs).toContain('https://x.com/daiksud');
@@ -190,7 +191,7 @@ describe('home', () => {
     for (const href of hrefs.filter((value) => value.startsWith('/#'))) {
       expect(ids.has(href.slice(2)), `Missing target: ${href}`).toBe(true);
     }
-    for (const href of ['/tags', '/profile', '/rss.xml']) {
+    for (const href of ['/profile', '/rss.xml']) {
       expect(hrefs).not.toContain(href);
     }
 

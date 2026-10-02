@@ -1,0 +1,242 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { tags as configuredTags } from '../config/site';
+import { formatDate, formatIsoDate } from '../lib/date';
+import { sortPostsByPublishedAt } from '../lib/posts';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Pane from './Pane.astro';
+import TerminalPrompt from './TerminalPrompt.astro';
+
+interface Props {
+  posts: CollectionEntry<'posts'>[];
+}
+
+const { posts } = Astro.props;
+const sortedPosts = sortPostsByPublishedAt(posts);
+const configuredTagSlugs = new Set<string>(configuredTags.map((tag) => tag.slug));
+const contentTagSlugs = [...new Set(sortedPosts.flatMap((post) => post.data.tags))];
+const extraTagSlugs = contentTagSlugs
+  .filter((slug) => !configuredTagSlugs.has(slug))
+  .sort((a, b) => a.localeCompare(b));
+
+const tagDefinitions = [
+  ...configuredTags,
+  ...extraTagSlugs.map((slug) => ({ slug, tone: 'muted' as const })),
+];
+
+const tagGroups = tagDefinitions.map((tag) => ({
+  ...tag,
+  posts: sortedPosts.filter((post) => post.data.tags.includes(tag.slug)),
+}));
+
+const description = '記事をタグごとに見つけられる一覧です。各タグの最新記事を表示します。';
+---
+
+<SiteLayout title="Tags" description={description}>
+  <div class="tags-index-page">
+    <Pane
+      class="tags-index-pane"
+      title="Tags"
+      headingId="tags-index-pane-heading"
+      titleElement="h1"
+    >
+      <span slot="meta" class="pane-label" lang="en">{tagGroups.length} {tagGroups.length === 1 ? 'tag' : 'tags'}</span>
+      <header class="tags-index-intro">
+        <div class="tags-index-commands" lang="en">
+          <p class="command-line">
+            <TerminalPrompt />
+            <span class="command">cd tags/</span>
+          </p>
+          <p class="command-line">
+            <TerminalPrompt path="~/tags" />
+            <span class="command">ls</span>
+          </p>
+        </div>
+      </header>
+
+      <ul class="tags-index-list">
+        {tagGroups.map((tag) => (
+          <li id={`tag-${tag.slug}`} class="tag-group" data-tone={tag.tone}>
+            <header class="tag-group-heading">
+              <h2 class="tag-group-title" lang="en">
+                <a href={`#tag-${tag.slug}`}>#{tag.slug}</a>
+              </h2>
+              <span class="tag-group-count" lang="en">
+                {tag.posts.length} {tag.posts.length === 1 ? 'post' : 'posts'}
+              </span>
+            </header>
+
+            {tag.posts.length === 0 ? (
+              <p class="tag-group-empty" lang="en">No posts yet.</p>
+            ) : (
+              <ol class="tag-post-list">
+                {tag.posts.slice(0, 3).map((post) => (
+                  <li>
+                    <time datetime={formatIsoDate(post.data.publishedAt)}>
+                      {formatDate(post.data.publishedAt)}
+                    </time>
+                    <a href={`/posts/${post.id}`}>{post.data.title}</a>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </li>
+        ))}
+      </ul>
+    </Pane>
+  </div>
+</SiteLayout>
+
+<style>
+  .tags-index-page {
+    min-width: 0;
+    min-height: 100%;
+  }
+
+  .tags-index-pane {
+    min-height: 100%;
+  }
+
+  :global(.tags-index-pane > .pane-heading) {
+    padding-block: 0.35rem 1rem;
+  }
+
+  :global(.tags-index-pane > .pane-heading .pane-title) {
+    gap: 0.8rem;
+    color: var(--text);
+    font-size: clamp(1.75rem, 3vw, 2.35rem);
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  :global(.tags-index-pane > .pane-heading .pane-title .chevron) {
+    color: var(--cyan);
+    font-size: 1.15em;
+  }
+
+  :global(.tags-index-pane > .pane-heading .pane-label) {
+    align-self: end;
+    padding-bottom: 0.15rem;
+  }
+
+  .tags-index-intro {
+    padding-block: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tags-index-commands {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .tags-index-list {
+    display: grid;
+  }
+
+  .tag-group {
+    padding-block: 1.35rem;
+    border-bottom: 1px solid var(--border);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .tag-group-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .tag-group-title {
+    font-size: 1rem;
+    line-height: 1.4;
+
+    a {
+      display: inline-block;
+      color: var(--tone);
+      border: 1px solid var(--tone);
+      border-radius: 4px;
+      padding: 0.3rem 0.65rem;
+      background: color-mix(in srgb, var(--tone) 8%, transparent);
+
+      &:hover {
+        background: color-mix(in srgb, var(--tone) 14%, transparent);
+        text-decoration: none;
+      }
+    }
+  }
+
+  .tag-group-count {
+    color: var(--muted);
+    font-size: 0.72rem;
+  }
+
+  .tag-group-empty {
+    margin-top: 0.9rem;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .tag-post-list {
+    display: grid;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: grid;
+      grid-template-columns: 7.5rem minmax(0, 1fr);
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+      border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+
+      &:first-child {
+        border-top: 0;
+      }
+    }
+
+    time {
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    a {
+      display: flex;
+      min-width: 0;
+      min-height: 44px;
+      align-items: center;
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      line-height: 1.65;
+      word-break: normal;
+      word-break: auto-phrase;
+
+      &:hover {
+        color: var(--blue);
+        text-decoration: none;
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    :global(.tags-index-pane > .pane-heading .pane-title) {
+      font-size: clamp(1.55rem, 8vw, 1.9rem);
+    }
+
+    .tag-post-list li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.1rem;
+      padding-block: 0.65rem;
+    }
+
+    .tag-post-list a {
+      min-height: 36px;
+    }
+  }
+</style>
