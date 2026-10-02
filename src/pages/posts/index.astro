@@ -10,7 +10,7 @@ const posts = sortPostsByPublishedAt(await getCollection('posts'));
 const description = 'つくったもの、学んだこと、考えたことを書き残した記事の一覧です。';
 ---
 
-<SiteLayout title="記事" description={description}>
+<SiteLayout title="Posts" description={description}>
   <div class="posts-index-page">
     <Pane
       class="posts-index-pane"
@@ -46,6 +46,29 @@ const description = 'つくったもの、学んだこと、考えたことを�
     min-height: 100%;
   }
 
+  :global(.posts-index-pane > .pane-heading) {
+    padding-block: 0.35rem 1rem;
+  }
+
+  :global(.posts-index-pane > .pane-heading .pane-title) {
+    gap: 0.8rem;
+    color: var(--text);
+    font-size: clamp(1.75rem, 3vw, 2.35rem);
+    font-weight: 750;
+    letter-spacing: -0.045em;
+    line-height: 1.15;
+  }
+
+  :global(.posts-index-pane > .pane-heading .pane-title .chevron) {
+    color: var(--cyan);
+    font-size: 1.15em;
+  }
+
+  :global(.posts-index-pane > .pane-heading .pane-label) {
+    align-self: end;
+    padding-bottom: 0.15rem;
+  }
+
   .posts-index-intro {
     padding-block: 1rem 1.5rem;
     border-bottom: 1px solid var(--border);
@@ -53,6 +76,12 @@ const description = 'つくったもの、学んだこと、考えたことを�
     .posts-index-commands {
       display: grid;
       gap: 0.35rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    :global(.posts-index-pane > .pane-heading .pane-title) {
+      font-size: clamp(1.55rem, 8vw, 1.9rem);
     }
   }
 </style>
