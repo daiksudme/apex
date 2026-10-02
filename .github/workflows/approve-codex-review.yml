@@ -57,12 +57,17 @@ jobs:
           COMMENT_CREATED_AT: ${{ github.event.comment.created_at }}
         run: |
           for attempt in 1 2 3 4 5 6; do
-            reaction_id="$(
-              gh api --paginate --slurp --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions" \
+            reaction_ids="$(
+              gh api --paginate --method GET "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/reactions" \
                 -f content='+1' \
                 -F per_page=100 \
-                --jq "[.[][] | select(.user.login == \"chatgpt-codex-connector[bot]\" and .created_at >= \"$COMMENT_CREATED_AT\")] | first | .id // empty"
+                --jq ".[] | select(.user.login == \"chatgpt-codex-connector[bot]\" and .created_at >= \"$COMMENT_CREATED_AT\") | .id"
             )"
+
+            reaction_id=""
+            if [[ -n "$reaction_ids" ]]; then
+              IFS= read -r reaction_id <<< "$reaction_ids"
+            fi
 
             if [[ -n "$reaction_id" ]]; then
               echo "found=true" >> "$GITHUB_OUTPUT"
@@ -89,6 +94,7 @@ jobs:
             exit 0
           fi
 
+          # gh pr review cannot bind an approval to a commit, so use the reviews API here.
           gh api --method POST "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" \
             -f event=APPROVE \
             -f commit_id="$REVIEWED_HEAD"
