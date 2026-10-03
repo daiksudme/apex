@@ -16,7 +16,7 @@ const activeLinksTo = (html, href) =>
     .filter((link) => link.includes('class="is-active"'));
 
 const sidebarTags = (html) =>
-  html.match(/<nav\\b[^>]*class="sidebar-tags"[^>]*>.*?<\\/nav>/s)?.[0] ?? '';
+  html.match(new RegExp('<nav\\b[^>]*class="sidebar-tags"[^>]*>.*?</nav>', 's'))?.[0] ?? '';
 
 beforeAll(async () => {
   outDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
