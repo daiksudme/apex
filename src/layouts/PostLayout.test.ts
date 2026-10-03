@@ -2,6 +2,11 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { describe, expect, it } from 'vitest';
 import PostLayout from './PostLayout.astro';
 
+const tagDefinitions = [
+  { slug: 'astro', tone: 'blue' },
+  { slug: 'development', tone: 'pink' },
+];
+
 describe('post layout', () => {
   it('renders article metadata and body in the shared site shell', async () => {
     const container = await AstroContainer.create();
@@ -14,6 +19,7 @@ describe('post layout', () => {
         publishedAt: new Date('2026-10-01T00:00:00.000Z'),
         updatedAt: new Date('2026-10-02T00:00:00.000Z'),
         tags: ['astro', 'development'],
+        siteTags: tagDefinitions,
       },
       slots: {
         default: '記事本文',
@@ -31,6 +37,8 @@ describe('post layout', () => {
     expect(html).toContain('datetime="2026-10-02"');
     expect(html).toContain('#astro');
     expect(html).toContain('#development');
+    expect(html).toMatch(/href="\/tags#tag-astro"[^>]*data-tone="blue"/);
+    expect(html).toMatch(/href="\/tags#tag-development"[^>]*data-tone="pink"/);
     expect(html).toContain('記事本文');
   });
 

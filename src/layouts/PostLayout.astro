@@ -52,7 +52,7 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
             </p>
           )}
         </div>
-        <PostTags tags={tags} />
+        <PostTags tags={tags} tagDefinitions={siteTags} sourceId={slug} />
       </header>
       <div class="post-content">
         <slot />

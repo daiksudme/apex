@@ -1,16 +1,24 @@
 ---
+import { deriveUsedTags, type TagDefinition } from '../lib/tags';
+
 interface Props {
   tags: string[];
+  tagDefinitions: TagDefinition[];
+  sourceId: string;
   class?: string;
 }
 
-const { tags, class: className } = Astro.props;
+const { tags, tagDefinitions, sourceId, class: className } = Astro.props;
+const tagDefinitionBySlug = new Map(
+  deriveUsedTags([{ id: sourceId, data: { tags } }], tagDefinitions).map((tag) => [tag.slug, tag]),
+);
+const displayTags = tags.map((slug) => tagDefinitionBySlug.get(slug)!);
 ---
 
 {tags.length > 0 && (
   <ul class:list={['post-tags', className]} aria-label="タグ" lang="en">
-    {tags.map((tag) => (
-      <li><a class="post-tag" href={`/tags#tag-${tag}`}>#{tag}</a></li>
+    {displayTags.map((tag) => (
+      <li><a class="post-tag" href={`/tags#tag-${tag.slug}`} data-tone={tag.tone}>#{tag.slug}</a></li>
     ))}
   </ul>
 )}
@@ -28,11 +36,11 @@ const { tags, class: className } = Astro.props;
 
     .post-tag {
       display: inline-block;
-      border: 1px solid var(--blue);
+      border: 1px solid var(--tone);
       border-radius: 4px;
       padding: 0.2rem 0.55rem;
-      color: var(--blue);
-      background: color-mix(in srgb, var(--blue) 8%, transparent);
+      color: var(--tone);
+      background: color-mix(in srgb, var(--tone) 8%, transparent);
       font-size: 0.75rem;
     }
   }
