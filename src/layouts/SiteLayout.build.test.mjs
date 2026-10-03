@@ -112,6 +112,18 @@ describe('generated navigation', () => {
 });
 
 describe('tag references during build', () => {
+  it('rejects duplicate catalog slugs before rendering conflicting tag groups', async () => {
+    const projectDir = await prepareProject();
+    await cp('tests/fixtures/invalid/duplicate-tags.yaml', join(projectDir, 'src/content/tags.yaml'));
+    const result = spawnSync(process.execPath, [astroCli, 'build'], {
+      cwd: projectDir,
+      encoding: 'utf8',
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stdout + result.stderr).toContain('Duplicate tag slug "fixture-tag"');
+  }, 30_000);
+
   it('rejects an undefined tag on an article older than the latest three', async () => {
     const projectDir = await prepareProject();
     await cp('tests/fixtures/invalid/old-post.md', join(projectDir, 'src/content/posts/old-post.md'));
