@@ -190,6 +190,12 @@ describe('home', () => {
     expect(emptyHtml).toContain('0 posts');
     expect(emptyHtml).toMatch(/<h3 class="empty-state-title"[^>]*>まだ記事はありません。<\/h3>/);
     expect(emptyHtml).toContain('ls posts/');
+
+    const sidebarTags = emptyHtml.match(
+      /<nav\b[^>]*class="sidebar-tags"[^>]*>.*?<\/nav>/s,
+    )?.[0] ?? '';
+    expect(sidebarTags).not.toContain('<li');
+    expect(sidebarTags).not.toContain('#astro');
   });
 
   it('links to dedicated pages, existing home sections and external destinations', () => {
