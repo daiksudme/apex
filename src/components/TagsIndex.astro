@@ -15,7 +15,7 @@ interface Props {
 const { posts } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
 const usedTags = deriveUsedTags(sortedPosts, configuredTags);
-const configuredTagSlugs = new Set(configuredTags.map((tag) => tag.slug));
+const configuredTagSlugs = new Set<string>(configuredTags.map((tag) => tag.slug));
 const usedTagBySlug = new Map(usedTags.map((tag) => [tag.slug, tag]));
 const configuredTagDefinitions = configuredTags.flatMap((configuredTag) => {
   const tag = usedTagBySlug.get(configuredTag.slug);
