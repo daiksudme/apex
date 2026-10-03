@@ -1,5 +1,6 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import type { CollectionEntry } from 'astro:content';
+import { tagDefinitions } from '../../tests/fixtures/tags';
 import { beforeAll, describe, expect, it } from 'vitest';
 import TagsIndex from './TagsIndex.astro';
 
@@ -58,7 +59,7 @@ beforeAll(async () => {
   const container = await AstroContainer.create();
   html = await container.renderToString(TagsIndex, {
     request: new Request('https://example.test/tags'),
-    props: { posts },
+    props: { posts, tagDefinitions },
   });
   text = [...html.matchAll(/>([^<]+)</g)].map((match) => match[1]).join('');
 });
@@ -80,6 +81,16 @@ describe('tags index', () => {
     expect(html).toMatch(/id="tag-testing"[^>]*data-tone="muted"/);
     expect(html).not.toContain('id="tag-terminal"');
     expect(html).not.toContain('id="tag-others"');
+  });
+
+  it('orders tags by post count and uses slug order for ties', () => {
+    const astro = html.indexOf('id="tag-astro"');
+    const cloudflare = html.indexOf('id="tag-cloudflare"');
+    const testing = html.indexOf('id="tag-testing"');
+
+    expect(astro).toBeGreaterThan(-1);
+    expect(astro).toBeLessThan(cloudflare);
+    expect(cloudflare).toBeLessThan(testing);
   });
 
   it('shows the latest three posts for each tag in descending publish-date order', () => {

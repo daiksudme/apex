@@ -1,14 +1,15 @@
+import { tagDefinitions } from '../../tests/fixtures/tags';
 import { describe, expect, it } from 'vitest';
-import { deriveUsedTags, orderTagsByConfiguration } from './tags';
+import { deriveUsedTags, orderTagsByPostCount } from './tags';
 
 describe('deriveUsedTags', () => {
-  it('extracts used tags once and applies configured tones with a muted fallback', () => {
+  it('extracts used tags once and applies the fixture definition tones', () => {
     const posts = [
-      { data: { tags: ['custom', 'development', 'custom'] } },
-      { data: { tags: ['essay', 'development'] } },
+      { id: 'first-post', data: { tags: ['custom', 'development', 'custom'] } },
+      { id: 'second-post', data: { tags: ['essay', 'development'] } },
     ];
 
-    expect(deriveUsedTags(posts)).toEqual([
+    expect(deriveUsedTags(posts, tagDefinitions)).toEqual([
       { slug: 'custom', tone: 'muted' },
       { slug: 'development', tone: 'pink' },
       { slug: 'essay', tone: 'purple' },
@@ -16,24 +17,24 @@ describe('deriveUsedTags', () => {
   });
 
   it('does not revive configured tags when there are no posts', () => {
-    expect(deriveUsedTags([])).toEqual([]);
+    expect(deriveUsedTags([], tagDefinitions)).toEqual([]);
   });
 });
 
-describe('orderTagsByConfiguration', () => {
-  it('keeps configured tags in configuration order and appends extra tags alphabetically', () => {
-    const usedTags = [
-      { slug: 'custom-z', tone: 'muted' },
-      { slug: 'essay', tone: 'purple' },
-      { slug: 'custom-a', tone: 'muted' },
-      { slug: 'development', tone: 'pink' },
+describe('orderTagsByPostCount', () => {
+  it('orders used tags by post count and uses slug order for ties', () => {
+    const posts = [
+      { id: 'first-post', data: { tags: ['custom-z', 'essay', 'development'] } },
+      { id: 'second-post', data: { tags: ['development', 'custom-a'] } },
+      { id: 'third-post', data: { tags: ['development', 'custom-a'] } },
     ];
+    const usedTags = deriveUsedTags(posts, tagDefinitions);
 
-    expect(orderTagsByConfiguration(usedTags)).toEqual([
+    expect(orderTagsByPostCount(usedTags, posts)).toEqual([
       { slug: 'development', tone: 'pink' },
-      { slug: 'essay', tone: 'purple' },
       { slug: 'custom-a', tone: 'muted' },
       { slug: 'custom-z', tone: 'muted' },
+      { slug: 'essay', tone: 'purple' },
     ]);
   });
 });

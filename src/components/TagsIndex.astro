@@ -2,21 +2,22 @@
 import type { CollectionEntry } from 'astro:content';
 import { formatDate, formatIsoDate } from '../lib/date';
 import { sortPostsByPublishedAt } from '../lib/posts';
-import { deriveUsedTags, orderTagsByConfiguration } from '../lib/tags';
+import { deriveUsedTags, orderTagsByPostCount, type TagDefinition } from '../lib/tags';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Pane from './Pane.astro';
 import TerminalPrompt from './TerminalPrompt.astro';
 
 interface Props {
   posts: CollectionEntry<'posts'>[];
+  tagDefinitions: TagDefinition[];
 }
 
-const { posts } = Astro.props;
+const { posts, tagDefinitions } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
-const usedTags = deriveUsedTags(sortedPosts);
-const tagDefinitions = orderTagsByConfiguration(usedTags);
+const usedTags = deriveUsedTags(sortedPosts, tagDefinitions);
+const siteTags = orderTagsByPostCount(usedTags, sortedPosts);
 
-const tagGroups = tagDefinitions.map((tag) => ({
+const tagGroups = siteTags.map((tag) => ({
   ...tag,
   posts: sortedPosts.filter((post) => post.data.tags.includes(tag.slug)),
 }));
@@ -24,7 +25,7 @@ const tagGroups = tagDefinitions.map((tag) => ({
 const description = '記事をタグごとに見つけられる一覧です。各タグの最新記事を表示します。';
 ---
 
-<SiteLayout title="Tags" description={description} siteTags={tagDefinitions}>
+<SiteLayout title="Tags" description={description} siteTags={siteTags}>
   <div class="tags-index-page">
     <Pane
       class="tags-index-pane"

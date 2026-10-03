@@ -31,16 +31,3 @@ export const navigation = [
   { label: 'X', href: profile.xUrl, icon: 'x' },
   { label: 'Zenn', href: profile.zennUrl, icon: 'link' },
 ] as const;
-
-// Configured tag tones and relative ordering. Article content determines which tags are shown.
-export const tags = [
-  { slug: 'astro', tone: 'blue' },
-  { slug: 'cloudflare', tone: 'purple' },
-  { slug: 'github', tone: 'green' },
-  { slug: 'development', tone: 'pink' },
-  { slug: 'terminal', tone: 'yellow' },
-  { slug: 'tooling', tone: 'orange' },
-  { slug: 'productivity', tone: 'cyan' },
-  { slug: 'essay', tone: 'purple' },
-  { slug: 'others', tone: 'muted' },
-] as const;

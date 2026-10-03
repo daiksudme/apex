@@ -1,5 +1,6 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import type { CollectionEntry } from 'astro:content';
+import { tagDefinitions } from '../../tests/fixtures/tags';
 import { beforeAll, describe, expect, it } from 'vitest';
 import Home from './Home.astro';
 
@@ -49,7 +50,7 @@ beforeAll(async () => {
   const container = await AstroContainer.create();
   html = await container.renderToString(Home, {
     request: new Request('https://example.test/'),
-    props: { posts },
+    props: { posts, tagDefinitions },
   });
   // Collect text runs for assertions only. This is not an HTML sanitizer.
   text = [...html.matchAll(/>([^<]+)</g)].map((match) => match[1]).join('');
@@ -96,6 +97,13 @@ describe('home', () => {
     }
     expect(tagsPane).not.toContain('#astro');
     expect(tagsPane).not.toContain('#essay');
+
+    const orderedTags = ['latest', 'oldest', 'second', 'third'];
+    for (let index = 1; index < orderedTags.length; index += 1) {
+      expect(tagsPane.indexOf(`#${orderedTags[index - 1]}`))
+        .toBeLessThan(tagsPane.indexOf(`#${orderedTags[index]}`));
+    }
+
     expect(tagsPane).toContain('記事で使っているタグ。');
   });
 
@@ -104,6 +112,7 @@ describe('home', () => {
     const tagHtml = await container.renderToString(Home, {
       request: new Request('https://example.test/'),
       props: {
+        tagDefinitions,
         posts: [
           {
             id: 'tag-source',
@@ -129,7 +138,7 @@ describe('home', () => {
     expect(tagsPane).toMatch(/href="\/tags#tag-development"[^>]*data-tone="pink"/);
     expect(sidebarTags).toMatch(/href="\/tags#tag-development"[^>]*data-tone="pink"/);
     expect(sidebarTags).toMatch(/href="\/tags#tag-custom"[^>]*data-tone="muted"/);
-    expect(sidebarTags.indexOf('#development')).toBeLessThan(sidebarTags.indexOf('#custom'));
+    expect(sidebarTags.indexOf('#custom')).toBeLessThan(sidebarTags.indexOf('#development'));
   });
 
   it('uses the shared pane header for every main content pane', () => {
@@ -217,7 +226,7 @@ describe('home', () => {
     const container = await AstroContainer.create();
     const emptyHtml = await container.renderToString(Home, {
       request: new Request('https://example.test/'),
-      props: { posts: [] },
+      props: { posts: [], tagDefinitions },
     });
 
     expect(emptyHtml).toContain('0 posts');

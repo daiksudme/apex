@@ -1,0 +1,10 @@
+catalog:
+  tags:
+    - slug: fixture-tag
+      tone: purple
+    - slug: development
+      tone: orange
+    - slug: essay
+      tone: blue
+    - slug: fixture-tag
+      tone: yellow

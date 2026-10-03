@@ -1,8 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
+import { getBlogContent } from '../lib/content';
 import Home from '../components/Home.astro';
 
-const posts = await getCollection('posts');
+const { posts, tagDefinitions } = await getBlogContent();
 ---
 
-<Home posts={posts} />
+<Home posts={posts} tagDefinitions={tagDefinitions} />

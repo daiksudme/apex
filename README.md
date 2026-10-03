@@ -20,7 +20,7 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 | Welcome pane | ターミナル風の導入、サイト紹介、セクションへの導線 | `welcome-pane` |
 | Profile pane | アバター、名前、所在地、プロフィール | `profile-pane` |
 | Posts pane | 最新記事。未公開時は空状態を表示 | `posts-pane` |
-| Tags pane | 今後扱いたいテーマ | `tags-pane` |
+| Tags pane | 記事で使われているタグ | `tags-pane` |
 | Commits pane | GitHubの更新履歴への導線 | `commits-pane` |
 | Footer pane | 終端プロンプト、GitHub導線、copyright | `footer-pane` |
 
@@ -48,6 +48,25 @@ tags:
 
 `slug` はFrontmatterで重複管理せず、Markdownのファイル名をそのまま使います。記事タイトルはレイアウトが `h1` として出力するため、Markdown本文には `#` 見出しを書かず、本文の見出しは `##` から始めます。
 
+### タグ定義
+
+使用できるタグは [src/content/tags.yaml](src/content/tags.yaml) の `catalog.tags` 配列で定義します。記事のFrontmatterの `tags` には、定義済みの `slug` を指定します。
+
+```yaml
+catalog:
+  tags:
+    - slug: astro
+      tone: blue
+    - slug: development
+      tone: pink
+```
+
+`slug` と `tone` は必須です。同じ `slug` を複数定義するとビルドエラーになります。`tone` は `blue` / `purple` / `green` / `pink` / `yellow` / `orange` / `cyan` / `muted` のいずれかを指定します。新しいタグを記事で使う前に、定義へ追加してください。未定義タグを使った記事が一つでもあれば、ビルドは対象記事とタグを示すエラーで失敗します。
+
+ホーム・タグ一覧・サイドバーには使用中のタグだけを表示します。タグは、そのタグを参照する記事数の多い順に表示し、同数の場合は `slug` の昇順にします。YAMLの配列順は表示順に影響しません。
+
+詳細な受け入れ条件は[記事タグの定義と参照](docs/behavior/tags.feature.md)、用語は[ブログの用語](docs/glossary.md)を参照してください。
+
 ### 日本語タイポグラフィ
 
 日本語本文は `word-break: auto-phrase` を使い、未対応ブラウザ向けに `word-break: normal` を先に指定します。機械的な文節判定だけに依存せず、意図した改行候補がある箇所では `<wbr>` を明示的に使います。
@@ -68,6 +87,8 @@ mise exec -- pnpm check
 mise exec -- pnpm build
 mise exec -- pnpm test
 ```
+
+記事・タグのテスト入力には `tests/fixtures/` の専用データを使います。生成HTMLテストはアプリのソースとフィクスチャーを一時プロジェクトへコピーしてビルドし、公開記事と本番タグ定義を読み込みません。正常なビルドに加え、最新3記事より古い記事の未定義タグでも失敗することを検証します。
 
 ### Cloudflare デプロイの記録
 
