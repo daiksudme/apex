@@ -15,6 +15,13 @@ interface ConfiguredTag {
 }
 
 export const deriveUsedTags = (
-  _posts: readonly TagSource[],
-  _configuredTags: readonly ConfiguredTag[],
-): TagDefinition[] => [];
+  posts: readonly TagSource[],
+  configuredTags: readonly ConfiguredTag[],
+): TagDefinition[] => {
+  const toneBySlug = new Map(configuredTags.map((tag) => [tag.slug, tag.tone]));
+
+  return [...new Set(posts.flatMap((post) => post.data.tags))].map((slug) => ({
+    slug,
+    tone: toneBySlug.get(slug) ?? 'muted',
+  }));
+};
