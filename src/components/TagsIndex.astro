@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { tags as configuredTags } from '../config/site';
 import { formatDate, formatIsoDate } from '../lib/date';
 import { sortPostsByPublishedAt } from '../lib/posts';
+import { deriveUsedTags } from '../lib/tags';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Pane from './Pane.astro';
 import TerminalPrompt from './TerminalPrompt.astro';
@@ -13,17 +14,18 @@ interface Props {
 
 const { posts } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
-const configuredTagSlugs = new Set<string>(configuredTags.map((tag) => tag.slug));
-const contentTagSlugs = [...new Set(sortedPosts.flatMap((post) => post.data.tags))];
-const contentTagSlugSet = new Set(contentTagSlugs);
-const extraTagSlugs = contentTagSlugs
-  .filter((slug) => !configuredTagSlugs.has(slug))
-  .sort((a, b) => a.localeCompare(b));
+const usedTags = deriveUsedTags(sortedPosts, configuredTags);
+const configuredTagSlugs = new Set(configuredTags.map((tag) => tag.slug));
+const usedTagBySlug = new Map(usedTags.map((tag) => [tag.slug, tag]));
+const configuredTagDefinitions = configuredTags.flatMap((configuredTag) => {
+  const tag = usedTagBySlug.get(configuredTag.slug);
+  return tag ? [tag] : [];
+});
+const extraTagDefinitions = usedTags
+  .filter((tag) => !configuredTagSlugs.has(tag.slug))
+  .sort((a, b) => a.slug.localeCompare(b.slug));
 
-const tagDefinitions = [
-  ...configuredTags.filter((tag) => contentTagSlugSet.has(tag.slug)),
-  ...extraTagSlugs.map((slug) => ({ slug, tone: 'muted' as const })),
-];
+const tagDefinitions = [...configuredTagDefinitions, ...extraTagDefinitions];
 
 const tagGroups = tagDefinitions.map((tag) => ({
   ...tag,
