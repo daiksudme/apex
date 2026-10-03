@@ -90,29 +90,6 @@ const description = '記事をタグごとに見つけられる一覧です。�
     min-height: 100%;
   }
 
-  :global(.tags-index-pane > .pane-heading) {
-    padding-block: 0.35rem 1rem;
-  }
-
-  :global(.tags-index-pane > .pane-heading .pane-title) {
-    gap: 0.8rem;
-    color: var(--text);
-    font-size: clamp(1.75rem, 3vw, 2.35rem);
-    font-weight: 750;
-    letter-spacing: -0.045em;
-    line-height: 1.15;
-    margin: 0;
-  }
-
-  :global(.tags-index-pane > .pane-heading .pane-title .chevron) {
-    color: var(--cyan);
-    font-size: 1.15em;
-  }
-
-  :global(.tags-index-pane > .pane-heading .pane-label) {
-    align-self: end;
-    padding-bottom: 0.15rem;
-  }
 
   .tags-index-intro {
     padding-block: 1rem 1.5rem;
@@ -217,12 +194,7 @@ const description = '記事をタグごとに見つけられる一覧です。�
     }
   }
 
-  @media (max-width: 640px) {
-    :global(.tags-index-pane > .pane-heading .pane-title) {
-      font-size: clamp(1.55rem, 8vw, 1.9rem);
-    }
-
-    .tag-post-list li {
+  @media (max-width: 640px) {    .tag-post-list li {
       grid-template-columns: minmax(0, 1fr);
       gap: 0.1rem;
       padding-block: 0.65rem;
