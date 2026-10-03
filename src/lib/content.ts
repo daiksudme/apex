@@ -1,4 +1,5 @@
 import { getCollection, getEntry } from 'astro:content';
+import { deriveUsedTags } from './tags';
 
 export async function getBlogContent() {
   const [posts, catalog] = await Promise.all([
@@ -9,6 +10,7 @@ export async function getBlogContent() {
     throw new Error('Missing tag catalog in src/content/tags.yaml');
   }
   const tagDefinitions = catalog.data.tags;
+  deriveUsedTags(posts, tagDefinitions);
 
   return { posts, tagDefinitions };
 }

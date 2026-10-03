@@ -1,7 +1,7 @@
 ---
 title: フィクスチャーの記事
 description: 生成HTMLを検証するための記事。
-publishedAt: 2026-01-01
+publishedAt: 2026-01-04
 tags:
   - development
   - essay

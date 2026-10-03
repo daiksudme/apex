@@ -5,8 +5,8 @@ import { deriveUsedTags, orderTagsByDefinition } from './tags';
 describe('deriveUsedTags', () => {
   it('extracts used tags once and applies the fixture definition tones', () => {
     const posts = [
-      { data: { tags: ['custom', 'development', 'custom'] } },
-      { data: { tags: ['essay', 'development'] } },
+      { id: 'first-post', data: { tags: ['custom', 'development', 'custom'] } },
+      { id: 'second-post', data: { tags: ['essay', 'development'] } },
     ];
 
     expect(deriveUsedTags(posts, tagDefinitions)).toEqual([

@@ -1,11 +1,11 @@
 // @ts-nocheck
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { cp, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-let projectDir;
+const projectDirs = [];
 let outDir;
 
 const readGeneratedPage = (...segments) =>
@@ -19,9 +19,9 @@ const activeLinksTo = (html, href) =>
 const sidebarTags = (html) =>
   html.match(new RegExp('<nav\\b[^>]*class="sidebar-tags"[^>]*>.*?</nav>', 's'))?.[0] ?? '';
 
-beforeAll(async () => {
-  projectDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
-  outDir = join(projectDir, 'dist');
+async function prepareProject() {
+  const projectDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
+  projectDirs.push(projectDir);
   await cp('src', join(projectDir, 'src'), {
     recursive: true,
     filter: (source) => source !== join('src', 'content') && !source.includes('.test.'),
@@ -31,8 +31,14 @@ beforeAll(async () => {
   }
   await cp('tests/fixtures/content', join(projectDir, 'src/content'), { recursive: true });
   await symlink(join(process.cwd(), 'node_modules'), join(projectDir, 'node_modules'), 'dir');
-  const astroCli = join(process.cwd(), 'node_modules', 'astro', 'bin', 'astro.mjs');
+  return projectDir;
+}
 
+const astroCli = join(process.cwd(), 'node_modules', 'astro', 'bin', 'astro.mjs');
+
+beforeAll(async () => {
+  const projectDir = await prepareProject();
+  outDir = join(projectDir, 'dist');
   execFileSync(process.execPath, [astroCli, 'build', '--outDir', outDir], {
     cwd: projectDir,
     stdio: 'pipe',
@@ -40,7 +46,7 @@ beforeAll(async () => {
 }, 30_000);
 
 afterAll(async () => {
-  await rm(projectDir, { recursive: true, force: true });
+  await Promise.all(projectDirs.map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
 describe('generated navigation', () => {
@@ -97,4 +103,19 @@ describe('generated navigation', () => {
       }
     }
   });
+});
+
+describe('tag references during build', () => {
+  it('rejects an undefined tag on an article older than the latest three', async () => {
+    const projectDir = await prepareProject();
+    await cp('tests/fixtures/invalid/old-post.md', join(projectDir, 'src/content/posts/old-post.md'));
+    const result = spawnSync(process.execPath, [astroCli, 'build'], {
+      cwd: projectDir,
+      encoding: 'utf8',
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stdout + result.stderr).toContain('old-post');
+    expect(result.stdout + result.stderr).toContain('undefined-tag');
+  }, 30_000);
 });
