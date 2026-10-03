@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+let projectDir;
 let outDir;
 
 const readGeneratedPage = (...segments) =>
@@ -19,17 +20,27 @@ const sidebarTags = (html) =>
   html.match(new RegExp('<nav\\b[^>]*class="sidebar-tags"[^>]*>.*?</nav>', 's'))?.[0] ?? '';
 
 beforeAll(async () => {
-  outDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
+  projectDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
+  outDir = join(projectDir, 'dist');
+  await cp('src', join(projectDir, 'src'), {
+    recursive: true,
+    filter: (source) => source !== join('src', 'content') && !source.includes('.test.'),
+  });
+  for (const file of ['astro.config.ts', 'package.json', 'tsconfig.json']) {
+    await cp(file, join(projectDir, file));
+  }
+  await cp('tests/fixtures/content', join(projectDir, 'src/content'), { recursive: true });
+  await symlink(join(process.cwd(), 'node_modules'), join(projectDir, 'node_modules'), 'dir');
   const astroCli = join(process.cwd(), 'node_modules', 'astro', 'bin', 'astro.mjs');
 
   execFileSync(process.execPath, [astroCli, 'build', '--outDir', outDir], {
-    cwd: process.cwd(),
+    cwd: projectDir,
     stdio: 'pipe',
   });
 }, 30_000);
 
 afterAll(async () => {
-  await rm(outDir, { recursive: true, force: true });
+  await rm(projectDir, { recursive: true, force: true });
 });
 
 describe('generated navigation', () => {
@@ -48,7 +59,7 @@ describe('generated navigation', () => {
   });
 
   it('keeps Posts active on generated article pages without marking the index current', async () => {
-    const html = await readGeneratedPage('posts', 'hello-daiksud');
+    const html = await readGeneratedPage('posts', 'fixture-post');
     const links = activeLinksTo(html, '/posts');
 
     expect(links).toHaveLength(2);
@@ -62,12 +73,10 @@ describe('generated navigation', () => {
     const expectedTags = [
       { slug: 'development', tone: 'pink' },
       { slug: 'essay', tone: 'purple' },
-      { slug: 'ai', tone: 'muted' },
-      { slug: 'continuous-delivery', tone: 'muted' },
-      { slug: 'devops', tone: 'muted' },
+      { slug: 'fixture-tag', tone: 'muted' },
     ];
 
-    for (const segments of [[], ['posts'], ['tags'], ['posts', 'hello-daiksud']]) {
+    for (const segments of [[], ['posts'], ['tags'], ['posts', 'fixture-post']]) {
       const html = await readGeneratedPage(...segments);
       const sidebar = sidebarTags(html);
 
