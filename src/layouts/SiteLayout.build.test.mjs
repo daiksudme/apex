@@ -20,9 +20,13 @@ const sidebarTags = (html) =>
   html.match(new RegExp('<nav\\b[^>]*class="sidebar-tags"[^>]*>.*?</nav>', 's'))?.[0] ?? '';
 
 const postTagLinkTo = (html, slug) =>
-  [...html.matchAll(/<a\\b[^>]*class="post-tag"[^>]*>/g)]
+  [...html.matchAll(/<a\\b[^>]*>/g)]
     .map((match) => match[0])
-    .find((link) => link.includes(`href="/tags#tag-${slug}"`)) ?? '';
+    .find((link) => {
+      const className = link.match(/\\bclass="([^"]*)"/)?.[1] ?? '';
+      return className.split(/\\s+/).includes('post-tag')
+        && link.includes(`href="/tags#tag-${slug}"`);
+    }) ?? '';
 
 async function prepareProject() {
   const projectDir = await mkdtemp(join(tmpdir(), 'apex-build-'));

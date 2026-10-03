@@ -68,7 +68,7 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
 
     <Pane id="posts" class="posts-pane" title="Latest Posts" headingId="posts-heading" tabindex={-1}>
       <span slot="meta" class="pane-label" lang="en">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
-      <PostList posts={latestPosts} tagDefinitions={tagDefinitions} headingLevel="h3" />
+      <PostList posts={latestPosts} headingLevel="h3" />
       <p slot="footer" class="pane-footnote" lang="en"><span aria-hidden="true">// </span>Small steps. Continuous learning.</p>
     </Pane>
 
