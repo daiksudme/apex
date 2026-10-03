@@ -133,6 +133,24 @@ describe('generated navigation', () => {
 });
 
 describe('generated Markdown body', () => {
+  it('wraps article links without changing Japanese text or scrollable code and tables', async () => {
+    const html = await readGeneratedPage('posts', 'fixture-post');
+    const styles = [...html.matchAll(/<style\b[^>]*>(.*?)<\/style>/gs)]
+      .map((match) => match[1]).join('\n');
+    const bodyStyles = styles.slice(styles.indexOf('.post-content['));
+
+    expect(bodyStyles).toMatch(/&\s+a\s*\{[^}]*overflow-wrap:\s*anywhere/);
+    expect(bodyStyles).toMatch(/^\.post-content\[data-astro-cid-[^\]]+\]\{[^&]*word-break:\s*auto-phrase/);
+    expect(bodyStyles).toMatch(/&\s+pre\s*\{[^}]*overflow-x:\s*auto/);
+    expect(bodyStyles).toMatch(/&\s+pre code\s*\{[^}]*overflow-wrap:\s*normal/);
+    expect(bodyStyles).toMatch(/&\s+table\s*\{[^}]*overflow-x:\s*auto/);
+
+    const href = html.match(/<link\b[^>]*href="([^"]+)"[^>]*rel="stylesheet"|<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"/)?.slice(1).find(Boolean);
+    const globalStyles = await readFile(join(outDir, href), 'utf8');
+    expect(globalStyles).toMatch(/:root\{[^}]*overflow-wrap:\s*normal/);
+    expect(globalStyles).not.toMatch(/(?:^|\})a\{[^}]*overflow-wrap:\s*anywhere/);
+  });
+
   const readPostBody = async () => {
     const html = await readGeneratedPage('posts', 'fixture-post');
     return html.match(/<div\b[^>]*class="post-content"[^>]*>(.*?)<\/div>/s)?.[1] ?? '';
