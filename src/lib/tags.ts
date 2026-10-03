@@ -28,5 +28,17 @@ export const deriveUsedTags = (
 
 export const orderTagsByConfiguration = (
   usedTags: readonly TagDefinition[],
-  _configuredTags: readonly ConfiguredTag[],
-): TagDefinition[] => [...usedTags];
+  configuredTags: readonly ConfiguredTag[],
+): TagDefinition[] => {
+  const usedTagBySlug = new Map(usedTags.map((tag) => [tag.slug, tag]));
+  const configuredTagSlugs = new Set<string>(configuredTags.map((tag) => tag.slug));
+  const configuredTagDefinitions = configuredTags.flatMap((configuredTag) => {
+    const tag = usedTagBySlug.get(configuredTag.slug);
+    return tag ? [tag] : [];
+  });
+  const extraTagDefinitions = usedTags
+    .filter((tag) => !configuredTagSlugs.has(tag.slug))
+    .sort((a, b) => a.slug.localeCompare(b.slug));
+
+  return [...configuredTagDefinitions, ...extraTagDefinitions];
+};
