@@ -5,11 +5,11 @@ import PostList from '../../components/PostList.astro';
 import TerminalPrompt from '../../components/TerminalPrompt.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { sortPostsByPublishedAt } from '../../lib/posts';
-import { deriveUsedTags, orderTagsByDefinition } from '../../lib/tags';
+import { deriveUsedTags, orderTagsByPostCount } from '../../lib/tags';
 
 const content = await getBlogContent();
 const posts = sortPostsByPublishedAt(content.posts);
-const siteTags = orderTagsByDefinition(deriveUsedTags(posts, content.tagDefinitions), content.tagDefinitions);
+const siteTags = orderTagsByPostCount(deriveUsedTags(posts, content.tagDefinitions), posts);
 const description = 'つくったもの、学んだこと、考えたことを書き残した記事の一覧です。';
 ---
 

@@ -3,7 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { navigation, profile, site } from '../config/site';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { sortPostsByPublishedAt } from '../lib/posts';
-import { deriveUsedTags, orderTagsByDefinition, type TagDefinition } from '../lib/tags';
+import { deriveUsedTags, orderTagsByPostCount, type TagDefinition } from '../lib/tags';
 import BrandLogo from './BrandLogo.astro';
 import Icon from './Icon.astro';
 import Pane from './Pane.astro';
@@ -18,8 +18,8 @@ interface Props {
 const { posts, tagDefinitions } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
 const latestPosts = sortedPosts.slice(0, 3);
-const homeTags = deriveUsedTags(sortedPosts, tagDefinitions);
-const siteTags = orderTagsByDefinition(homeTags, tagDefinitions);
+const homeTags = orderTagsByPostCount(deriveUsedTags(sortedPosts, tagDefinitions), sortedPosts);
+const siteTags = homeTags;
 const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
 ---
 

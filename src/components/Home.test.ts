@@ -97,6 +97,13 @@ describe('home', () => {
     }
     expect(tagsPane).not.toContain('#astro');
     expect(tagsPane).not.toContain('#essay');
+
+    const orderedTags = ['latest', 'oldest', 'second', 'third'];
+    for (let index = 1; index < orderedTags.length; index += 1) {
+      expect(tagsPane.indexOf(`#${orderedTags[index - 1]}`))
+        .toBeLessThan(tagsPane.indexOf(`#${orderedTags[index]}`));
+    }
+
     expect(tagsPane).toContain('記事で使っているタグ。');
   });
 
@@ -131,7 +138,7 @@ describe('home', () => {
     expect(tagsPane).toMatch(/href="\/tags#tag-development"[^>]*data-tone="pink"/);
     expect(sidebarTags).toMatch(/href="\/tags#tag-development"[^>]*data-tone="pink"/);
     expect(sidebarTags).toMatch(/href="\/tags#tag-custom"[^>]*data-tone="muted"/);
-    expect(sidebarTags.indexOf('#development')).toBeLessThan(sidebarTags.indexOf('#custom'));
+    expect(sidebarTags.indexOf('#custom')).toBeLessThan(sidebarTags.indexOf('#development'));
   });
 
   it('uses the shared pane header for every main content pane', () => {

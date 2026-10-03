@@ -30,10 +30,21 @@ export const deriveUsedTags = (
   return [...usedTags.values()];
 };
 
-export const orderTagsByDefinition = (
+export const orderTagsByPostCount = (
   usedTags: readonly TagDefinition[],
-  definitions: readonly TagDefinition[],
+  posts: readonly TagSource[],
 ): TagDefinition[] => {
-  const usedSlugs = new Set(usedTags.map((tag) => tag.slug));
-  return definitions.filter((tag) => usedSlugs.has(tag.slug));
+  const postCountBySlug = new Map<string, number>();
+
+  for (const post of posts) {
+    for (const slug of new Set(post.data.tags)) {
+      postCountBySlug.set(slug, (postCountBySlug.get(slug) ?? 0) + 1);
+    }
+  }
+
+  return [...usedTags].sort((left, right) => {
+    const countDifference =
+      (postCountBySlug.get(right.slug) ?? 0) - (postCountBySlug.get(left.slug) ?? 0);
+    return countDifference || left.slug.localeCompare(right.slug);
+  });
 };

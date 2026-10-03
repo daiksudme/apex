@@ -83,6 +83,16 @@ describe('tags index', () => {
     expect(html).not.toContain('id="tag-others"');
   });
 
+  it('orders tags by post count and uses slug order for ties', () => {
+    const astro = html.indexOf('id="tag-astro"');
+    const cloudflare = html.indexOf('id="tag-cloudflare"');
+    const testing = html.indexOf('id="tag-testing"');
+
+    expect(astro).toBeGreaterThan(-1);
+    expect(astro).toBeLessThan(cloudflare);
+    expect(cloudflare).toBeLessThan(testing);
+  });
+
   it('shows the latest three posts for each tag in descending publish-date order', () => {
     const astroStart = html.indexOf('id="tag-astro"');
     const cloudflareStart = html.indexOf('id="tag-cloudflare"');
