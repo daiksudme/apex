@@ -25,3 +25,8 @@ export const deriveUsedTags = (
     tone: toneBySlug.get(slug) ?? 'muted',
   }));
 };
+
+export const orderTagsByConfiguration = (
+  usedTags: readonly TagDefinition[],
+  _configuredTags: readonly ConfiguredTag[],
+): TagDefinition[] => [...usedTags];
