@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { build } from 'astro';
+import { execFileSync } from 'node:child_process';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -17,13 +17,13 @@ const linksTo = (html, href) =>
 
 beforeAll(async () => {
   outDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
+  const astroCli = join(process.cwd(), 'node_modules', 'astro', 'bin', 'astro.mjs');
 
-  await build({
-    root: process.cwd(),
-    outDir,
-    logLevel: 'silent',
+  execFileSync(process.execPath, [astroCli, 'build', '--outDir', outDir], {
+    cwd: process.cwd(),
+    stdio: 'pipe',
   });
-});
+}, 30_000);
 
 afterAll(async () => {
   await rm(outDir, { recursive: true, force: true });
