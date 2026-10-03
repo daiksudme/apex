@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { navigation, profile, site, tags as configuredTags } from '../config/site';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { sortPostsByPublishedAt } from '../lib/posts';
+import { deriveUsedTags, orderTagsByConfiguration } from '../lib/tags';
 import BrandLogo from './BrandLogo.astro';
 import Icon from './Icon.astro';
 import Pane from './Pane.astro';
@@ -16,15 +17,12 @@ interface Props {
 const { posts } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
 const latestPosts = sortedPosts.slice(0, 3);
-const configuredTagTones = new Map<string, string>(configuredTags.map((tag) => [tag.slug, tag.tone]));
-const homeTags = [...new Set(sortedPosts.flatMap((post) => post.data.tags))].map((slug) => ({
-  slug,
-  tone: configuredTagTones.get(slug) ?? 'muted',
-}));
+const homeTags = deriveUsedTags(sortedPosts, configuredTags);
+const siteTags = orderTagsByConfiguration(homeTags, configuredTags);
 const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
 ---
 
-<SiteLayout>
+<SiteLayout siteTags={siteTags}>
   <div class="dashboard">
     <Pane class="welcome-pane" title="Welcome" headingId="welcome-heading" titleElement="div">
       <p class="command-line" lang="en"><TerminalPrompt /> <span class="command">cat welcome.txt</span></p>

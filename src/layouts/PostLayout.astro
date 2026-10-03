@@ -3,6 +3,7 @@ import Pane from '../components/Pane.astro';
 import PostTags from '../components/PostTags.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
 import { formatDate, formatIsoDate } from '../lib/date';
+import type { TagDefinition } from '../lib/tags';
 import SiteLayout from './SiteLayout.astro';
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
   publishedAt: Date;
   updatedAt?: Date;
   tags?: string[];
+  siteTags?: TagDefinition[];
 }
 
 const {
@@ -21,13 +23,14 @@ const {
   publishedAt,
   updatedAt,
   tags = [],
+  siteTags = [],
 } = Astro.props;
 
 const sourcePath = `posts/${slug}.md`;
 const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
 ---
 
-<SiteLayout title={title} description={description}>
+<SiteLayout title={title} description={description} siteTags={siteTags}>
   <div class="post-page">
     <Pane as="article" class="post-pane" title="Post" headingId="post-pane-heading" titleElement="div" ariaLabelledBy="post-title">
       <header class="post-header">

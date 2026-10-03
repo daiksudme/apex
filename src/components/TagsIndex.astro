@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { tags as configuredTags } from '../config/site';
 import { formatDate, formatIsoDate } from '../lib/date';
 import { sortPostsByPublishedAt } from '../lib/posts';
+import { deriveUsedTags, orderTagsByConfiguration } from '../lib/tags';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import Pane from './Pane.astro';
 import TerminalPrompt from './TerminalPrompt.astro';
@@ -13,17 +14,8 @@ interface Props {
 
 const { posts } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
-const configuredTagSlugs = new Set<string>(configuredTags.map((tag) => tag.slug));
-const contentTagSlugs = [...new Set(sortedPosts.flatMap((post) => post.data.tags))];
-const contentTagSlugSet = new Set(contentTagSlugs);
-const extraTagSlugs = contentTagSlugs
-  .filter((slug) => !configuredTagSlugs.has(slug))
-  .sort((a, b) => a.localeCompare(b));
-
-const tagDefinitions = [
-  ...configuredTags.filter((tag) => contentTagSlugSet.has(tag.slug)),
-  ...extraTagSlugs.map((slug) => ({ slug, tone: 'muted' as const })),
-];
+const usedTags = deriveUsedTags(sortedPosts, configuredTags);
+const tagDefinitions = orderTagsByConfiguration(usedTags, configuredTags);
 
 const tagGroups = tagDefinitions.map((tag) => ({
   ...tag,
@@ -33,7 +25,7 @@ const tagGroups = tagDefinitions.map((tag) => ({
 const description = '記事をタグごとに見つけられる一覧です。各タグの最新記事を表示します。';
 ---
 
-<SiteLayout title="Tags" description={description}>
+<SiteLayout title="Tags" description={description} siteTags={tagDefinitions}>
   <div class="tags-index-page">
     <Pane
       class="tags-index-pane"
@@ -98,29 +90,6 @@ const description = '記事をタグごとに見つけられる一覧です。�
     min-height: 100%;
   }
 
-  :global(.tags-index-pane > .pane-heading) {
-    padding-block: 0.35rem 1rem;
-  }
-
-  :global(.tags-index-pane > .pane-heading .pane-title) {
-    gap: 0.8rem;
-    color: var(--text);
-    font-size: clamp(1.75rem, 3vw, 2.35rem);
-    font-weight: 750;
-    letter-spacing: -0.045em;
-    line-height: 1.15;
-    margin: 0;
-  }
-
-  :global(.tags-index-pane > .pane-heading .pane-title .chevron) {
-    color: var(--cyan);
-    font-size: 1.15em;
-  }
-
-  :global(.tags-index-pane > .pane-heading .pane-label) {
-    align-self: end;
-    padding-bottom: 0.15rem;
-  }
 
   .tags-index-intro {
     padding-block: 1rem 1.5rem;
@@ -226,10 +195,6 @@ const description = '記事をタグごとに見つけられる一覧です。�
   }
 
   @media (max-width: 640px) {
-    :global(.tags-index-pane > .pane-heading .pane-title) {
-      font-size: clamp(1.55rem, 8vw, 1.9rem);
-    }
-
     .tag-post-list li {
       grid-template-columns: minmax(0, 1fr);
       gap: 0.1rem;

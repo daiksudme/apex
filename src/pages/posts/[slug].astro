@@ -1,21 +1,28 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { tags as configuredTags } from '../../config/site';
 import PostLayout from '../../layouts/PostLayout.astro';
+import { deriveUsedTags, orderTagsByConfiguration, type TagDefinition } from '../../lib/tags';
 
 export async function getStaticPaths() {
   const posts = await getCollection('posts');
+  const siteTags = orderTagsByConfiguration(
+    deriveUsedTags(posts, configuredTags),
+    configuredTags,
+  );
 
   return posts.map((post) => ({
     params: { slug: post.id },
-    props: { post },
+    props: { post, siteTags },
   }));
 }
 
 interface Props {
   post: CollectionEntry<'posts'>;
+  siteTags: TagDefinition[];
 }
 
-const { post } = Astro.props;
+const { post, siteTags } = Astro.props;
 const { Content } = await render(post);
 ---
 
@@ -26,6 +33,7 @@ const { Content } = await render(post);
   publishedAt={post.data.publishedAt}
   updatedAt={post.data.updatedAt}
   tags={post.data.tags}
+  siteTags={siteTags}
 >
   <Content />
 </PostLayout>
