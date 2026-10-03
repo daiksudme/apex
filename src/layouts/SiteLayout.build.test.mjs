@@ -1,15 +1,16 @@
+// @ts-nocheck
 import { build } from 'astro';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-let outDir: string;
+let outDir;
 
-const readGeneratedPage = (...segments: string[]) =>
+const readGeneratedPage = (...segments) =>
   readFile(join(outDir, ...segments, 'index.html'), 'utf8');
 
-const linksTo = (html: string, href: string) =>
+const linksTo = (html, href) =>
   [...html.matchAll(new RegExp(`<a\\b[^>]*href="${href}"[^>]*>`, 'g'))].map(
     (match) => match[0],
   );
