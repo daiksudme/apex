@@ -132,6 +132,51 @@ describe('generated navigation', () => {
 
 });
 
+describe('generated Markdown body', () => {
+  const readPostBody = async () => {
+    const html = await readGeneratedPage('posts', 'fixture-post');
+    return html.match(/<div\b[^>]*class="post-content"[^>]*>(.*?)<\/div>/s)?.[1] ?? '';
+  };
+
+  it('renders a fenced code block with its content', async () => {
+    const body = await readPostBody();
+    const code = body.match(/<pre\b[^>]*>\s*<code\b[^>]*>(.*?)<\/code>\s*<\/pre>/s)?.[1] ?? '';
+
+    expect(code.replace(/<[^>]*>/g, '').trim()).toBe('const fixture = 42;');
+  });
+
+  it('renders table headers and cells', async () => {
+    const body = await readPostBody();
+    const table = body.match(/<table\b[^>]*>(.*?)<\/table>/s)?.[1] ?? '';
+
+    expect([...table.matchAll(/<th\b[^>]*>(.*?)<\/th>/gs)].map((match) => match[1]))
+      .toEqual(['Feature', 'Result']);
+    expect([...table.matchAll(/<td\b[^>]*>(.*?)<\/td>/gs)].map((match) => match[1]))
+      .toEqual(['Markdown', 'Generated HTML']);
+  });
+
+  it('renders an image with its alt text and source', async () => {
+    const body = await readPostBody();
+    const image = body.match(/<img\b[^>]*>/)?.[0] ?? '';
+
+    expect(image).toContain('alt="Fixture diagram"');
+    expect(image).toContain('src="/images/fixture-diagram.svg"');
+  });
+
+  it('renders an external link with noopener and without noreferrer', async () => {
+    const body = await readPostBody();
+    const link = [...body.matchAll(/<a\b[^>]*>.*?<\/a>/gs)]
+      .map((match) => match[0])
+      .find((anchor) => anchor.includes('href="https://example.com/fixture-reference"')) ?? '';
+    const rel = link.match(/\brel="([^"]*)"/)?.[1].split(/\s+/) ?? [];
+
+    expect(link).toContain('Fixture reference</a>');
+    expect(link).toContain('target="_blank"');
+    expect(rel).toEqual(['noopener']);
+    expect(rel).not.toContain('noreferrer');
+  });
+});
+
 describe('tag references during build', () => {
   it('rejects duplicate catalog slugs before rendering conflicting tag groups', async () => {
     const projectDir = await prepareProject();
