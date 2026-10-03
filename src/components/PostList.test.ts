@@ -3,6 +3,11 @@ import type { CollectionEntry } from 'astro:content';
 import { describe, expect, it } from 'vitest';
 import PostList from './PostList.astro';
 
+const tagDefinitions = [
+  { slug: 'devops', tone: 'pink' },
+  { slug: 'ai', tone: 'purple' },
+];
+
 const posts = [
   {
     id: 'newer-post',
@@ -27,7 +32,7 @@ const posts = [
 describe('post list', () => {
   it('renders post metadata and links with h2 headings by default', async () => {
     const container = await AstroContainer.create();
-    const html = await container.renderToString(PostList, { props: { posts } });
+    const html = await container.renderToString(PostList, { props: { posts, tagDefinitions } });
 
     expect(html).toContain('href="/posts/newer-post"');
     expect(html).toContain('href="/posts/older-post"');
@@ -35,6 +40,8 @@ describe('post list', () => {
     expect(html).toContain('新しい記事の概要です。');
     expect(html).toContain('#devops');
     expect(html).toContain('#ai');
+    expect(html).toMatch(/href="\/tags#tag-devops"[^>]*data-tone="pink"/);
+    expect(html).toMatch(/href="\/tags#tag-ai"[^>]*data-tone="purple"/);
     expect(html.match(/<h1\b/g)).toBeNull();
     expect(html.match(/<h2\b/g)).toHaveLength(2);
   });
@@ -42,7 +49,7 @@ describe('post list', () => {
   it('can render post headings as h3 for embedded lists', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(PostList, {
-      props: { posts, headingLevel: 'h3' },
+      props: { posts, tagDefinitions, headingLevel: 'h3' },
     });
 
     expect(html.match(/<h2\b/g)).toBeNull();
@@ -52,7 +59,7 @@ describe('post list', () => {
   it('uses the requested heading level for the empty state', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(PostList, {
-      props: { posts: [], headingLevel: 'h3' },
+      props: { posts: [], tagDefinitions, headingLevel: 'h3' },
     });
 
     expect(html).toMatch(/<h3 class="empty-state-title"[^>]*>まだ記事はありません。<\/h3>/);
