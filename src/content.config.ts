@@ -1,5 +1,5 @@
 import { defineCollection } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
 const posts = defineCollection({
@@ -13,4 +13,14 @@ const posts = defineCollection({
   }),
 });
 
-export const collections = { posts };
+const tags = defineCollection({
+  loader: file('src/content/tags.yaml'),
+  schema: z.object({
+    tags: z.array(z.object({
+      slug: z.string(),
+      tone: z.enum(['blue', 'purple', 'green', 'pink', 'yellow', 'orange', 'cyan', 'muted']),
+    })),
+  }),
+});
+
+export const collections = { posts, tags };

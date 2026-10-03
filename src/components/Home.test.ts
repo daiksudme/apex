@@ -1,5 +1,6 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import type { CollectionEntry } from 'astro:content';
+import { tagDefinitions } from '../../tests/fixtures/tags';
 import { beforeAll, describe, expect, it } from 'vitest';
 import Home from './Home.astro';
 
@@ -49,7 +50,7 @@ beforeAll(async () => {
   const container = await AstroContainer.create();
   html = await container.renderToString(Home, {
     request: new Request('https://example.test/'),
-    props: { posts },
+    props: { posts, tagDefinitions },
   });
   // Collect text runs for assertions only. This is not an HTML sanitizer.
   text = [...html.matchAll(/>([^<]+)</g)].map((match) => match[1]).join('');
@@ -104,6 +105,7 @@ describe('home', () => {
     const tagHtml = await container.renderToString(Home, {
       request: new Request('https://example.test/'),
       props: {
+        tagDefinitions,
         posts: [
           {
             id: 'tag-source',
@@ -217,7 +219,7 @@ describe('home', () => {
     const container = await AstroContainer.create();
     const emptyHtml = await container.renderToString(Home, {
       request: new Request('https://example.test/'),
-      props: { posts: [] },
+      props: { posts: [], tagDefinitions },
     });
 
     expect(emptyHtml).toContain('0 posts');

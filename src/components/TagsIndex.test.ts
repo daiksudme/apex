@@ -1,5 +1,6 @@
 import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import type { CollectionEntry } from 'astro:content';
+import { tagDefinitions } from '../../tests/fixtures/tags';
 import { beforeAll, describe, expect, it } from 'vitest';
 import TagsIndex from './TagsIndex.astro';
 
@@ -58,7 +59,7 @@ beforeAll(async () => {
   const container = await AstroContainer.create();
   html = await container.renderToString(TagsIndex, {
     request: new Request('https://example.test/tags'),
-    props: { posts },
+    props: { posts, tagDefinitions },
   });
   text = [...html.matchAll(/>([^<]+)</g)].map((match) => match[1]).join('');
 });

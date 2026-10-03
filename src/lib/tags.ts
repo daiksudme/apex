@@ -1,5 +1,3 @@
-import { tags as configuredTags } from '../config/site';
-
 export interface TagDefinition {
   slug: string;
   tone: string;
@@ -13,9 +11,10 @@ interface TagSource {
 
 export const deriveUsedTags = (
   posts: readonly TagSource[],
+  definitions: readonly TagDefinition[],
 ): TagDefinition[] => {
   const toneBySlug = new Map<string, string>(
-    configuredTags.map((tag) => [tag.slug, tag.tone]),
+    definitions.map((tag) => [tag.slug, tag.tone]),
   );
 
   return [...new Set(posts.flatMap((post) => post.data.tags))].map((slug) => ({
@@ -24,12 +23,13 @@ export const deriveUsedTags = (
   }));
 };
 
-export const orderTagsByConfiguration = (
+export const orderTagsByDefinition = (
   usedTags: readonly TagDefinition[],
+  definitions: readonly TagDefinition[],
 ): TagDefinition[] => {
   const usedTagBySlug = new Map(usedTags.map((tag) => [tag.slug, tag]));
-  const configuredTagSlugs = new Set<string>(configuredTags.map((tag) => tag.slug));
-  const configuredTagDefinitions = configuredTags.flatMap((configuredTag) => {
+  const configuredTagSlugs = new Set<string>(definitions.map((tag) => tag.slug));
+  const configuredTagDefinitions = definitions.flatMap((configuredTag) => {
     const tag = usedTagBySlug.get(configuredTag.slug);
     return tag ? [tag] : [];
   });

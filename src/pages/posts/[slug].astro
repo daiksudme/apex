@@ -1,11 +1,12 @@
 ---
-import { getCollection, render, type CollectionEntry } from 'astro:content';
+import { render, type CollectionEntry } from 'astro:content';
+import { getBlogContent } from '../../lib/content';
 import PostLayout from '../../layouts/PostLayout.astro';
-import { deriveUsedTags, orderTagsByConfiguration, type TagDefinition } from '../../lib/tags';
+import { deriveUsedTags, orderTagsByDefinition, type TagDefinition } from '../../lib/tags';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('posts');
-  const siteTags = orderTagsByConfiguration(deriveUsedTags(posts));
+  const { posts, tagDefinitions } = await getBlogContent();
+  const siteTags = orderTagsByDefinition(deriveUsedTags(posts, tagDefinitions), tagDefinitions);
 
   return posts.map((post) => ({
     params: { slug: post.id },

@@ -1,0 +1,26 @@
+catalog:
+  tags:
+    - slug: astro
+      tone: blue
+    - slug: cloudflare
+      tone: purple
+    - slug: github
+      tone: green
+    - slug: development
+      tone: pink
+    - slug: terminal
+      tone: yellow
+    - slug: tooling
+      tone: orange
+    - slug: productivity
+      tone: cyan
+    - slug: essay
+      tone: purple
+    - slug: others
+      tone: muted
+    - slug: ai
+      tone: muted
+    - slug: continuous-delivery
+      tone: muted
+    - slug: devops
+      tone: muted

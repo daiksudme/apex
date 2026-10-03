@@ -71,9 +71,9 @@ describe('generated navigation', () => {
 
   it('renders only content-backed sidebar tags with canonical fragment links and tones on every page', async () => {
     const expectedTags = [
-      { slug: 'development', tone: 'pink' },
-      { slug: 'essay', tone: 'purple' },
-      { slug: 'fixture-tag', tone: 'muted' },
+      { slug: 'fixture-tag', tone: 'purple' },
+      { slug: 'development', tone: 'orange' },
+      { slug: 'essay', tone: 'blue' },
     ];
 
     for (const segments of [[], ['posts'], ['tags'], ['posts', 'fixture-post']]) {
@@ -83,6 +83,7 @@ describe('generated navigation', () => {
       expect(sidebar).not.toBe('');
       expect(sidebar).not.toContain('#astro');
       expect(sidebar).not.toContain('#cloudflare');
+      expect(sidebar).not.toContain('#unused-tag');
 
       let previousIndex = -1;
       for (const tag of expectedTags) {
@@ -90,7 +91,8 @@ describe('generated navigation', () => {
         const index = sidebar.indexOf(href);
         expect(index).toBeGreaterThan(previousIndex);
         expect(sidebar).toContain(`#${tag.slug}`);
-        expect(sidebar).toContain(`data-tone="${tag.tone}"`);
+        const anchor = [...sidebar.matchAll(/<a\b[^>]*>/g)].map((match) => match[0]).find((link) => link.includes(href));
+        expect(anchor).toContain(`data-tone="${tag.tone}"`);
         previousIndex = index;
       }
     }

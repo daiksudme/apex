@@ -1,8 +1,8 @@
 ---
-import { getCollection } from 'astro:content';
+import { getBlogContent } from '../../lib/content';
 import TagsIndex from '../../components/TagsIndex.astro';
 
-const posts = await getCollection('posts');
+const { posts, tagDefinitions } = await getBlogContent();
 ---
 
-<TagsIndex posts={posts} />
+<TagsIndex posts={posts} tagDefinitions={tagDefinitions} />
