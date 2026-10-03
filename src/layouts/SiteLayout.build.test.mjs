@@ -19,6 +19,11 @@ const activeLinksTo = (html, href) =>
 const sidebarTags = (html) =>
   html.match(new RegExp('<nav\\b[^>]*class="sidebar-tags"[^>]*>.*?</nav>', 's'))?.[0] ?? '';
 
+const postTagLinkTo = (html, slug) =>
+  [...html.matchAll(/<a\\b[^>]*class="post-tag"[^>]*>/g)]
+    .map((match) => match[0])
+    .find((link) => link.includes(`href="/tags#tag-${slug}"`)) ?? '';
+
 async function prepareProject() {
   const projectDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
   projectDirs.push(projectDir);
@@ -109,6 +114,18 @@ describe('generated navigation', () => {
       }
     }
   });
+
+  it('applies fixture catalog tones to post tags rendered by lists and article layout', async () => {
+    for (const segments of [[], ['posts']]) {
+      const html = await readGeneratedPage(...segments);
+      expect(postTagLinkTo(html, 'development')).toContain('data-tone="orange"');
+    }
+
+    const articleHtml = await readGeneratedPage('posts', 'fixture-post');
+    expect(postTagLinkTo(articleHtml, 'development')).toContain('data-tone="orange"');
+    expect(postTagLinkTo(articleHtml, 'fixture-tag')).toContain('data-tone="purple"');
+  });
+
 });
 
 describe('tag references during build', () => {
