@@ -99,6 +99,39 @@ describe('home', () => {
     expect(tagsPane).toContain('記事で使っているタグ。');
   });
 
+  it('applies configured and fallback tones to shared home and sidebar tags', async () => {
+    const container = await AstroContainer.create();
+    const tagHtml = await container.renderToString(Home, {
+      request: new Request('https://example.test/'),
+      props: {
+        posts: [
+          {
+            id: 'tag-source',
+            data: {
+              title: 'タグ確認',
+              description: 'タグ表示確認用の記事です。',
+              publishedAt: new Date('2026-10-01T00:00:00.000Z'),
+              tags: ['custom', 'development'],
+            },
+          },
+        ] as CollectionEntry<'posts'>[],
+      },
+    });
+
+    const tagsPane = tagHtml.match(
+      /<section\b[^>]*class="pane tags-pane"[^>]*>.*?<\/section>/s,
+    )?.[0] ?? '';
+    const sidebarTags = tagHtml.match(
+      /<nav\b[^>]*class="sidebar-tags"[^>]*>.*?<\/nav>/s,
+    )?.[0] ?? '';
+
+    expect(tagsPane).toMatch(/href="\/tags#tag-custom"[^>]*data-tone="muted"/);
+    expect(tagsPane).toMatch(/href="\/tags#tag-development"[^>]*data-tone="pink"/);
+    expect(sidebarTags).toMatch(/href="\/tags#tag-development"[^>]*data-tone="pink"/);
+    expect(sidebarTags).toMatch(/href="\/tags#tag-custom"[^>]*data-tone="muted"/);
+    expect(sidebarTags.indexOf('#development')).toBeLessThan(sidebarTags.indexOf('#custom'));
+  });
+
   it('uses the shared pane header for every main content pane', () => {
     expect(html.match(/class="pane-heading"/g)).toHaveLength(5);
     for (const id of ['welcome-heading', 'profile-heading', 'posts-heading', 'tags-heading', 'commits-heading']) {
