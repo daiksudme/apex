@@ -32,7 +32,7 @@ export const navigation = [
   { label: 'Zenn', href: profile.zennUrl, icon: 'link' },
 ] as const;
 
-// Tags shown in the site navigation and home page.
+// Configured tag tones and relative ordering. Article content determines which tags are shown.
 export const tags = [
   { slug: 'astro', tone: 'blue' },
   { slug: 'cloudflare', tone: 'purple' },

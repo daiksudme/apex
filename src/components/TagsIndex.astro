@@ -1,6 +1,5 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { tags as configuredTags } from '../config/site';
 import { formatDate, formatIsoDate } from '../lib/date';
 import { sortPostsByPublishedAt } from '../lib/posts';
 import { deriveUsedTags, orderTagsByConfiguration } from '../lib/tags';
@@ -14,8 +13,8 @@ interface Props {
 
 const { posts } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
-const usedTags = deriveUsedTags(sortedPosts, configuredTags);
-const tagDefinitions = orderTagsByConfiguration(usedTags, configuredTags);
+const usedTags = deriveUsedTags(sortedPosts);
+const tagDefinitions = orderTagsByConfiguration(usedTags);
 
 const tagGroups = tagDefinitions.map((tag) => ({
   ...tag,

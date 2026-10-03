@@ -73,11 +73,11 @@ describe('tags index', () => {
     expect(html.match(/<h1\b/g)).toHaveLength(1);
   });
 
-  it('shows only tags used by posts and keeps content-only tags', () => {
+  it('shows only tags used by posts with configured and fallback tones', () => {
     expect(html).toContain('3 tags');
-    expect(html).toContain('id="tag-astro"');
-    expect(html).toContain('id="tag-cloudflare"');
-    expect(html).toContain('id="tag-testing"');
+    expect(html).toMatch(/id="tag-astro"[^>]*data-tone="blue"/);
+    expect(html).toMatch(/id="tag-cloudflare"[^>]*data-tone="purple"/);
+    expect(html).toMatch(/id="tag-testing"[^>]*data-tone="muted"/);
     expect(html).not.toContain('id="tag-terminal"');
     expect(html).not.toContain('id="tag-others"');
   });

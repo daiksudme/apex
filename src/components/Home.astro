@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { navigation, profile, site, tags as configuredTags } from '../config/site';
+import { navigation, profile, site } from '../config/site';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { sortPostsByPublishedAt } from '../lib/posts';
 import { deriveUsedTags, orderTagsByConfiguration } from '../lib/tags';
@@ -17,8 +17,8 @@ interface Props {
 const { posts } = Astro.props;
 const sortedPosts = sortPostsByPublishedAt(posts);
 const latestPosts = sortedPosts.slice(0, 3);
-const homeTags = deriveUsedTags(sortedPosts, configuredTags);
-const siteTags = orderTagsByConfiguration(homeTags, configuredTags);
+const homeTags = deriveUsedTags(sortedPosts);
+const siteTags = orderTagsByConfiguration(homeTags);
 const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
 ---
 
