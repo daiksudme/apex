@@ -10,10 +10,10 @@ let outDir;
 const readGeneratedPage = (...segments) =>
   readFile(join(outDir, ...segments, 'index.html'), 'utf8');
 
-const linksTo = (html, href) =>
-  [...html.matchAll(new RegExp(`<a\\b[^>]*href="${href}"[^>]*>`, 'g'))].map(
-    (match) => match[0],
-  );
+const activeLinksTo = (html, href) =>
+  [...html.matchAll(new RegExp(`<a\\b[^>]*href="${href}"[^>]*>`, 'g'))]
+    .map((match) => match[0])
+    .filter((link) => link.includes('class="is-active"'));
 
 beforeAll(async () => {
   outDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
@@ -35,7 +35,7 @@ describe('generated navigation', () => {
     ['tags', '/tags'],
   ])('marks /%s as the current page in both navigation landmarks', async (page, href) => {
     const html = await readGeneratedPage(page);
-    const links = linksTo(html, href);
+    const links = activeLinksTo(html, href);
 
     expect(links).toHaveLength(2);
     for (const link of links) {
@@ -46,7 +46,7 @@ describe('generated navigation', () => {
 
   it('keeps Posts active on generated article pages without marking the index current', async () => {
     const html = await readGeneratedPage('posts', 'hello-daiksud');
-    const links = linksTo(html, '/posts');
+    const links = activeLinksTo(html, '/posts');
 
     expect(links).toHaveLength(2);
     for (const link of links) {
