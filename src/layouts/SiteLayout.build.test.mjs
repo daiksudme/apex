@@ -15,6 +15,9 @@ const activeLinksTo = (html, href) =>
     .map((match) => match[0])
     .filter((link) => link.includes('class="is-active"'));
 
+const sidebarTags = (html) =>
+  html.match(/<nav\\b[^>]*class="sidebar-tags"[^>]*>.*?<\\/nav>/s)?.[0] ?? '';
+
 beforeAll(async () => {
   outDir = await mkdtemp(join(tmpdir(), 'apex-build-'));
   const astroCli = join(process.cwd(), 'node_modules', 'astro', 'bin', 'astro.mjs');
@@ -52,6 +55,28 @@ describe('generated navigation', () => {
     for (const link of links) {
       expect(link).toContain('class="is-active"');
       expect(link).not.toContain('aria-current="page"');
+    }
+  });
+
+  it('renders only content-backed sidebar tags with canonical fragment links on every page', async () => {
+    const expectedTags = ['development', 'essay', 'ai', 'continuous-delivery', 'devops'];
+
+    for (const segments of [[], ['posts'], ['tags'], ['posts', 'hello-daiksud']]) {
+      const html = await readGeneratedPage(...segments);
+      const sidebar = sidebarTags(html);
+
+      expect(sidebar).not.toBe('');
+      expect(sidebar).not.toContain('#astro');
+      expect(sidebar).not.toContain('#cloudflare');
+
+      let previousIndex = -1;
+      for (const tag of expectedTags) {
+        const href = `href="/tags#tag-${tag}"`;
+        const index = sidebar.indexOf(href);
+        expect(index).toBeGreaterThan(previousIndex);
+        expect(sidebar).toContain(`#${tag}`);
+        previousIndex = index;
+      }
     }
   });
 });
