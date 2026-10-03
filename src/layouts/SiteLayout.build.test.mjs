@@ -142,7 +142,10 @@ describe('generated Markdown body', () => {
     const body = await readPostBody();
     const code = body.match(/<pre\b[^>]*>\s*<code\b[^>]*>(.*?)<\/code>\s*<\/pre>/s)?.[1] ?? '';
 
-    expect(code.replace(/<[^>]*>/g, '').trim()).toBe('const fixture = 42;');
+    const text = [...code.matchAll(/(?:^|>)([^<]*)(?=<|$)/g)]
+      .map((match) => match[1]).join('').trim();
+
+    expect(text).toBe('const fixture = 42;');
   });
 
   it('renders table headers and cells', async () => {
