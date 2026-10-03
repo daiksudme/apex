@@ -4,10 +4,15 @@ import Icon from '../components/Icon.astro';
 import Pane from '../components/Pane.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
 import { getPageTitle } from '../lib/page-title';
-import { navigation, profile, site, tags } from '../config/site';
+import type { TagDefinition } from '../lib/tags';
+import { navigation, profile, site } from '../config/site';
 import '../styles/global.css';
-interface Props { title?: string; description?: string }
-const { title, description = site.description } = Astro.props;
+interface Props {
+  title?: string;
+  description?: string;
+  siteTags?: TagDefinition[];
+}
+const { title, description = site.description, siteTags = [] } = Astro.props;
 const pageTitle = getPageTitle(title);
 const year = new Date().getFullYear();
 const pathname = Astro.url.pathname;
@@ -77,8 +82,8 @@ const getSocialBrand = (label: string) => socialBrands[label as keyof typeof soc
       <nav class="sidebar-tags" aria-label="タグ">
         <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Tags</p>
         <ul lang="en">
-          {tags.map((tag) => (
-            <li><a href="/tags" data-tone={tag.tone}><span class="tag-dot" aria-hidden="true"></span>#{tag.slug}</a></li>
+          {siteTags.map((tag) => (
+            <li><a href={`/tags#tag-${tag.slug}`} data-tone={tag.tone}><span class="tag-dot" aria-hidden="true"></span>#{tag.slug}</a></li>
           ))}
         </ul>
       </nav>

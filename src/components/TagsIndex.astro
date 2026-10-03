@@ -25,7 +25,7 @@ const tagGroups = tagDefinitions.map((tag) => ({
 const description = '記事をタグごとに見つけられる一覧です。各タグの最新記事を表示します。';
 ---
 
-<SiteLayout title="Tags" description={description}>
+<SiteLayout title="Tags" description={description} siteTags={tagDefinitions}>
   <div class="tags-index-page">
     <Pane
       class="tags-index-pane"
