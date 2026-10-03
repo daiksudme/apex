@@ -82,11 +82,17 @@ describe('generated navigation', () => {
       { slug: 'essay', tone: 'blue' },
     ];
 
+    const tagsPage = await readGeneratedPage('tags');
+    const tagIds = new Set([...tagsPage.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
     for (const segments of [[], ['posts'], ['tags'], ['posts', 'fixture-post']]) {
       const html = await readGeneratedPage(...segments);
       const sidebar = sidebarTags(html);
 
       expect(sidebar).not.toBe('');
+      expect([...sidebar.matchAll(/<a\b/g)]).toHaveLength(expectedTags.length);
+      for (const [, target] of html.matchAll(/href="\/tags#([^"]+)"/g)) {
+        expect(tagIds.has(target), `Missing tag target: ${target}`).toBe(true);
+      }
       expect(sidebar).not.toContain('#astro');
       expect(sidebar).not.toContain('#cloudflare');
       expect(sidebar).not.toContain('#unused-tag');
