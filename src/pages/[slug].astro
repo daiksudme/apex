@@ -6,6 +6,10 @@ import { deriveUsedTags, orderTagsByPostCount, type TagDefinition } from '../lib
 
 export async function getStaticPaths() {
   const { posts, tagDefinitions } = await getBlogContent();
+  const conflictingPost = posts.find((post) => post.id === 'posts' || post.id === 'tags');
+  if (conflictingPost) {
+    throw new Error(`Post slug "${conflictingPost.id}" conflicts with an existing page`);
+  }
   const siteTags = orderTagsByPostCount(deriveUsedTags(posts, tagDefinitions), posts);
 
   return posts.map((post) => ({

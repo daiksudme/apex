@@ -269,3 +269,18 @@ describe('tag references during build', () => {
     expect(result.stdout + result.stderr).toContain('undefined-tag');
   }, 30_000);
 });
+
+
+describe('root article route collisions', () => {
+  it.each(['posts', 'tags'])('rejects an article that would occupy /%s', async (slug) => {
+    const projectDir = await prepareProject();
+    await cp('tests/fixtures/content/posts/fixture-post.md', join(projectDir, `src/content/posts/${slug}.md`));
+    const result = spawnSync(process.execPath, [astroCli, 'build'], {
+      cwd: projectDir,
+      encoding: 'utf8',
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stdout + result.stderr).toContain(`Post slug "${slug}" conflicts with an existing page`);
+  }, 30_000);
+});
