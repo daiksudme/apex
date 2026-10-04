@@ -59,6 +59,16 @@ afterAll(async () => {
 });
 
 describe('generated navigation', () => {
+  it.each(['fixture-post', 'second-post', 'third-post', 'profile'])('starts %s with its common terminal command', async (slug) => {
+    const html = await readGeneratedPage(slug);
+    const article = html.match(/<article\b[^>]*aria-labelledby="post-title"[^>]*>(.*?)<\/article>/s)?.[1] ?? '';
+    expect(article).not.toContain('pane-heading');
+    const firstLine = article.match(/<p\b[^>]*>(.*?)<\/p>/s)?.[1] ?? '';
+    expect(firstLine).toContain(`cat ${slug}.md`);
+    expect(firstLine).not.toContain('cat posts/');
+    expect(article).toMatch(/<h1\b[^>]*id="post-title"/);
+  });
+
   it('serves profile through common metadata, lists, tags and navigation', async () => {
     const html = await readGeneratedPage('profile');
     expect(html).toContain('フィクスチャーの自己紹介');

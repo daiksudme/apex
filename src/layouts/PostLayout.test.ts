@@ -8,14 +8,14 @@ const tagDefinitions = [
 ];
 
 describe('post layout', () => {
-  it('renders article metadata and body in the shared site shell', async () => {
+  it.each(['example-post', 'profile'])('renders %s metadata and body in the shared site shell', async (slug) => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(PostLayout, {
-      request: new Request('https://example.test/posts/example-post'),
+      request: new Request(`https://example.test/${slug}`),
       props: {
         title: '記事タイトル',
         description: '記事の概要です。',
-        slug: 'example-post',
+        slug,
         publishedAt: new Date('2026-10-01T00:00:00.000Z'),
         updatedAt: new Date('2026-10-02T00:00:00.000Z'),
         tags: ['astro', 'development'],
@@ -30,7 +30,12 @@ describe('post layout', () => {
     const article = html.match(/<article\b[^>]*>/)?.[0] ?? '';
     expect(article).toContain('class="pane post-pane"');
     expect(article).toContain('aria-labelledby="post-title"');
-    expect(html).toContain('cat posts/example-post.md');
+    const articleBody = html.match(/<article\b[^>]*>(.*?)<\/article>/s)?.[1] ?? '';
+    expect(articleBody).not.toContain('pane-heading');
+    expect(articleBody).not.toContain('post-pane-heading');
+    const firstLine = articleBody.match(/<p\b[^>]*>(.*?)<\/p>/s)?.[1] ?? '';
+    expect(firstLine).toContain(`cat ${slug}.md`);
+    expect(firstLine).not.toContain('cat posts/');
     expect(html).toMatch(/<h1 id="post-title"[^>]*>記事タイトル<\/h1>/);
     expect(html).toContain('記事の概要です。');
     expect(html).toContain('datetime="2026-10-01"');
@@ -45,7 +50,7 @@ describe('post layout', () => {
   it('does not mark the posts index as the current article page', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(PostLayout, {
-      request: new Request('https://example.test/posts/example-post'),
+      request: new Request('https://example.test/example-post'),
       props: {
         title: '記事タイトル',
         description: '記事の概要です。',
