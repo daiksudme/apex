@@ -246,14 +246,14 @@ describe('home', () => {
     expect(hrefs).toContain('#main-content');
     expect(hrefs).toContain('/posts');
     expect(hrefs).toContain('/tags');
-    expect(hrefs).toContain('/#profile');
+    expect(hrefs).toContain('/profile');
     expect(hrefs).toContain('https://github.com/daiksud');
     expect(hrefs).toContain('https://x.com/daiksud');
     expect(hrefs).toContain('https://zenn.dev/daiksud');
     for (const href of hrefs.filter((value) => value.startsWith('/#'))) {
       expect(ids.has(href.slice(2)), `Missing target: ${href}`).toBe(true);
     }
-    for (const href of ['/profile', '/rss.xml']) {
+    for (const href of ['/rss.xml']) {
       expect(hrefs).not.toContain(href);
     }
 

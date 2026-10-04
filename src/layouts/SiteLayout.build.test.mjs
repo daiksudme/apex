@@ -59,6 +59,23 @@ afterAll(async () => {
 });
 
 describe('generated navigation', () => {
+  it('serves profile through common metadata, lists, tags and navigation', async () => {
+    const html = await readGeneratedPage('profile');
+    expect(html).toContain('フィクスチャーの自己紹介');
+    expect(html).toContain('datetime="2026-01-01"');
+    expect(html).toContain('datetime="2026-01-05"');
+    expect(postTagLinkTo(html, 'development')).toContain('data-tone="orange"');
+    expect(activeLinksTo(html, '/posts')).toHaveLength(2);
+    for (const page of ['posts', 'tags']) {
+      const main = (await readGeneratedPage(page)).match(/<main\b[^>]*>(.*?)<\/main>/s)?.[1] ?? '';
+      expect(main).toMatch(/href="\/profile"[^>]*>\s*(?:<span\b[^>]*>)?フィクスチャーのプロフィール/);
+    }
+    const home = await readGeneratedPage();
+    expect(home).toContain('id="profile"');
+    expect(home.match(/<a\b[^>]*href="\/profile"[^>]*>/g)).toHaveLength(3);
+    expect(home).not.toContain('href="/#profile"');
+  });
+
   it('links to root articles from home, lists, tags, and Markdown', async () => {
     for (const segments of [[], ['posts'], ['tags']]) {
       const html = await readGeneratedPage(...segments);
