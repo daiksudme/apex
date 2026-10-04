@@ -2,6 +2,7 @@
 title: daiksudについて
 description: 効率的にソフトウェアを作り、安心して届けられる環境への関心と、いま学び、試していること。
 publishedAt: 2026-10-01
+updatedAt: 2026-10-04
 tags:
   - devops
   - continuous-delivery
