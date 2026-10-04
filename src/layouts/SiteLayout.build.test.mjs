@@ -59,6 +59,18 @@ afterAll(async () => {
 });
 
 describe('generated navigation', () => {
+  it('links to root articles from home, lists, tags, and Markdown', async () => {
+    for (const segments of [[], ['posts'], ['tags']]) {
+      const html = await readGeneratedPage(...segments);
+      for (const slug of ['fixture-post', 'second-post', 'third-post']) {
+        expect(html).toContain(`href="/${slug}"`);
+        expect(html).not.toContain(`href="/posts/${slug}"`);
+      }
+    }
+    const article = await readGeneratedPage('fixture-post');
+    expect(article).toMatch(/href="\/second-post"[^>]*>Second fixture article<\/a>/);
+  });
+
   it.each(['fixture-post', 'second-post', 'third-post'])('generates /%s without an old page or redirect', async (slug) => {
     const html = await readGeneratedPage(slug);
     expect(html).toContain('class="pane post-pane"');

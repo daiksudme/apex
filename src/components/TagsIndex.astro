@@ -68,7 +68,7 @@ const description = '記事をタグごとに見つけられる一覧です。�
                     <time datetime={formatIsoDate(post.data.publishedAt)}>
                       {formatDate(post.data.publishedAt)}
                     </time>
-                    <a href={`/posts/${post.id}`}>{post.data.title}</a>
+                    <a href={`/${post.id}`}>{post.data.title}</a>
                   </li>
                 ))}
               </ol>
