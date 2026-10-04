@@ -11,16 +11,18 @@ interface Props {
   title?: string;
   description?: string;
   siteTags?: TagDefinition[];
+  activeSection?: 'posts';
 }
-const { title, description = site.description, siteTags = [] } = Astro.props;
+const { title, description = site.description, siteTags = [], activeSection } = Astro.props;
 const pageTitle = getPageTitle(title);
 const year = new Date().getFullYear();
 const pathname = Astro.url.pathname;
 const isCurrentNavigationItem = (href: string) => href === pathname;
 const isActiveNavigationItem = (href: string) =>
+  (activeSection === 'posts' && href === '/posts') || (
   href === '/posts' || href === '/tags'
     ? pathname === href || pathname.startsWith(`${href}/`)
-    : isCurrentNavigationItem(href);
+    : isCurrentNavigationItem(href));
 const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
 const socialBrands = {
   GitHub: 'github',

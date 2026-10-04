@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cp, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import { access, cp, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -59,6 +59,12 @@ afterAll(async () => {
 });
 
 describe('generated navigation', () => {
+  it.each(['fixture-post', 'second-post', 'third-post'])('generates /%s without an old page or redirect', async (slug) => {
+    const html = await readGeneratedPage(slug);
+    expect(html).toContain('class="pane post-pane"');
+    await expect(access(join(outDir, 'posts', slug))).rejects.toThrow();
+  });
+
   it.each([
     ['posts', '/posts'],
     ['tags', '/tags'],
@@ -74,7 +80,7 @@ describe('generated navigation', () => {
   });
 
   it('keeps Posts active on generated article pages without marking the index current', async () => {
-    const html = await readGeneratedPage('posts', 'fixture-post');
+    const html = await readGeneratedPage('fixture-post');
     const links = activeLinksTo(html, '/posts');
 
     expect(links).toHaveLength(2);
@@ -93,7 +99,7 @@ describe('generated navigation', () => {
 
     const tagsPage = await readGeneratedPage('tags');
     const tagIds = new Set([...tagsPage.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
-    for (const segments of [[], ['posts'], ['tags'], ['posts', 'fixture-post']]) {
+    for (const segments of [[], ['posts'], ['tags'], ['fixture-post']]) {
       const html = await readGeneratedPage(...segments);
       const sidebar = sidebarTags(html);
 
@@ -125,7 +131,7 @@ describe('generated navigation', () => {
       expect(postTagLinkTo(html, 'development')).toContain('data-tone="orange"');
     }
 
-    const articleHtml = await readGeneratedPage('posts', 'fixture-post');
+    const articleHtml = await readGeneratedPage('fixture-post');
     expect(postTagLinkTo(articleHtml, 'development')).toContain('data-tone="orange"');
     expect(postTagLinkTo(articleHtml, 'fixture-tag')).toContain('data-tone="purple"');
   });
@@ -134,7 +140,7 @@ describe('generated navigation', () => {
 
 describe('generated Markdown body', () => {
   it('wraps article links without changing Japanese text or scrollable code and tables', async () => {
-    const html = await readGeneratedPage('posts', 'fixture-post');
+    const html = await readGeneratedPage('fixture-post');
     const styles = [...html.matchAll(/<style\b[^>]*>(.*?)<\/style>/gs)]
       .map((match) => match[1]).join('\n');
     const bodyStyles = styles.slice(styles.indexOf('.post-content['));
@@ -152,7 +158,7 @@ describe('generated Markdown body', () => {
   });
 
   const readPostBody = async () => {
-    const html = await readGeneratedPage('posts', 'fixture-post');
+    const html = await readGeneratedPage('fixture-post');
     return html.match(/<div\b[^>]*class="post-content"[^>]*>(.*?)<\/div>/s)?.[1] ?? '';
   };
 
