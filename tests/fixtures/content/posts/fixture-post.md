@@ -23,3 +23,5 @@ const fixture = 42;
 ![Fixture diagram](/images/fixture-diagram.svg)
 
 [Fixture reference](https://example.com/fixture-reference)
+
+[Second fixture article](/second-post)

@@ -1,11 +1,15 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
-import { getBlogContent } from '../../lib/content';
-import PostLayout from '../../layouts/PostLayout.astro';
-import { deriveUsedTags, orderTagsByPostCount, type TagDefinition } from '../../lib/tags';
+import { getBlogContent } from '../lib/content';
+import PostLayout from '../layouts/PostLayout.astro';
+import { deriveUsedTags, orderTagsByPostCount, type TagDefinition } from '../lib/tags';
 
 export async function getStaticPaths() {
   const { posts, tagDefinitions } = await getBlogContent();
+  const conflictingPost = posts.find((post) => post.id === 'posts' || post.id === 'tags');
+  if (conflictingPost) {
+    throw new Error(`Post slug "${conflictingPost.id}" conflicts with an existing page`);
+  }
   const siteTags = orderTagsByPostCount(deriveUsedTags(posts, tagDefinitions), posts);
 
   return posts.map((post) => ({

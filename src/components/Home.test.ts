@@ -210,9 +210,9 @@ describe('home', () => {
     expect(text).toContain('3番目の記事');
     expect(text).not.toContain('一番古い記事');
 
-    const newest = html.indexOf('href="/posts/newest-post"');
-    const second = html.indexOf('href="/posts/second-post"');
-    const third = html.indexOf('href="/posts/third-post"');
+    const newest = html.indexOf('href="/newest-post"');
+    const second = html.indexOf('href="/second-post"');
+    const third = html.indexOf('href="/third-post"');
     expect(newest).toBeGreaterThan(-1);
     expect(newest).toBeLessThan(second);
     expect(second).toBeLessThan(third);
@@ -246,14 +246,14 @@ describe('home', () => {
     expect(hrefs).toContain('#main-content');
     expect(hrefs).toContain('/posts');
     expect(hrefs).toContain('/tags');
-    expect(hrefs).toContain('/#profile');
+    expect(hrefs).toContain('/profile');
     expect(hrefs).toContain('https://github.com/daiksud');
     expect(hrefs).toContain('https://x.com/daiksud');
     expect(hrefs).toContain('https://zenn.dev/daiksud');
     for (const href of hrefs.filter((value) => value.startsWith('/#'))) {
       expect(ids.has(href.slice(2)), `Missing target: ${href}`).toBe(true);
     }
-    for (const href of ['/profile', '/rss.xml']) {
+    for (const href of ['/rss.xml']) {
       expect(hrefs).not.toContain(href);
     }
 

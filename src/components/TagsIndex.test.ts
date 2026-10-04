@@ -101,9 +101,9 @@ describe('tags index', () => {
     expect(astroHtml).toContain('4 posts');
     expect(astroHtml).not.toContain('一番古いAstro記事');
 
-    const newest = astroHtml.indexOf('href="/posts/newest-astro"');
-    const second = astroHtml.indexOf('href="/posts/second-astro"');
-    const third = astroHtml.indexOf('href="/posts/third-astro"');
+    const newest = astroHtml.indexOf('href="/newest-astro"');
+    const second = astroHtml.indexOf('href="/second-astro"');
+    const third = astroHtml.indexOf('href="/third-astro"');
     expect(newest).toBeGreaterThan(-1);
     expect(newest).toBeLessThan(second);
     expect(second).toBeLessThan(third);

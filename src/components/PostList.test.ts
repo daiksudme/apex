@@ -34,8 +34,8 @@ describe('post list', () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(PostList, { props: { posts, tagDefinitions } });
 
-    expect(html).toContain('href="/posts/newer-post"');
-    expect(html).toContain('href="/posts/older-post"');
+    expect(html).toContain('href="/newer-post"');
+    expect(html).toContain('href="/older-post"');
     expect(html).toContain('datetime="2026-10-02"');
     expect(html).toContain('新しい記事の概要です。');
     expect(html).toContain('#devops');

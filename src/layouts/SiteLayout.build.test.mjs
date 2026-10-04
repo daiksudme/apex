@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cp, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import { access, cp, mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -59,6 +59,51 @@ afterAll(async () => {
 });
 
 describe('generated navigation', () => {
+  it.each(['fixture-post', 'second-post', 'third-post', 'profile'])('starts %s with its common terminal command', async (slug) => {
+    const html = await readGeneratedPage(slug);
+    const article = html.match(/<article\b[^>]*aria-labelledby="post-title"[^>]*>(.*?)<\/article>/s)?.[1] ?? '';
+    expect(article).not.toContain('pane-heading');
+    const firstLine = article.match(/<p\b[^>]*>(.*?)<\/p>/s)?.[1] ?? '';
+    expect(firstLine).toContain(`cat ${slug}.md`);
+    expect(firstLine).not.toContain('cat posts/');
+    expect(article).toMatch(/<h1\b[^>]*id="post-title"/);
+  });
+
+  it('serves profile through common metadata, lists, tags and navigation', async () => {
+    const html = await readGeneratedPage('profile');
+    expect(html).toContain('フィクスチャーの自己紹介');
+    expect(html).toContain('datetime="2026-01-01"');
+    expect(html).toContain('datetime="2026-01-05"');
+    expect(postTagLinkTo(html, 'development')).toContain('data-tone="orange"');
+    expect(activeLinksTo(html, '/posts')).toHaveLength(2);
+    for (const page of ['posts', 'tags']) {
+      const main = (await readGeneratedPage(page)).match(/<main\b[^>]*>(.*?)<\/main>/s)?.[1] ?? '';
+      expect(main).toMatch(/href="\/profile"[^>]*>\s*(?:<span\b[^>]*>)?フィクスチャーのプロフィール/);
+    }
+    const home = await readGeneratedPage();
+    expect(home).toContain('id="profile"');
+    expect(home.match(/<a\b[^>]*href="\/profile"[^>]*>/g)).toHaveLength(3);
+    expect(home).not.toContain('href="/#profile"');
+  });
+
+  it('links to root articles from home, lists, tags, and Markdown', async () => {
+    for (const segments of [[], ['posts'], ['tags']]) {
+      const html = await readGeneratedPage(...segments);
+      for (const slug of ['fixture-post', 'second-post', 'third-post']) {
+        expect(html).toContain(`href="/${slug}"`);
+        expect(html).not.toContain(`href="/posts/${slug}"`);
+      }
+    }
+    const article = await readGeneratedPage('fixture-post');
+    expect(article).toMatch(/href="\/second-post"[^>]*>Second fixture article<\/a>/);
+  });
+
+  it.each(['fixture-post', 'second-post', 'third-post'])('generates /%s without an old page or redirect', async (slug) => {
+    const html = await readGeneratedPage(slug);
+    expect(html).toContain('class="pane post-pane"');
+    await expect(access(join(outDir, 'posts', slug))).rejects.toThrow();
+  });
+
   it.each([
     ['posts', '/posts'],
     ['tags', '/tags'],
@@ -74,7 +119,7 @@ describe('generated navigation', () => {
   });
 
   it('keeps Posts active on generated article pages without marking the index current', async () => {
-    const html = await readGeneratedPage('posts', 'fixture-post');
+    const html = await readGeneratedPage('fixture-post');
     const links = activeLinksTo(html, '/posts');
 
     expect(links).toHaveLength(2);
@@ -93,7 +138,7 @@ describe('generated navigation', () => {
 
     const tagsPage = await readGeneratedPage('tags');
     const tagIds = new Set([...tagsPage.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
-    for (const segments of [[], ['posts'], ['tags'], ['posts', 'fixture-post']]) {
+    for (const segments of [[], ['posts'], ['tags'], ['fixture-post']]) {
       const html = await readGeneratedPage(...segments);
       const sidebar = sidebarTags(html);
 
@@ -125,7 +170,7 @@ describe('generated navigation', () => {
       expect(postTagLinkTo(html, 'development')).toContain('data-tone="orange"');
     }
 
-    const articleHtml = await readGeneratedPage('posts', 'fixture-post');
+    const articleHtml = await readGeneratedPage('fixture-post');
     expect(postTagLinkTo(articleHtml, 'development')).toContain('data-tone="orange"');
     expect(postTagLinkTo(articleHtml, 'fixture-tag')).toContain('data-tone="purple"');
   });
@@ -134,7 +179,7 @@ describe('generated navigation', () => {
 
 describe('generated Markdown body', () => {
   it('wraps article links without changing Japanese text or scrollable code and tables', async () => {
-    const html = await readGeneratedPage('posts', 'fixture-post');
+    const html = await readGeneratedPage('fixture-post');
     const styles = [...html.matchAll(/<style\b[^>]*>(.*?)<\/style>/gs)]
       .map((match) => match[1]).join('\n');
     const bodyStyles = styles.slice(styles.indexOf('.post-content['));
@@ -152,7 +197,7 @@ describe('generated Markdown body', () => {
   });
 
   const readPostBody = async () => {
-    const html = await readGeneratedPage('posts', 'fixture-post');
+    const html = await readGeneratedPage('fixture-post');
     return html.match(/<div\b[^>]*class="post-content"[^>]*>(.*?)<\/div>/s)?.[1] ?? '';
   };
 
@@ -222,5 +267,20 @@ describe('tag references during build', () => {
     expect(result.status).toBe(1);
     expect(result.stdout + result.stderr).toContain('old-post');
     expect(result.stdout + result.stderr).toContain('undefined-tag');
+  }, 30_000);
+});
+
+
+describe('root article route collisions', () => {
+  it.each(['posts', 'tags'])('rejects an article that would occupy /%s', async (slug) => {
+    const projectDir = await prepareProject();
+    await cp('tests/fixtures/content/posts/fixture-post.md', join(projectDir, `src/content/posts/${slug}.md`));
+    const result = spawnSync(process.execPath, [astroCli, 'build'], {
+      cwd: projectDir,
+      encoding: 'utf8',
+    });
+
+    expect(result.status).toBe(1);
+    expect(result.stdout + result.stderr).toContain(`Post slug "${slug}" conflicts with an existing page`);
   }, 30_000);
 });
