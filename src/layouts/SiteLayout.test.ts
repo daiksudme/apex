@@ -44,7 +44,8 @@ describe('site layout navigation', () => {
   it('keeps the posts section active on article pages without claiming the index is current', async () => {
     const container = await AstroContainer.create();
     const html = await container.renderToString(SiteLayout, {
-      request: new Request('https://example.test/posts/example-post'),
+      request: new Request('https://example.test/example-post'),
+      props: { activeSection: 'posts' },
       slots: { default: '<h1>記事タイトル</h1>' },
     });
 

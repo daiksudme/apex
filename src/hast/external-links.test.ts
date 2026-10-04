@@ -9,7 +9,7 @@ describe('Markdown external links', () => {
         '[GitHub](https://github.com/daiksud)',
         '[Zenn](https://zenn.dev/daiksud)',
         '[X](https://x.com/daiksud)',
-        '[Internal](/posts/example)',
+        '[Internal](/example)',
         '<a href="https://example.com/raw" rel="ugc">Raw external</a>',
         '[Uppercase scheme](HTTPS://example.com/uppercase)',
       ].join('\n\n'),
@@ -51,7 +51,7 @@ describe('Markdown external links', () => {
 
     const internal = [...html.matchAll(/<a\b[^>]*>/g)]
       .map((match) => match[0])
-      .find((tag) => tag.includes('href="/posts/example"'));
+      .find((tag) => tag.includes('href="/example"'));
     expect(internal).toBeDefined();
     expect(internal).not.toContain('target="_blank"');
     expect(internal).not.toContain('rel="noopener"');

@@ -30,7 +30,11 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 ### 記事ページ
 
-記事は `src/content/posts/<slug>.md` に置き、AstroのContent Collectionから `/posts/<slug>` を静的生成します。`/posts` では全記事を `publishedAt` の新しい順に一覧表示します。
+記事は `src/content/posts/<slug>.md` に置き、AstroのContent Collectionから `/<slug>` を静的生成します。`/posts` では全記事を `publishedAt` の新しい順に一覧表示します。
+
+全個別記事は共通の記事レイアウトを使い、Post paneの見出しを表示せず、先頭のターミナル行を `cat <slug>.md` にします。プロフィールは `profile.md` から `/profile` を生成し、`cat profile.md` を表示します。プロフィールも日付・タグ・一覧掲載のルールは他の記事と同じです。Profileメニューは `/profile` を指し、ホームのProfile paneも残ります。
+
+既存の一覧ルート `/posts` と `/tags` を保護するため、記事名 `posts` と `tags` はビルドエラーになります。旧 `/posts/<slug>` のページやリダイレクトは生成しません。詳しい受け入れ条件は[個別記事のルートと共通表示](docs/behavior/posts.feature.md)を参照してください。
 
 Frontmatterは次の形式です。
 
