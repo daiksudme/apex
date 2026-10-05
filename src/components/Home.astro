@@ -36,7 +36,7 @@ const homeSections = [
       <p class="welcome-description">{site.description}</p>
       <p class="tagline" lang="en">{site.tagline}</p>
       <div class="welcome-links">
-        <p class="eyebrow" lang="en">On this page</p>
+        <p class="command-line" lang="en"><TerminalPrompt /> <span class="command">ls</span></p>
         <nav aria-label="On this page">
           {homeSections.map((item) => (
             <a href={item.href} lang="en"><span aria-hidden="true">#</span>{item.label}</a>
