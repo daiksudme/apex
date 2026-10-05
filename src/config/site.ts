@@ -21,13 +21,10 @@ export const profile = {
   bio: 'よりよい明日をつくるために、技術と創造の力を探求しています。',
 } as const;
 
-// Navigation uses canonical page routes and external destinations.
+// Global navigation uses canonical site routes.
 export const navigation = [
   { label: 'Home', href: '/', icon: 'home' },
   { label: 'Posts', href: '/posts', icon: 'posts' },
   { label: 'Tags', href: '/tags', icon: 'tags' },
   { label: 'Profile', href: '/profile', icon: 'profile' },
-  { label: 'GitHub', href: profile.githubUrl, icon: 'github' },
-  { label: 'X', href: profile.xUrl, icon: 'x' },
-  { label: 'Zenn', href: profile.zennUrl, icon: 'link' },
 ] as const;

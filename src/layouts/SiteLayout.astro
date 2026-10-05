@@ -24,13 +24,6 @@ const isActiveNavigationItem = (href: string) =>
       ? pathname === href || pathname.startsWith(`${href}/`)
       : isCurrentNavigationItem(href)
   );
-const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
-const socialBrands = {
-  GitHub: 'github',
-  X: 'x',
-  Zenn: 'zenn',
-} as const;
-const getSocialBrand = (label: string) => socialBrands[label as keyof typeof socialBrands];
 ---
 
 <!doctype html>
@@ -49,38 +42,19 @@ const getSocialBrand = (label: string) => socialBrands[label as keyof typeof soc
       <a class="brand" href="/" aria-label={`${site.name} ホーム`}>
         {site.name}<span class="cursor" aria-hidden="true"></span>
       </a>
-      <nav class="header-nav" aria-label="メインナビゲーション">
-        {navigation.slice(1).map((item) => (
-          <a
-            href={item.href}
-            lang="en"
-            class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
-            aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
-            target={isExternalHref(item.href) ? '_blank' : undefined}
-            rel={isExternalHref(item.href) ? 'noopener' : undefined}
-          ><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
-        ))}
-      </nav>
       <p class="header-tagline" lang="en">{site.tagline}</p>
     </header>
 
     <Pane as="aside" class="sidebar-pane" ariaLabel="サイトメニュー">
       <nav class="sidebar-nav" aria-label="ページナビゲーション">
-        {navigation.map((item) => {
-          const socialBrand = getSocialBrand(item.label);
-          return (
-            <a
-              href={item.href}
-              lang="en"
-              class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
-              aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
-              target={isExternalHref(item.href) ? '_blank' : undefined}
-              rel={isExternalHref(item.href) ? 'noopener' : undefined}
-            >
-              {socialBrand ? <BrandLogo name={socialBrand} /> : <Icon name={item.icon} />}<span>{item.label}</span>
-            </a>
-          );
-        })}
+        {navigation.map((item) => (
+          <a
+            href={item.href}
+            lang="en"
+            class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
+            aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
+          ><Icon name={item.icon} /><span>{item.label}</span></a>
+        ))}
       </nav>
       <nav class="sidebar-tags" aria-label="タグ">
         <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Tags</p>
@@ -185,7 +159,7 @@ const getSocialBrand = (label: string) => socialBrands[label as keyof typeof soc
     grid-area: header;
     min-height: 84px;
     display: grid;
-    grid-template-columns: max-content minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: 2rem;
     padding: 1.25rem 2rem;
@@ -219,36 +193,6 @@ const getSocialBrand = (label: string) => socialBrands[label as keyof typeof soc
 
     @media (max-width: 640px) {
       font-size: 1.6rem;
-    }
-  }
-
-  .header-nav {
-    display: grid;
-    grid-auto-flow: column;
-    justify-content: end;
-    gap: 1.25rem;
-    font-size: 0.9rem;
-
-    a {
-      white-space: nowrap;
-
-      span {
-        color: var(--muted);
-      }
-
-      &[aria-current='page'],
-      &.is-active {
-        color: var(--cyan);
-        text-decoration: underline;
-
-        span {
-          color: var(--cyan);
-        }
-      }
-    }
-
-    @media (max-width: 960px) {
-      display: none;
     }
   }
 

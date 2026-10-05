@@ -59,6 +59,36 @@ afterAll(async () => {
 });
 
 describe('generated navigation', () => {
+  it('generates a local Home ToC with unique focusable targets near each heading', async () => {
+    const html = await readGeneratedPage();
+    const nav = html.match(/<nav\b[^>]*aria-label="On this page"[^>]*>(.*?)<\/nav>/s)?.[1] ?? '';
+    expect([...nav.matchAll(/href="([^"]+)"/g)].map((match) => match[1]))
+      .toEqual(['#about', '#posts', '#tags', '#commits']);
+    expect(nav).not.toMatch(/aria-current|is-active|target=/);
+    const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const [id, title] of [['about', 'About'], ['posts', 'Latest Posts'], ['tags', 'Tags'], ['commits', 'Recent Commits']]) {
+      const target = html.match(new RegExp(`<section\\b(?=[^>]*id="${id}")[^>]*>.*?</section>`, 's'))?.[0] ?? '';
+      expect(target).toContain('tabindex="-1"');
+      expect(target).toContain(`aria-labelledby="${id}-heading"`);
+      expect(target).toMatch(new RegExp(`<h2\\b[^>]*id="${id}-heading"[^>]*>.*?${title}</h2>`, 's'));
+    }
+  });
+
+  it.each([[], ['posts'], ['tags'], ['profile']])('generates only four global destinations on %j', async (...segments) => {
+    const html = await readGeneratedPage(...segments);
+    const nav = html.match(/<nav\b[^>]*aria-label="ページナビゲーション"[^>]*>(.*?)<\/nav>/s)?.[1] ?? '';
+    expect([...nav.matchAll(/href="([^"]+)"/g)].map((match) => match[1]))
+      .toEqual(['/', '/posts', '/tags', '/profile']);
+    for (const route of ['posts', 'tags', 'profile']) await expect(access(join(outDir, route, 'index.html'))).resolves.toBeUndefined();
+    const header = html.match(/<header\b[^>]*class="site-header"[^>]*>(.*?)<\/header>/s)?.[1] ?? '';
+    expect(header).not.toContain('<nav');
+    const footer = html.match(/<footer\b[^>]*>(.*?)<\/footer>/s)?.[1] ?? '';
+    for (const href of ['https://github.com/daiksud', 'https://x.com/daiksud', 'https://zenn.dev/daiksud']) expect(footer).toContain(`href="${href}"`);
+    expect(html).toContain('href="#main-content"');
+    expect(html).toContain('id="main-content" tabindex="-1"');
+  });
+
   it.each(['fixture-post', 'second-post', 'third-post', 'profile'])('starts %s with its common terminal command', async (slug) => {
     const html = await readGeneratedPage(slug);
     const article = html.match(/<article\b[^>]*aria-labelledby="post-title"[^>]*>(.*?)<\/article>/s)?.[1] ?? '';
@@ -75,14 +105,17 @@ describe('generated navigation', () => {
     expect(html).toContain('datetime="2026-01-01"');
     expect(html).toContain('datetime="2026-01-05"');
     expect(postTagLinkTo(html, 'development')).toContain('data-tone="orange"');
-    expect(activeLinksTo(html, '/posts')).toHaveLength(2);
+    expect(activeLinksTo(html, '/posts')).toHaveLength(1);
     for (const page of ['posts', 'tags']) {
       const main = (await readGeneratedPage(page)).match(/<main\b[^>]*>(.*?)<\/main>/s)?.[1] ?? '';
       expect(main).toMatch(/href="\/profile"[^>]*>\s*(?:<span\b[^>]*>)?フィクスチャーのプロフィール/);
     }
     const home = await readGeneratedPage();
-    expect(home).toContain('id="profile"');
-    expect(home.match(/<a\b[^>]*href="\/profile"[^>]*>/g)).toHaveLength(3);
+    expect(home).toContain('id="about"');
+    const about = home.match(/<section\b(?=[^>]*id="about")[^>]*>(.*?)<\/section>/s)?.[1] ?? '';
+    expect(about).toContain('href="/profile"');
+    expect(about).toContain('詳しいプロフィール');
+    expect(home.match(/<a\b[^>]*href="\/profile"[^>]*>/g)).toHaveLength(2);
     expect(home).not.toContain('href="/#profile"');
   });
 
@@ -107,11 +140,11 @@ describe('generated navigation', () => {
   it.each([
     ['posts', '/posts'],
     ['tags', '/tags'],
-  ])('marks /%s as the current page in both navigation landmarks', async (page, href) => {
+  ])('marks /%s as the current page in the page navigation', async (page, href) => {
     const html = await readGeneratedPage(page);
     const links = activeLinksTo(html, href);
 
-    expect(links).toHaveLength(2);
+    expect(links).toHaveLength(1);
     for (const link of links) {
       expect(link).toContain('class="is-active"');
       expect(link).toContain('aria-current="page"');
@@ -122,7 +155,7 @@ describe('generated navigation', () => {
     const html = await readGeneratedPage('fixture-post');
     const links = activeLinksTo(html, '/posts');
 
-    expect(links).toHaveLength(2);
+    expect(links).toHaveLength(1);
     for (const link of links) {
       expect(link).toContain('class="is-active"');
       expect(link).not.toContain('aria-current="page"');

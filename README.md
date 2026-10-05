@@ -16,15 +16,17 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 | 名称 | 役割 | CSSクラス |
 | --- | --- | --- |
-| Sidebar pane | サイトナビゲーションとTopics | `sidebar-pane` |
-| Welcome pane | ターミナル風の導入、サイト紹介、セクションへの導線 | `welcome-pane` |
-| Profile pane | アバター、名前、所在地、プロフィール | `profile-pane` |
+| Sidebar pane | サイト内4ページのナビゲーションとTags | `sidebar-pane` |
+| Welcome pane | ターミナル風の導入、サイト紹介、On this pageのページ内目次 | `welcome-pane` |
+| About pane | アバター、名前、所在地、短い紹介と詳細Profileへの導線 | `about-pane` |
 | Posts pane | 最新記事。未公開時は空状態を表示 | `posts-pane` |
 | Tags pane | 記事で使われているタグ | `tags-pane` |
 | Commits pane | GitHubの更新履歴への導線 | `commits-pane` |
-| Footer pane | 終端プロンプト、GitHub導線、copyright | `footer-pane` |
+| Footer pane | 終端プロンプト、GitHub / X / Zenn導線、copyright | `footer-pane` |
 
 共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。ホームは合計7つのpaneで構成し、すべて `src/components/Pane.astro` を使います。Sidebar paneとFooter paneは `aside` / `footer` としてサイトシェルの `sidebar` / `footer` Grid Areaに配置し、残る5つは `section` として `dashboard` の直接のGrid Itemになります。共通headerはmain側5 paneで表示し、各pane固有の内容だけをslotで渡します。Headerはトップバーとしてpaneと区別します。
+
+共通NavigationはHome `/`、Posts `/posts`、Tags `/tags`、Profile `/profile` の4ページです。デスクトップではSidebar pane、モバイルでは本文より上のサイトメニューに置き、ヘッダーはブランドとタグラインを表示します。WelcomeのOn this pageはAbout `#about`、Latest Posts `#posts`、Tags `#tags`、Recent Commits `#commits` に移動する目次です。`#` を添えた表示で現在ページの選択状態と区別し、各移動先はキーボードでもフォーカスできます。共通のGitHub / X / ZennリンクはFooter paneに置きます。詳しい受け入れ条件は[ナビゲーションとHomeの目次](docs/behavior/navigation.feature.md)を参照してください。
 
 これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
 
@@ -32,7 +34,7 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 記事は `src/content/posts/<slug>.md` に置き、AstroのContent Collectionから `/<slug>` を静的生成します。`/posts` では全記事を `publishedAt` の新しい順に一覧表示します。
 
-全個別記事は共通の記事レイアウトを使い、Post paneの見出しを表示せず、先頭のターミナル行を `cat <slug>.md` にします。プロフィールは `profile.md` から `/profile` を生成し、`cat profile.md` を表示します。プロフィールも日付・タグ・一覧掲載のルールは他の記事と同じです。Profileメニューは `/profile` を指し、ホームのProfile paneも残ります。
+全個別記事は共通の記事レイアウトを使い、Post paneの見出しを表示せず、先頭のターミナル行を `cat <slug>.md` にします。プロフィールは `profile.md` から `/profile` を生成し、`cat profile.md` を表示します。プロフィールも日付・タグ・一覧掲載のルールは他の記事と同じです。Profileメニューは `/profile` を指し、ホームの短い紹介はAbout paneに置き、詳細Profileへのリンクを表示します。
 
 既存の一覧ルート `/posts` と `/tags` を保護するため、記事名 `posts` と `tags` はビルドエラーになります。旧 `/posts/<slug>` のページやリダイレクトは生成しません。詳しい受け入れ条件は[個別記事のルートと共通表示](docs/behavior/posts.feature.md)を参照してください。
 

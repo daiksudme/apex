@@ -115,6 +115,6 @@ describe('tags index', () => {
   });
 
   it('marks Tags as the current navigation destination', () => {
-    expect(html.match(/href="\/tags"[^>]*aria-current="page"/g)).toHaveLength(2);
+    expect(html.match(/href="\/tags"[^>]*aria-current="page"/g)).toHaveLength(1);
   });
 });
