@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { navigation, profile, site } from '../config/site';
+import { profile, site } from '../config/site';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { sortPostsByPublishedAt } from '../lib/posts';
 import { deriveUsedTags, orderTagsByPostCount, type TagDefinition } from '../lib/tags';
@@ -20,7 +20,12 @@ const sortedPosts = sortPostsByPublishedAt(posts);
 const latestPosts = sortedPosts.slice(0, 3);
 const homeTags = orderTagsByPostCount(deriveUsedTags(sortedPosts, tagDefinitions), sortedPosts);
 const siteTags = homeTags;
-const isExternalHref = (href: string) => href.startsWith('https://') || href.startsWith('http://');
+const homeSections = [
+  { label: 'About', href: '#about' },
+  { label: 'Latest Posts', href: '#posts' },
+  { label: 'Tags', href: '#tags' },
+  { label: 'Recent Commits', href: '#commits' },
+] as const;
 ---
 
 <SiteLayout siteTags={siteTags}>
@@ -31,15 +36,10 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       <p class="welcome-description">{site.description}</p>
       <p class="tagline" lang="en">{site.tagline}</p>
       <div class="welcome-links">
-        <p class="command-line" lang="en"><TerminalPrompt /> <span class="command">ls</span></p>
-        <nav aria-label="ホームのセクション">
-          {navigation.slice(1).map((item) => (
-            <a
-              href={item.href}
-              lang="en"
-              target={isExternalHref(item.href) ? '_blank' : undefined}
-              rel={isExternalHref(item.href) ? 'noopener' : undefined}
-            ><span aria-hidden="true">[ </span>{item.label.toLowerCase()}<span aria-hidden="true"> ]</span></a>
+        <p class="eyebrow" lang="en">On this page</p>
+        <nav aria-label="On this page">
+          {homeSections.map((item) => (
+            <a href={item.href} lang="en"><span aria-hidden="true">#</span>{item.label}</a>
           ))}
         </nav>
       </div>
@@ -83,7 +83,7 @@ const isExternalHref = (href: string) => href.startsWith('https://') || href.sta
       <p class="tags-note">記事で使っているタグ。</p>
     </Pane>
 
-    <Pane class="commits-pane" title="Recent Commits" headingId="commits-heading">
+    <Pane id="commits" class="commits-pane" title="Recent Commits" headingId="commits-heading" tabindex={-1}>
       <a slot="meta" class="pane-link" href={site.commitsUrl} lang="en" target="_blank" rel="noopener">GitHub <Icon name="arrow" size={16} /></a>
       <div class="repository-summary">
         <span class="repository-icon"><Icon name="branch" size={26} /></span>

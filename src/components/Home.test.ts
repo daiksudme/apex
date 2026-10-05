@@ -85,6 +85,23 @@ describe('home', () => {
     expect(html).not.toContain('id="profile"');
   });
 
+  it('uses On this page only for four unique focusable Home sections', () => {
+    const welcome = html.match(/<section\b[^>]*class="pane welcome-pane"[^>]*>(.*?)<\/section>/s)?.[1] ?? '';
+    expect(welcome).toContain('On this page');
+    const nav = welcome.match(/<nav\b[^>]*aria-label="On this page"[^>]*>(.*?)<\/nav>/s)?.[1] ?? '';
+    expect([...nav.matchAll(/href="([^"]+)"/g)].map((match) => match[1]))
+      .toEqual(['#about', '#posts', '#tags', '#commits']);
+    expect(nav).not.toMatch(/aria-current|is-active|target=|\[ /);
+    for (const [id, title] of [['about', 'About'], ['posts', 'Latest Posts'], ['tags', 'Tags'], ['commits', 'Recent Commits']]) {
+      expect(html.match(new RegExp(`id="${id}"`, 'g'))).toHaveLength(1);
+      const target = html.match(new RegExp(`<section\\b(?=[^>]*id="${id}")[^>]*>.*?</section>`, 's'))?.[0] ?? '';
+      expect(target).toContain('tabindex="-1"');
+      expect(target).toContain(`id="${id}-heading"`);
+      expect(target).toMatch(new RegExp(`<h2\\b[^>]*>.*?${title}</h2>`, 's'));
+      expect(nav).toMatch(new RegExp(`<span[^>]*>#</span>${title}`));
+    }
+  });
+
   it('uses tag terminology consistently', () => {
     expect(html).toContain('class="sidebar-tags"');
     expect(html).toContain('aria-label="タグ"');

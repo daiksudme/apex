@@ -16,8 +16,8 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 
 | 名称 | 役割 | CSSクラス |
 | --- | --- | --- |
-| Sidebar pane | サイトナビゲーションとTopics | `sidebar-pane` |
-| Welcome pane | ターミナル風の導入、サイト紹介、セクションへの導線 | `welcome-pane` |
+| Sidebar pane | サイト内4ページのナビゲーションとTags | `sidebar-pane` |
+| Welcome pane | ターミナル風の導入、サイト紹介、On this pageのページ内目次 | `welcome-pane` |
 | About pane | アバター、名前、所在地、短い紹介と詳細Profileへの導線 | `about-pane` |
 | Posts pane | 最新記事。未公開時は空状態を表示 | `posts-pane` |
 | Tags pane | 記事で使われているタグ | `tags-pane` |
@@ -25,6 +25,8 @@ Astroで構築した静的サイトです。出力先は `dist/` です。Cloudf
 | Footer pane | 終端プロンプト、GitHub / X / Zenn導線、copyright | `footer-pane` |
 
 共通の外枠は `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` とします。ホームは合計7つのpaneで構成し、すべて `src/components/Pane.astro` を使います。Sidebar paneとFooter paneは `aside` / `footer` としてサイトシェルの `sidebar` / `footer` Grid Areaに配置し、残る5つは `section` として `dashboard` の直接のGrid Itemになります。共通headerはmain側5 paneで表示し、各pane固有の内容だけをslotで渡します。Headerはトップバーとしてpaneと区別します。
+
+共通NavigationはHome `/`、Posts `/posts`、Tags `/tags`、Profile `/profile` の4ページです。デスクトップではSidebar pane、モバイルでは本文より上のサイトメニューに置き、ヘッダーはブランドとタグラインを表示します。WelcomeのOn this pageはAbout `#about`、Latest Posts `#posts`、Tags `#tags`、Recent Commits `#commits` に移動する目次です。`#` を添えた表示で現在ページの選択状態と区別し、各移動先はキーボードでもフォーカスできます。共通のGitHub / X / ZennリンクはFooter paneに置きます。詳しい受け入れ条件は[ナビゲーションとHomeの目次](docs/behavior/navigation.feature.md)を参照してください。
 
 これはブログUIの設計用語です。実際の端末、セッション管理、paneの分割・移動・リサイズ機能を意味しません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` は変更しません。
 
