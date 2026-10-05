@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { resolve, sep } from 'node:path';
 
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE
   ? pathToFileURL(process.env.PLAYWRIGHT_MODULE).href : 'playwright');
@@ -13,7 +13,7 @@ const server = createServer(async (req, res) => {
   try {
     const pathname = new URL(req.url, 'http://localhost').pathname;
     const file = resolve('dist', '.' + (pathname.endsWith('/') ? pathname + 'index.html' : pathname));
-    if (!file.startsWith(resolve('dist') + '/')) throw new Error('Outside dist');
+    if (!file.startsWith(resolve('dist') + sep)) throw new Error('Outside dist');
     res.setHeader('Content-Type', file.endsWith('.css') ? 'text/css' : file.endsWith('.html') ? 'text/html' : 'application/octet-stream');
     res.end(await readFile(file));
   } catch {
