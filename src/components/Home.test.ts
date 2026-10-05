@@ -3,6 +3,7 @@ import type { CollectionEntry } from 'astro:content';
 import { tagDefinitions } from '../../tests/fixtures/tags';
 import { beforeAll, describe, expect, it } from 'vitest';
 import Home from './Home.astro';
+import { profile } from '../config/site';
 
 const posts = [
   {
@@ -64,15 +65,24 @@ describe('home', () => {
     expect(text).not.toMatch(/apex|daiksud@daiksud\.me|daiksud@tokyo/);
   });
 
-  it('renders the welcome, profile, posts, tags and repository panes', () => {
+  it('renders the welcome, about, posts, tags and repository panes', () => {
     expect(text).toContain('つくる。試す。書き残す。');
     expect(html).toMatch(/つくる。<wbr\b[^>]*>試す。<wbr\b[^>]*>書き残す。/);
     expect(text).toContain('Build. Learn. Write. Repeat.');
-    for (const heading of ['Welcome', 'Profile', 'Latest Posts', 'Tags', 'Recent Commits']) {
+    for (const heading of ['Welcome', 'About', 'Latest Posts', 'Tags', 'Recent Commits']) {
       expect(text).toContain(heading);
     }
     expect(html.match(/<h1\b/g)).toHaveLength(1);
     expect(html.indexOf('<h1')).toBeLessThan(html.indexOf('<h2'));
+  });
+
+  it('keeps the short About introduction and links to the detailed Profile article', () => {
+    const about = html.match(/<section\b(?=[^>]*id="about")[^>]*>(.*?)<\/section>/s)?.[1] ?? '';
+    expect(about).toMatch(/<h2\b[^>]*id="about-heading"[^>]*>.*?About<\/h2>/s);
+    expect(about).toContain(profile.bio);
+    expect(about).toContain('href="/profile"');
+    expect(about).toContain('詳しいプロフィール');
+    expect(html).not.toContain('id="profile"');
   });
 
   it('uses tag terminology consistently', () => {
@@ -143,7 +153,7 @@ describe('home', () => {
 
   it('uses the shared pane header for every main content pane', () => {
     expect(html.match(/class="pane-heading"/g)).toHaveLength(5);
-    for (const id of ['welcome-heading', 'profile-heading', 'posts-heading', 'tags-heading', 'commits-heading']) {
+    for (const id of ['welcome-heading', 'about-heading', 'posts-heading', 'tags-heading', 'commits-heading']) {
       expect(html).toContain(`id="${id}"`);
       expect(html).toContain(`aria-labelledby="${id}"`);
     }
@@ -152,7 +162,7 @@ describe('home', () => {
   it('uses pane terminology for all seven pane regions', () => {
     const sectionClasses = [...html.matchAll(/<section\b[^>]*\sclass="([^"]+)"/g)]
       .map((match) => match[1].split(/\s+/));
-    const paneNames = ['welcome', 'profile', 'posts', 'tags', 'commits'];
+    const paneNames = ['welcome', 'about', 'posts', 'tags', 'commits'];
     expect(sectionClasses).toHaveLength(paneNames.length);
     for (const name of paneNames) {
       expect(sectionClasses).toContainEqual(expect.arrayContaining(['pane', `${name}-pane`]));
@@ -174,7 +184,7 @@ describe('home', () => {
   it('keeps the site shell and panes as direct layout regions', () => {
     expect(html).toMatch(/<body\b[^>]*>.*<header\b[^>]*class="site-header"[^>]*>.*<aside\b[^>]*class="pane sidebar-pane".*<main id="main-content".*<footer\b[^>]*class="pane footer-pane".*<\/body>/s);
     expect(html).toMatch(/<div\b[^>]*class="dashboard"[^>]*>\s*<section\b[^>]*class="pane welcome-pane"/);
-    expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane profile-pane"/);
+    expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane about-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane posts-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane tags-pane"/);
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane commits-pane"/);
@@ -185,7 +195,7 @@ describe('home', () => {
     for (const className of ['tagline', 'profile-role', 'profile-note', 'pane-footnote', 'footer-command']) {
       expect(html).toMatch(new RegExp(`<p\\b(?=[^>]*class="${className}")(?=[^>]*lang="en")[^>]*>`));
     }
-    expect(html).toMatch(/<p\b(?=[^>]*class="eyebrow")(?=[^>]*lang="en")[^>]*>Profile<\/p>/);
+    expect(html).toMatch(/<p\b(?=[^>]*class="eyebrow")(?=[^>]*lang="en")[^>]*>About<\/p>/);
   });
 
   it('uses the shared original logos for GitHub, X and Zenn everywhere', () => {

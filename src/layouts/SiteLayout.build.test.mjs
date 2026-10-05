@@ -81,8 +81,11 @@ describe('generated navigation', () => {
       expect(main).toMatch(/href="\/profile"[^>]*>\s*(?:<span\b[^>]*>)?フィクスチャーのプロフィール/);
     }
     const home = await readGeneratedPage();
-    expect(home).toContain('id="profile"');
-    expect(home.match(/<a\b[^>]*href="\/profile"[^>]*>/g)).toHaveLength(2);
+    expect(home).toContain('id="about"');
+    const about = home.match(/<section\b(?=[^>]*id="about")[^>]*>(.*?)<\/section>/s)?.[1] ?? '';
+    expect(about).toContain('href="/profile"');
+    expect(about).toContain('詳しいプロフィール');
+    expect(home.match(/<a\b[^>]*href="\/profile"[^>]*>/g)).toHaveLength(3);
     expect(home).not.toContain('href="/#profile"');
   });
 
