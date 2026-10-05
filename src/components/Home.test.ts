@@ -85,6 +85,17 @@ describe('home', () => {
     expect(html).not.toContain('id="profile"');
   });
 
+  it('presents the local ToC as ls output without a redundant visible label', () => {
+    const output = html.match(/<div\b[^>]*class="welcome-links"[^>]*>(.*?)<\/div>/s)?.[1] ?? '';
+    const command = output.match(/^\s*<p\b[^>]*class="command-line"[^>]*>(.*?)<\/p>/s)?.[1] ?? '';
+    expect(command).toContain('daiksud');
+    expect(command).toContain('kawasaki');
+    expect(command).toMatch(/<span\b[^>]*class="command"[^>]*>ls<\/span>/);
+    expect(output).not.toMatch(/<p\b[^>]*>On this page<\/p>/);
+    expect(output).toContain('aria-label="On this page"');
+    expect(output.indexOf('</p>')).toBeLessThan(output.indexOf('<nav'));
+  });
+
   it('uses On this page only for four unique focusable Home sections', () => {
     const welcome = html.match(/<section\b[^>]*class="pane welcome-pane"[^>]*>(.*?)<\/section>/s)?.[1] ?? '';
     expect(welcome).toContain('On this page');

@@ -61,6 +61,9 @@ afterAll(async () => {
 describe('generated navigation', () => {
   it('generates a local Home ToC with unique focusable targets near each heading', async () => {
     const html = await readGeneratedPage();
+    const output = html.match(/<div\b[^>]*class="welcome-links"[^>]*>(.*?)<\/div>/s)?.[1] ?? '';
+    expect(output).toMatch(/^\s*<p\b[^>]*class="command-line"[^>]*>.*?<span\b[^>]*class="command"[^>]*>ls<\/span><\/p>\s*<nav/s);
+    expect(output).not.toMatch(/<p\b[^>]*>On this page<\/p>/);
     const nav = html.match(/<nav\b[^>]*aria-label="On this page"[^>]*>(.*?)<\/nav>/s)?.[1] ?? '';
     expect([...nav.matchAll(/href="([^"]+)"/g)].map((match) => match[1]))
       .toEqual(['#about', '#posts', '#tags', '#commits']);

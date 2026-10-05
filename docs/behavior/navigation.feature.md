@@ -32,7 +32,7 @@ description: ページ移動、Home内移動、外部リンクを区別する受
 
 #### シナリオ: 目次をキーボードで使う
 
-- 前提: HomeのWelcomeにOn this pageがある
+- 前提: HomeのWelcomeにlsコマンドと、その出力としてページ内目次がある
 - ならば: About、Latest Posts、Tags、Recent Commitsはそれぞれ `#about`、`#posts`、`#tags`、`#commits` を参照する
 - かつ: 各移動先は一意で、対応する見出し付近へ移動しフォーカスを受け取れる
 - かつ: 目次は `#` を添えて表示し、グローバルナビゲーションの選択状態と区別する
