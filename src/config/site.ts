@@ -1,6 +1,6 @@
 export const site = {
   name: 'daiksud.me',
-  description: '技術の試行錯誤、個人開発、学んだこと、考えたことを書き残すためのブログです。',
+  description: 'A blog about experiments with technology, personal projects, and what I learn and think along the way.',
   tagline: 'Build. Learn. Write. Repeat.',
   repositoryUrl: 'https://github.com/daiksudme/apex',
   commitsUrl: 'https://github.com/daiksudme/apex/commits/main/',
@@ -18,7 +18,7 @@ export const profile = {
   zennUrl: 'https://zenn.dev/daiksud',
   zennLabel: 'zenn.dev/daiksud',
   avatarUrl: 'https://avatars.githubusercontent.com/u/155234749?v=4&s=320',
-  bio: 'よりよい明日をつくるために、技術と創造の力を探求しています。',
+  bio: 'I’m exploring technology and creativity to build a better tomorrow.',
 } as const;
 
 // Global navigation uses canonical site routes.

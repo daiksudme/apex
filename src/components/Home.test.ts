@@ -66,9 +66,13 @@ describe('home', () => {
   });
 
   it('renders the welcome, about, posts, tags and repository panes', () => {
-    expect(text).toContain('つくる。試す。書き残す。');
-    expect(html).toMatch(/つくる。<wbr\b[^>]*>試す。<wbr\b[^>]*>書き残す。/);
+    expect(text).toContain('Build. Try. Write.');
+    expect(html).toMatch(/Build\. <wbr\b[^>]*>Try\. <wbr\b[^>]*>Write\./);
     expect(text).toContain('Build. Learn. Write. Repeat.');
+    expect(html).toContain('A blog about experiments with technology, personal projects, and what I learn and think along the way.');
+    expect(text).toContain('I’m exploring technology and creativity to build a better tomorrow.');
+    expect(text).toContain('I’m improving this site one step at a time.');
+    expect(text).toContain('View commit history on GitHub');
     for (const heading of ['Welcome', 'About', 'Latest Posts', 'Tags', 'Recent Commits']) {
       expect(text).toContain(heading);
     }
@@ -81,7 +85,7 @@ describe('home', () => {
     expect(about).toMatch(/<h2\b[^>]*id="about-heading"[^>]*>.*?About<\/h2>/s);
     expect(about).toContain(profile.bio);
     expect(about).toContain('href="/profile"');
-    expect(about).toContain('詳しいプロフィール');
+    expect(about).toContain('More about me');
     expect(html).not.toContain('id="profile"');
   });
 
@@ -142,7 +146,7 @@ describe('home', () => {
         .toBeLessThan(tagsPane.indexOf(`#${orderedTags[index]}`));
     }
 
-    expect(tagsPane).toContain('記事で使っているタグ。');
+    expect(tagsPane).toContain('Tags used in my posts.');
   });
 
   it('applies configured and fallback tones to shared home and sidebar tags', async () => {
@@ -236,7 +240,7 @@ describe('home', () => {
   it('uses the actual GitHub avatar with alternative text and dimensions', () => {
     const avatar = html.match(/<img\b[^>]*>/)?.[0] ?? '';
     expect(avatar).toContain('https://avatars.githubusercontent.com/u/155234749');
-    expect(avatar).toContain('alt="daiksudのGitHubアバター"');
+    expect(avatar).toContain('alt="daiksud’s GitHub avatar"');
     expect(avatar).toMatch(/width="\d+"/);
     expect(avatar).toMatch(/height="\d+"/);
   });

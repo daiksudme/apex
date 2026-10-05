@@ -117,7 +117,7 @@ describe('generated navigation', () => {
     expect(home).toContain('id="about"');
     const about = home.match(/<section\b(?=[^>]*id="about")[^>]*>(.*?)<\/section>/s)?.[1] ?? '';
     expect(about).toContain('href="/profile"');
-    expect(about).toContain('詳しいプロフィール');
+    expect(about).toContain('More about me');
     expect(home.match(/<a\b[^>]*href="\/profile"[^>]*>/g)).toHaveLength(2);
     expect(home).not.toContain('href="/#profile"');
   });

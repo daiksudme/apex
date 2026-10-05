@@ -32,7 +32,7 @@ const homeSections = [
   <div class="dashboard">
     <Pane class="welcome-pane" title="Welcome" headingId="welcome-heading" titleElement="div">
       <p class="command-line" lang="en"><TerminalPrompt /> <span class="command">cat welcome.txt</span></p>
-      <h1>つくる。<wbr />試す。<wbr />書き残す。</h1>
+      <h1>Build. <wbr />Try. <wbr />Write.</h1>
       <p class="welcome-description">{site.description}</p>
       <p class="tagline" lang="en">{site.tagline}</p>
       <div class="welcome-links">
@@ -48,7 +48,7 @@ const homeSections = [
 
     <Pane id="about" class="about-pane" title="About" headingId="about-heading" tabindex={-1}>
       <div class="profile-top">
-        <img class="avatar" src={profile.avatarUrl} alt="daiksudのGitHubアバター" width="160" height="160" decoding="async" referrerpolicy="no-referrer" />
+        <img class="avatar" src={profile.avatarUrl} alt="daiksud’s GitHub avatar" width="160" height="160" decoding="async" referrerpolicy="no-referrer" />
         <div>
           <p class="eyebrow" lang="en">About</p>
           <h3>{profile.name}</h3>
@@ -63,7 +63,7 @@ const homeSections = [
         <div><dt><Icon name="link" /><span>Website</span></dt><dd><a href="/">{site.name}</a></dd></div>
       </dl>
       <p class="profile-bio">{profile.bio}</p>
-      <a class="text-link" href="/profile">詳しいプロフィール <Icon name="arrow" size={16} /></a>
+      <a class="text-link" href="/profile">More about me <Icon name="arrow" size={16} /></a>
       <p class="profile-note" lang="en"><span class="tag-dot" aria-hidden="true"></span>Building in public</p>
     </Pane>
 
@@ -80,7 +80,7 @@ const homeSections = [
           <li><a href={`/tags#tag-${tag.slug}`} class="tag" data-tone={tag.tone}>#{tag.slug}</a></li>
         ))}
       </ul>
-      <p class="tags-note">記事で使っているタグ。</p>
+      <p class="tags-note">Tags used in my posts.</p>
     </Pane>
 
     <Pane id="commits" class="commits-pane" title="Recent Commits" headingId="commits-heading" tabindex={-1}>
@@ -89,10 +89,10 @@ const homeSections = [
         <span class="repository-icon"><Icon name="branch" size={26} /></span>
         <div>
           <p class="repository-name">{site.name}</p>
-          <p class="repository-description">このサイトも、少しずつ育てています。</p>
+          <p class="repository-description">I’m improving this site one step at a time.</p>
         </div>
       </div>
-      <a class="text-link" href={site.commitsUrl} target="_blank" rel="noopener">GitHubで更新履歴を見る <Icon name="arrow" size={16} /></a>
+      <a class="text-link" href={site.commitsUrl} target="_blank" rel="noopener">View commit history on GitHub <Icon name="arrow" size={16} /></a>
     </Pane>
   </div>
 </SiteLayout>
