@@ -130,6 +130,8 @@ describe('generated navigation', () => {
         expect(html).not.toContain(`href="/posts/${slug}"`);
       }
     }
+    const posts = await readGeneratedPage('posts');
+    expect(posts).toContain('name="description" content="Posts about things I build, learn, and think about."');
     const article = await readGeneratedPage('fixture-post');
     expect(article).toMatch(/href="\/second-post"[^>]*>Second fixture article<\/a>/);
   });

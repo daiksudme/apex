@@ -67,6 +67,7 @@ beforeAll(async () => {
 describe('tags index', () => {
   it('renders the canonical tags page with the terminal command sequence', () => {
     expect(html).toContain('<title>Tags | daiksud.me</title>');
+    expect(html).toContain('name="description" content="Browse posts by tag, with the latest posts for each tag."');
     expect(text).toContain('daiksud@kawasaki:~$');
     expect(text).toContain('cd tags/');
     expect(text).toContain('daiksud@kawasaki:~/tags$');
