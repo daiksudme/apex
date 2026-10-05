@@ -190,9 +190,9 @@ describe('home', () => {
 
   it('uses the shared original logos for GitHub, X and Zenn everywhere', () => {
     for (const brand of ['github', 'x', 'zenn']) {
-      expect(html.match(new RegExp(`data-brand="${brand}"`, 'g'))).toHaveLength(3);
+      expect(html.match(new RegExp(`data-brand="${brand}"`, 'g'))).toHaveLength(2);
     }
-    expect(html.match(/data-logo-style="original"/g)).toHaveLength(9);
+    expect(html.match(/data-logo-style="original"/g)).toHaveLength(6);
   });
 
   it('uses the actual GitHub avatar with alternative text and dimensions', () => {
