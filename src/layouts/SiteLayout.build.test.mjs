@@ -80,7 +80,7 @@ describe('generated navigation', () => {
 
   it.each([[], ['posts'], ['tags'], ['profile']])('generates only four global destinations on %j', async (...segments) => {
     const html = await readGeneratedPage(...segments);
-    const nav = html.match(/<nav\b[^>]*aria-label="ページナビゲーション"[^>]*>(.*?)<\/nav>/s)?.[1] ?? '';
+    const nav = html.match(/<nav\b[^>]*aria-label="Page navigation"[^>]*>(.*?)<\/nav>/s)?.[1] ?? '';
     expect([...nav.matchAll(/href="([^"]+)"/g)].map((match) => match[1]))
       .toEqual(['/', '/posts', '/tags', '/profile']);
     for (const route of ['posts', 'tags', 'profile']) await expect(access(join(outDir, route, 'index.html'))).resolves.toBeUndefined();
@@ -117,7 +117,7 @@ describe('generated navigation', () => {
     expect(home).toContain('id="about"');
     const about = home.match(/<section\b(?=[^>]*id="about")[^>]*>(.*?)<\/section>/s)?.[1] ?? '';
     expect(about).toContain('href="/profile"');
-    expect(about).toContain('詳しいプロフィール');
+    expect(about).toContain('More about me');
     expect(home.match(/<a\b[^>]*href="\/profile"[^>]*>/g)).toHaveLength(2);
     expect(home).not.toContain('href="/#profile"');
   });
@@ -130,6 +130,8 @@ describe('generated navigation', () => {
         expect(html).not.toContain(`href="/posts/${slug}"`);
       }
     }
+    const posts = await readGeneratedPage('posts');
+    expect(posts).toContain('name="description" content="Posts about things I build, learn, and think about."');
     const article = await readGeneratedPage('fixture-post');
     expect(article).toMatch(/href="\/second-post"[^>]*>Second fixture article<\/a>/);
   });

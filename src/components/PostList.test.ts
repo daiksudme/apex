@@ -38,6 +38,7 @@ describe('post list', () => {
     expect(html).toContain('href="/older-post"');
     expect(html).toContain('datetime="2026-10-02"');
     expect(html).toContain('新しい記事の概要です。');
+    expect(html).toMatch(/<ul\b[^>]*class="post-tags(?: [^"]*)?"[^>]*aria-label="Tags"/);
     expect(html).toContain('#devops');
     expect(html).toContain('#ai');
     expect(html).toMatch(/href="\/tags#tag-devops"[^>]*data-tone="pink"/);
@@ -62,7 +63,9 @@ describe('post list', () => {
       props: { posts: [], tagDefinitions, headingLevel: 'h3' },
     });
 
-    expect(html).toMatch(/<h3 class="empty-state-title"[^>]*>まだ記事はありません。<\/h3>/);
+    expect(html).toMatch(/<h3 class="empty-state-title"[^>]*>No posts yet\.<\/h3>/);
+    expect(html).toContain('Things I build, learn, and think about.');
+    expect(html).toContain('I’ll share them here, one post at a time.');
     expect(html).toContain('ls posts/');
     expect(html).not.toContain('class="post-list"');
   });

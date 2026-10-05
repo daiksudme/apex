@@ -66,9 +66,13 @@ describe('home', () => {
   });
 
   it('renders the welcome, about, posts, tags and repository panes', () => {
-    expect(text).toContain('つくる。試す。書き残す。');
-    expect(html).toMatch(/つくる。<wbr\b[^>]*>試す。<wbr\b[^>]*>書き残す。/);
+    expect(text).toContain('Build. Try. Write.');
+    expect(html).toMatch(/Build\. <wbr\b[^>]*>Try\. <wbr\b[^>]*>Write\./);
     expect(text).toContain('Build. Learn. Write. Repeat.');
+    expect(html).toContain('A blog about experiments with technology, personal projects, and what I learn and think along the way.');
+    expect(text).toContain('I’m exploring technology and creativity to build a better tomorrow.');
+    expect(text).toContain('I’m improving this site one step at a time.');
+    expect(text).toContain('View commit history on GitHub');
     for (const heading of ['Welcome', 'About', 'Latest Posts', 'Tags', 'Recent Commits']) {
       expect(text).toContain(heading);
     }
@@ -81,7 +85,7 @@ describe('home', () => {
     expect(about).toMatch(/<h2\b[^>]*id="about-heading"[^>]*>.*?About<\/h2>/s);
     expect(about).toContain(profile.bio);
     expect(about).toContain('href="/profile"');
-    expect(about).toContain('詳しいプロフィール');
+    expect(about).toContain('More about me');
     expect(html).not.toContain('id="profile"');
   });
 
@@ -115,7 +119,7 @@ describe('home', () => {
 
   it('uses tag terminology consistently', () => {
     expect(html).toContain('class="sidebar-tags"');
-    expect(html).toContain('aria-label="タグ"');
+    expect(html).toContain('aria-label="Tags"');
     expect(html).toContain('href="/tags"');
     expect(html).toContain('class="tag-dot"');
     expect(text).not.toContain('Topics');
@@ -142,7 +146,7 @@ describe('home', () => {
         .toBeLessThan(tagsPane.indexOf(`#${orderedTags[index]}`));
     }
 
-    expect(tagsPane).toContain('記事で使っているタグ。');
+    expect(tagsPane).toContain('Tags used in my posts.');
   });
 
   it('applies configured and fallback tones to shared home and sidebar tags', async () => {
@@ -218,8 +222,8 @@ describe('home', () => {
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane commits-pane"/);
   });
 
-  it('marks English passages for pronunciation in the Japanese document', () => {
-    expect(html).toMatch(/<html\b(?=[^>]*lang="ja")[^>]*>/);
+  it('declares the document language as English', () => {
+    expect(html).toMatch(/<html\b(?=[^>]*lang="en")[^>]*>/);
     for (const className of ['tagline', 'profile-role', 'profile-note', 'pane-footnote', 'footer-command']) {
       expect(html).toMatch(new RegExp(`<p\\b(?=[^>]*class="${className}")(?=[^>]*lang="en")[^>]*>`));
     }
@@ -236,7 +240,7 @@ describe('home', () => {
   it('uses the actual GitHub avatar with alternative text and dimensions', () => {
     const avatar = html.match(/<img\b[^>]*>/)?.[0] ?? '';
     expect(avatar).toContain('https://avatars.githubusercontent.com/u/155234749');
-    expect(avatar).toContain('alt="daiksudのGitHubアバター"');
+    expect(avatar).toContain('alt="daiksud’s GitHub avatar"');
     expect(avatar).toMatch(/width="\d+"/);
     expect(avatar).toMatch(/height="\d+"/);
   });
@@ -268,7 +272,7 @@ describe('home', () => {
     });
 
     expect(emptyHtml).toContain('0 posts');
-    expect(emptyHtml).toMatch(/<h3 class="empty-state-title"[^>]*>まだ記事はありません。<\/h3>/);
+    expect(emptyHtml).toMatch(/<h3 class="empty-state-title"[^>]*>No posts yet\.<\/h3>/);
     expect(emptyHtml).toContain('ls posts/');
 
     const sidebarTags = emptyHtml.match(

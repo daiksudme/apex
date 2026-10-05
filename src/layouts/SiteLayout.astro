@@ -27,7 +27,7 @@ const isActiveNavigationItem = (href: string) =>
 ---
 
 <!doctype html>
-<html lang="ja">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -37,16 +37,16 @@ const isActiveNavigationItem = (href: string) =>
     <title>{pageTitle}</title>
   </head>
   <body>
-    <a class="skip-link" href="#main-content">本文へスキップ</a>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
-      <a class="brand" href="/" aria-label={`${site.name} ホーム`}>
+      <a class="brand" href="/" aria-label={`${site.name} home`}>
         {site.name}<span class="cursor" aria-hidden="true"></span>
       </a>
       <p class="header-tagline" lang="en">{site.tagline}</p>
     </header>
 
-    <Pane as="aside" class="sidebar-pane" ariaLabel="サイトメニュー">
-      <nav class="sidebar-nav" aria-label="ページナビゲーション">
+    <Pane as="aside" class="sidebar-pane" ariaLabel="Site menu">
+      <nav class="sidebar-nav" aria-label="Page navigation">
         {navigation.map((item) => (
           <a
             href={item.href}
@@ -56,7 +56,7 @@ const isActiveNavigationItem = (href: string) =>
           ><Icon name={item.icon} /><span>{item.label}</span></a>
         ))}
       </nav>
-      <nav class="sidebar-tags" aria-label="タグ">
+      <nav class="sidebar-tags" aria-label="Tags">
         <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Tags</p>
         <ul lang="en">
           {siteTags.map((tag) => (

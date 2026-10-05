@@ -9,7 +9,12 @@ describe('site layout navigation', () => {
       request: new Request('https://example.test/'),
       slots: { default: '<h1>ホーム</h1>' },
     });
-    const nav = html.match(/<nav\b[^>]*aria-label="ページナビゲーション"[^>]*>(.*?)<\/nav>/s)?.[1] ?? '';
+    expect(html).toMatch(/<html\b[^>]*lang="en"/);
+    expect(html).toContain('Skip to content');
+    expect(html).toContain('aria-label="Site menu"');
+    expect(html).toContain('aria-label="daiksud.me home"');
+    expect(html).toContain('aria-label="Tags"');
+    const nav = html.match(/<nav\b[^>]*aria-label="Page navigation"[^>]*>(.*?)<\/nav>/s)?.[1] ?? '';
     expect([...nav.matchAll(/href="([^"]+)"/g)].map((match) => match[1]))
       .toEqual(['/', '/posts', '/tags', '/profile']);
     const header = html.match(/<header\b[^>]*class="site-header"[^>]*>(.*?)<\/header>/s)?.[1] ?? '';

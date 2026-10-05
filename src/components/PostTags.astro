@@ -16,7 +16,7 @@ const displayTags = tags.map((slug) => tagDefinitionBySlug.get(slug)!);
 ---
 
 {tags.length > 0 && (
-  <ul class:list={['post-tags', className]} aria-label="タグ" lang="en">
+  <ul class:list={['post-tags', className]} aria-label="Tags" lang="en">
     {displayTags.map((tag) => (
       <li><a class="post-tag" href={`/tags#tag-${tag.slug}`} data-tone={tag.tone}>#{tag.slug}</a></li>
     ))}

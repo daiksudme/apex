@@ -1,61 +1,36 @@
 ---
-title: daiksudについて
-description: 効率的にソフトウェアを作り、安心して届けられる環境への関心と、いま学び、試していること。
+title: About Daiki Sudo
+description: I’m a software engineer in Japan interested in XP, TDD/BDD, DDD, Lean, DevOps, and Team Topologies. I especially enjoy finding better ways to build software.
 publishedAt: 2026-10-01
-updatedAt: 2026-10-04
+updatedAt: 2026-10-05
 tags:
   - devops
   - continuous-delivery
   - development
-  - ai
   - essay
 ---
 
-ソフトウェアエンジニアのdaiksudです。ソフトウェアを作ることと、その作り方を考えることが好きです。
+Hi, I’m Daiki Sudo, a software engineer in Japan.
 
-## 効率的に作り、安心して届ける
+I started my career at a video game company in 2012. I loved playing games and wanted to work in the gaming industry, but I wasn’t very good at coming up with ideas for fun games. I wanted to help people with great game ideas focus on making those games. Looking back, that may have been where my interest in creating an environment for efficient development began.
 
-どうすれば効率的にソフトウェアを作れるのか。そのために、どんな開発環境を整えるべきなのかを考えています。
+For over ten years, I’ve kept asking myself, “How can we develop software efficiently?” Then one day, I came across a book that changed my life as an engineer: *Accelerate*. Reading it made me realize that I hadn’t really understood DevOps, CI/CD, and the ideas behind them. It also helped me recognize the kind of engineer I wanted to be.
 
-特に大切にしたいのは、自動テストを徹底し、検証を通れば自信を持って本番へデプロイできるほど、信頼できる検証を育てることです。
+Since then, I’ve read the following books:
 
-「本当にデプロイしても壊れないだろうか」という不安が残るなら、検証の中身を確かめ、足りない確認を自動化する。そうして、安心して変更を重ねられる環境を作っていきたいと思っています。
+- *Team Topologies*
+- *Continuous Delivery*
+- *The DevOps Handbook*
+- *Modern Software Engineering*
+- *Learning Domain-Driven Design*
+- *Domain-Driven Transformation*
+- *Test Driven Development: By Example*
+- *Extreme Programming Explained*
 
-変更を小さく保ち、確かめながら届けられる状態を目指したいです。
+These books have deeply influenced the way I think about software development.
 
-そのために、次のような分野を学び、実践していきたいと考えています。
-
-- エクストリームプログラミング（XP）
-- DevOps
-- リーンソフトウェア開発
-- 継続的デリバリー
-- テスト駆動開発（TDD）
-- ふるまい駆動開発（BDD）
-- ドメイン駆動設計（DDD）
-- チームトポロジー
-
-設計やテストだけでなく、チーム構造や開発プロセスも含めて、継続的に価値を届ける方法を考えるところに関心があります。
-
-DevOps InstituteのDevOps Foundation認定も取得しました。感覚的に理解していたことを体系的に学び直す機会になりましたが、これからも実践しながら学んでいきたいと思っています。
-
-## いま取り組んでいること
-
-いまは特にXPに関心があります。まだ学び始めたところで、実践経験も多くありません。まずは一人で、TDDや漸進設計、自動検証を小さな変更から試していきたいです。
-
-GitHub CopilotやCodexを使った開発も試しています。AIにどんな情報を伝え、どこまで任せ、変更をどう検証するかを考えながら、instructionsやskills、CI、GitHubのルールを整えています。人間もAIも安心して変更できる環境を作るための試行です。
-
-GitHubは、小さなツールや開発環境を作り、気になったことを試す場所です。このサイトもその一つで、Astro、Cloudflare、GitHub Actionsを使いながら、サイトそのものと開発フローを少しずつ改善しています。
-
-## このサイトについて
-
-Zennでは技術記事を書いています。このサイトでは、開発で試したことや、読書・勉強会で考えたこと、まだ答えの出ていない疑問も含めて、学習途中のことを自由に書き残していきたいと思っています。
-
-このページも、関心や取り組みの変化に合わせて更新していきます。
-
-## リンク
+## Links
 
 - [GitHub](https://github.com/daiksud)
 - [Zenn](https://zenn.dev/daiksud)
 - [X](https://x.com/daiksud)
-
-つくる。試す。書き残す。

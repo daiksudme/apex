@@ -22,7 +22,7 @@ const tagGroups = siteTags.map((tag) => ({
   posts: sortedPosts.filter((post) => post.data.tags.includes(tag.slug)),
 }));
 
-const description = '記事をタグごとに見つけられる一覧です。各タグの最新記事を表示します。';
+const description = 'Browse posts by tag, with the latest posts for each tag.';
 ---
 
 <SiteLayout title="Tags" description={description} siteTags={siteTags}>
