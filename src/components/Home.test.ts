@@ -115,7 +115,7 @@ describe('home', () => {
 
   it('uses tag terminology consistently', () => {
     expect(html).toContain('class="sidebar-tags"');
-    expect(html).toContain('aria-label="タグ"');
+    expect(html).toContain('aria-label="Tags"');
     expect(html).toContain('href="/tags"');
     expect(html).toContain('class="tag-dot"');
     expect(text).not.toContain('Topics');
@@ -218,8 +218,8 @@ describe('home', () => {
     expect(html).toMatch(/<\/section>\s*<section\b[^>]*class="pane commits-pane"/);
   });
 
-  it('marks English passages for pronunciation in the Japanese document', () => {
-    expect(html).toMatch(/<html\b(?=[^>]*lang="ja")[^>]*>/);
+  it('declares the document language as English', () => {
+    expect(html).toMatch(/<html\b(?=[^>]*lang="en")[^>]*>/);
     for (const className of ['tagline', 'profile-role', 'profile-note', 'pane-footnote', 'footer-command']) {
       expect(html).toMatch(new RegExp(`<p\\b(?=[^>]*class="${className}")(?=[^>]*lang="en")[^>]*>`));
     }
