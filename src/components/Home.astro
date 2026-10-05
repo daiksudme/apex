@@ -105,7 +105,7 @@ const homeSections = [
     grid-template-areas:
       "welcome about"
       "posts tags"
-      "posts commits";
+      ". commits";
     gap: var(--pane-gap);
     align-items: stretch;
 
@@ -343,7 +343,10 @@ const homeSections = [
     grid-template-rows: auto minmax(0, 1fr) auto;
     align-content: stretch;
     align-self: stretch;
-    min-height: 364px;
+
+    @media (max-width: 960px) {
+      min-height: 364px;
+    }
 
     @media (max-width: 640px) {
       min-height: 340px;
