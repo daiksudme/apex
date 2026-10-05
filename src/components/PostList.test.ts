@@ -38,6 +38,7 @@ describe('post list', () => {
     expect(html).toContain('href="/older-post"');
     expect(html).toContain('datetime="2026-10-02"');
     expect(html).toContain('新しい記事の概要です。');
+    expect(html).toMatch(/<ul\b[^>]*class="post-tags(?: [^"]*)?"[^>]*aria-label="Tags"/);
     expect(html).toContain('#devops');
     expect(html).toContain('#ai');
     expect(html).toMatch(/href="\/tags#tag-devops"[^>]*data-tone="pink"/);
