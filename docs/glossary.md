@@ -1,15 +1,15 @@
 ---
 type: Reference
-title: ブログの用語
-description: 記事分類に用いるタグと表示対象の用語。
+title: Blog terminology
+description: Terms for tags used to classify posts and for what is displayed.
 ---
 
-## 記事分類
+## Post classification
 
-| 用語 | 定義 | モデルの境界 | コード上の名称 |
+| Term | Definition | Model boundary | Code name |
 | --- | --- | --- | --- |
-| タグ定義 | 記事で使用できる識別子と表示色。YAML内の定義順に意味はない | ブログの記事分類 | TagDefinition |
-| 使用中タグ | タグ定義のうち、少なくとも一つの記事から参照されるタグ | ブログの記事分類 | deriveUsedTags |
-| タグ参照 | 記事が指定するタグの識別子。未定義の識別子はビルドエラーになる | ブログの記事分類 | posts.data.tags |
+| Tag definition | An identifier and display color available for posts. Definition order in YAML has no meaning | Blog post classification | TagDefinition |
+| Used tag | A tag definition referenced by at least one post | Blog post classification | deriveUsedTags |
+| Tag reference | A tag identifier specified by a post. An undefined identifier causes a build error | Blog post classification | posts.data.tags |
 
-詳細は[記事タグの定義と参照](behavior/tags.feature.md)を参照する。
+See [post tag definitions and references](behavior/tags.feature.md) for details.

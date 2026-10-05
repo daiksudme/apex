@@ -1,47 +1,47 @@
 ---
 type: Feature
-title: 個別記事のルートと共通表示
-description: 記事とプロフィールをルート直下で読み、一覧とタグから移動するための受け入れ条件。
+title: Individual post routes and shared presentation
+description: Acceptance criteria for reading posts and the profile at root-level routes and navigating from the post and tag indexes.
 ---
 
-## 機能: 個別記事をルート直下で読む
+## Feature: Read individual posts at root-level routes
 
-読者は記事とプロフィールを同じ表示で読み、記事一覧とタグから移動できる。
+Readers can read posts and the profile with the same presentation and navigate to them from the post and tag indexes.
 
-### ルール: ファイル名が個別記事のルートになる
+### Rule: The filename determines the individual post route
 
-#### シナリオ: 複数の記事へ移動する
+#### Scenario: Navigate to multiple posts
 
-- 前提: `fixture-post.md` と `second-post.md` がある
-- もし: サイトを生成する
-- ならば: `/fixture-post` と `/second-post` で記事を読める
-- かつ: ホーム、記事一覧、タグ一覧、本文の内部リンクが新しいURLを参照する
-- かつ: `/posts/<slug>` のページやリダイレクトを生成しない
-- かつ: `/posts` と `/tags` の一覧を維持する
-- かつ: 個別記事ではPostsのナビゲーションを選択状態にし、一覧を現在のページとは示さない
+- Given: `fixture-post.md` and `second-post.md` exist
+- When: the site is generated
+- Then: the posts can be read at `/fixture-post` and `/second-post`
+- And: Home, the post index, the tag index, and internal body links reference the new URLs
+- And: no pages or redirects are generated at `/posts/<slug>`
+- And: the `/posts` and `/tags` indexes are retained
+- And: individual posts show the Posts navigation item as selected, without identifying the index as the current page
 
-#### シナリオ: 既存ルートと記事名が衝突する
+#### Scenario: A post name conflicts with an existing route
 
-- 前提: `posts.md` または `tags.md` がある
-- もし: サイトを生成する
-- ならば: 対象の記事名を示してビルドが失敗し、既存の一覧を上書きしない
+- Given: `posts.md` or `tags.md` exists
+- When: the site is generated
+- Then: the build fails with the affected post name and does not overwrite the existing index
 
-### ルール: プロフィールも共通の記事として表示する
+### Rule: The profile is also presented as a shared post
 
-#### シナリオ: プロフィールを読む
+#### Scenario: Read the profile
 
-- 前提: 承認済みの紹介記事を本文とfrontmatterを保って `profile.md` に改名する
-- もし: Profileメニューから移動する
-- ならば: `/profile` で記事を読める
-- かつ: 他の記事と同じ日付、タグ、一覧掲載ルールに従う
-- かつ: ホームの短い紹介はAbout paneとして維持し、詳細Profileへのリンクを表示する
+- Given: the approved introduction article is renamed to `profile.md`, preserving its body and frontmatter
+- When: the reader navigates from the Profile menu
+- Then: the article can be read at `/profile`
+- And: it follows the same date, tag, and listing rules as other posts
+- And: Home's short introduction is retained as the About pane, with a link to the detailed Profile
 
-#### シナリオ: 記事の先頭を読む
+#### Scenario: Read the beginning of a post
 
-- 前提: `fixture-post.md` と `profile.md` がある
-- もし: 各記事を読む
-- ならば: 記事paneのPost見出しは表示しない
-- かつ: 最初のターミナル行はそれぞれ `cat fixture-post.md` と `cat profile.md` になる
-- かつ: 記事タイトルの見出しとアクセシブルな記事名を維持する
+- Given: `fixture-post.md` and `profile.md` exist
+- When: the reader views each post
+- Then: the post pane's Post heading is not displayed
+- And: the first terminal lines are `cat fixture-post.md` and `cat profile.md`, respectively
+- And: the post title heading and accessible post name are preserved
 
-生成HTMLの検証は [SiteLayout.build.test.mjs](../../src/layouts/SiteLayout.build.test.mjs)、共通表示の検証は [PostLayout.test.ts](../../src/layouts/PostLayout.test.ts) に対応する。
+Generated HTML verification corresponds to [SiteLayout.build.test.mjs](../../src/layouts/SiteLayout.build.test.mjs); shared presentation verification corresponds to [PostLayout.test.ts](../../src/layouts/PostLayout.test.ts).
