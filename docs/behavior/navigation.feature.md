@@ -1,41 +1,41 @@
 ---
 type: Feature
-title: サイトナビゲーションとHomeの目次
-description: ページ移動、Home内移動、外部リンクを区別する受け入れ条件。
+title: Site navigation and the Home table of contents
+description: Acceptance criteria for distinguishing page navigation, navigation within Home, and external links.
 ---
 
-## 機能: 読者が目的のページとHomeのセクションへ移動する
+## Feature: Readers navigate to the intended page and Home section
 
-読者はサイト内のページ移動、Home内の目次、外部リンクの行き先を区別できる。
+Readers can distinguish navigation between site pages, the table of contents within Home, and external link destinations.
 
-### ルール: 共通ナビゲーションはサイト内の4ページを示す
+### Rule: Shared navigation identifies the four site pages
 
-#### シナリオ: ページと外部リンクを選ぶ
+#### Scenario: Choose pages and external links
 
-- 前提: サイトのいずれかのページを読んでいる
-- ならば: Home、Posts、Tags、Profileはそれぞれ `/`、`/posts`、`/tags`、`/profile` へ移動する
-- かつ: デスクトップではサイドバー、モバイルでは本文より上のサイトメニューに表示される
-- かつ: ヘッダーに同じナビゲーションを重複表示しない
-- かつ: 共通のGitHub、X、Zennリンクはフッターから利用できる
-- かつ: 紹介文脈の外部リンクと更新履歴へのリンクは維持する
+- Given: the reader is viewing any page on the site
+- Then: Home, Posts, Tags, and Profile link to `/`, `/posts`, `/tags`, and `/profile`, respectively
+- And: they appear in the sidebar on desktop and in the site menu above the body on mobile
+- And: the header does not duplicate the same navigation
+- And: shared GitHub, X, and Zenn links are available from the footer
+- And: external links in the introduction and the link to the change history are preserved
 
-### ルール: Homeの短い紹介はAbout、詳細な紹介はProfileで読む
+### Rule: Home's short introduction is read in About, and the detailed introduction in Profile
 
-#### シナリオ: 短い紹介から詳細へ移動する
+#### Scenario: Navigate from the short introduction to the details
 
-- 前提: Homeを読んでいる
-- ならば: 短い紹介はAboutと表示され、既存の紹介文の分量を維持する
-- かつ: Aboutから `/profile` の詳細記事へ移動できる
-- かつ: 詳細Profileは既存の本文と共通記事表示を維持する
+- Given: the reader is viewing Home
+- Then: the short introduction is labeled About and retains the existing amount of introductory text
+- And: About links to the detailed article at `/profile`
+- And: the detailed Profile retains its existing body and shared post presentation
 
-### ルール: On this pageはHome内の見出しへ移動する
+### Rule: On this page links to headings within Home
 
-#### シナリオ: 目次をキーボードで使う
+#### Scenario: Use the table of contents with a keyboard
 
-- 前提: HomeのWelcomeにlsコマンドと、その出力としてページ内目次がある
-- ならば: About、Latest Posts、Tags、Recent Commitsはそれぞれ `#about`、`#posts`、`#tags`、`#commits` を参照する
-- かつ: 各移動先は一意で、対応する見出し付近へ移動しフォーカスを受け取れる
-- かつ: 目次は `#` を添えて表示し、グローバルナビゲーションの選択状態と区別する
-- かつ: TabとEnterでリンクを操作でき、フォーカス表示と既存の本文スキップを利用できる
+- Given: Home's Welcome contains an ls command and an on-page table of contents presented as its output
+- Then: About, Latest Posts, Tags, and Recent Commits reference `#about`, `#posts`, `#tags`, and `#commits`, respectively
+- And: each destination is unique, brings the reader near the corresponding heading, and can receive focus
+- And: the table of contents displays `#` to distinguish its links from the global navigation's selection state
+- And: links can be operated with Tab and Enter, with visible focus and the existing skip-to-content link available
 
-コンポーネント検証は [SiteLayout.test.ts](../../src/layouts/SiteLayout.test.ts) と [Home.test.ts](../../src/components/Home.test.ts)、生成HTMLの検証は [SiteLayout.build.test.mjs](../../src/layouts/SiteLayout.build.test.mjs) に対応する。画面幅とキーボード操作はブラウザでも確認する。
+Component verification corresponds to [SiteLayout.test.ts](../../src/layouts/SiteLayout.test.ts) and [Home.test.ts](../../src/components/Home.test.ts); generated HTML verification corresponds to [SiteLayout.build.test.mjs](../../src/layouts/SiteLayout.build.test.mjs). Also verify viewport widths and keyboard operation in a browser.

@@ -1,54 +1,54 @@
 ---
 type: Specification
-title: 記事タグの定義と参照
-description: YAMLのタグ定義、記事の参照検証、使用中タグの表示ルール。
+title: Post tag definitions and references
+description: YAML tag definitions, validation of post references, and display rules for used tags.
 ---
 
-## 機能: 記事で使用できるタグを定義する
+## Feature: Define the tags available for posts
 
-記事の執筆者は使用できるタグを定義し、未定義タグを含む記事の公開をビルド時に防げる。読者は各ページで同じタグの色とリンク先を利用できる。
+Post authors can define available tags and prevent posts with undefined tags from being published by rejecting them at build time. Readers can use the same tag colors and link destinations on each page.
 
-### ルール: タグ定義を正本にする
+### Rule: Tag definitions are the source of truth
 
-タグの識別子と表示色を `src/content/tags.yaml` で管理する。記事は識別子を参照する。同じ識別子を複数定義できない。YAML内の定義順に意味はない。
+Manage tag identifiers and display colors in `src/content/tags.yaml`. Posts reference the identifiers. The same identifier cannot be defined more than once. Definition order in YAML has no meaning.
 
-#### シナリオ: 定義されたタグで記事を公開する
+#### Scenario: Publish a post with a defined tag
 
-- 前提: `sample` タグの表示色が `blue` と定義されている
-- かつ: 記事が `sample` を指定している
-- もし: サイトをビルドする
-- ならば: ビルドは成功する
-- かつ: タグ一覧とサイドバーに `sample` が `blue` で表示される
+- Given: the display color of the `sample` tag is defined as `blue`
+- And: a post specifies `sample`
+- When: the site is built
+- Then: the build succeeds
+- And: `sample` appears in `blue` in the tag index and sidebar
 
-#### シナリオ: 同じ識別子を重複定義する
+#### Scenario: Define the same identifier more than once
 
-- 前提: タグ定義に `sample` が異なる色で二つ存在する
-- もし: サイトをビルドする
-- ならば: ビルドは失敗する
-- かつ: エラーから重複した `sample` を特定できる
+- Given: the tag definitions contain two entries for `sample` with different colors
+- When: the site is built
+- Then: the build fails
+- And: the error identifies the duplicated `sample`
 
-### ルール: 未定義タグを含む記事はビルドを失敗させる
+### Rule: A post with undefined tags causes the build to fail
 
-#### シナリオ: 古い記事に未定義タグがある
+#### Scenario: An older post has an undefined tag
 
-- 前提: 最新3記事は定義されたタグだけを指定している
-- かつ: それより古い記事が未定義の `unknown` を指定している
-- もし: サイトをビルドする
-- ならば: ビルドは失敗する
-- かつ: エラーから対象記事と `unknown` を特定できる
+- Given: the latest three posts specify only defined tags
+- And: an older post specifies the undefined tag `unknown`
+- When: the site is built
+- Then: the build fails
+- And: the error identifies the affected post and `unknown`
 
-### ルール: 使用中のタグだけを表示する
+### Rule: Display only tags in use
 
-#### シナリオ: 定義済みだが未使用のタグがある
+#### Scenario: A defined tag is unused
 
-- 前提: `sample` と `unused` が定義されている
-- かつ: 複数の記事が `sample` だけを指定している
-- もし: タグ一覧を表示する
-- ならば: `sample` は一度だけ表示される
-- かつ: `unused` は表示されない
+- Given: `sample` and `unused` are defined
+- And: multiple posts specify only `sample`
+- When: the tag index is displayed
+- Then: `sample` appears only once
+- And: `unused` does not appear
 
-記事がない場合はタグも表示しない。ホーム・タグ一覧・サイドバーでは、タグを参照する記事数の多い順に表示し、同数の場合は識別子の昇順にする。タグごとの記事は公開日降順で最新3件を表示する。各タグのリンクは `/tags#tag-<識別子>` を指す。
+When there are no posts, no tags are displayed either. Home, the tag index, and the sidebar order tags by descending number of posts referencing them, with ties broken by ascending identifier. Each tag displays its latest three posts in descending publication-date order. Each tag link points to `/tags#tag-<identifier>`.
 
-## 検証用データ
+## Verification data
 
-自動テストには専用のタグ定義・記事フィクスチャーを使う。公開記事や本番タグ定義をテスト入力にせず、生成HTMLの検証も一時プロジェクトで行う。
+Automated tests use dedicated tag definitions and post fixtures. Do not use published posts or production tag definitions as test input; generated HTML verification also runs in a temporary project.
