@@ -25,7 +25,7 @@ const url = process.argv[2] ?? `http://127.0.0.1:${server.address().port}/`;
 let browser;
 try {
   browser = await chromium.launch({
-    executablePath: process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    ...(process.env.CHROME ? { executablePath: process.env.CHROME } : {}),
     headless: true,
   });
   for (const width of [1440, 1100, 961, 960, 390]) {
