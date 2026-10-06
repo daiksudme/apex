@@ -29,6 +29,8 @@ Since then, I’ve read the following books:
 
 These books have deeply influenced the way I think about software development.
 
+These days, I’m especially interested in XP, TDD, and incremental design, and how AI tools can support them. I’m still exploring the question that first drew me to this work: how can we develop software efficiently?
+
 ## Links
 
 - [GitHub](https://github.com/daiksud)
