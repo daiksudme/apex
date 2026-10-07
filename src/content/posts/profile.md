@@ -4,9 +4,6 @@ description: I’m a software engineer in Japan interested in XP, TDD/BDD, DDD, 
 publishedAt: 2026-10-01
 updatedAt: 2026-10-05
 tags:
-  - devops
-  - continuous-delivery
-  - development
   - essay
 ---
 
