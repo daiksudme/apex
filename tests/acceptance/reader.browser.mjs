@@ -1,12 +1,20 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { checkFixtureContent } from './content.browser.mjs';
+import { checkArticleStart, checkFixtureContent } from './content.browser.mjs';
 import { checkHomeGeometry } from '../home-layout.browser.mjs';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const base = process.argv[2];
 const fixtures = process.argv[3] === '--fixtures';
+async function checkExternalLink(link, href) {
+  assert.ok(await link.isVisible(), 'NAV-01 external link is available');
+  assert.equal(await link.getAttribute('href'), href, 'NAV-01 external destination');
+  assert.equal(await link.getAttribute('target'), '_blank');
+  const relations = (await link.getAttribute('rel')).split(/\s+/);
+  assert.ok(relations.includes('noopener'), 'NAV-01 external link protects its opener');
+  assert.ok(!relations.includes('noreferrer'), 'NAV-01 external link preserves referral');
+}
 const browser = await chromium.launch();
 try {
   for (const width of fixtures ? [390] : [1440, 1100, 961, 960, 390]) {
@@ -30,25 +38,24 @@ try {
       assert.equal(await navigation.getByRole('link').count(), 4, 'NAV-01 exactly four site pages');
       for (const [name, href] of [['Home', '/'], ['Posts', '/posts'], ['Tags', '/tags'], ['Profile', '/profile']]) {
         assert.equal(await navigation.getByRole('link', { name, exact: true }).getAttribute('href'), href, 'NAV-01 shared navigation');
+        assert.equal(await page.getByRole('banner').getByRole('link', { name, exact: true }).count(), 0,
+          'NAV-01 header does not duplicate page navigation');
       }
+      const headerLinks = await page.getByRole('banner').getByRole('link').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+      assert.ok(headerLinks.every((href) => !['/posts', '/tags', '/profile'].includes(href)), 'NAV-01 header has no duplicate page destinations');
       const footer = page.getByRole('contentinfo');
       for (const [name, href] of [
         ['GitHub', 'https://github.com/daiksud'], ['X', 'https://x.com/daiksud'], ['Zenn', 'https://zenn.dev/daiksud'],
       ]) {
-        const link = footer.getByRole('link', { name: `daiksud on ${name}`, exact: true });
-        assert.ok(await link.isVisible(), 'NAV-01 shared footer link is available');
-        assert.equal(await link.getAttribute('href'), href, 'NAV-01 external destination');
-        assert.equal(await link.getAttribute('target'), '_blank');
-        const relations = (await link.getAttribute('rel')).split(/\s+/);
-        assert.ok(relations.includes('noopener'), 'NAV-01 external link protects its opener');
-        assert.ok(!relations.includes('noreferrer'), 'NAV-01 external link preserves referral');
+        await checkExternalLink(footer.getByRole('link', { name: `daiksud on ${name}`, exact: true }), href);
       }
     };
     const readArticle = async (title, href) => {
       const heading = main.getByRole('heading', { level: 1 });
       assert.equal((await heading.innerText()).trim(), title, 'POST-01 post title');
-      assert.ok(await main.getByRole('article', { name: title, exact: true }).isVisible(), 'POST-04 accessible article');
-      assert.ok(await main.getByText(`cat ${decodeURIComponent(href.slice(1))}.md`, { exact: true }).isVisible(), 'POST-04 post command');
+      const article = main.getByRole('article', { name: title, exact: true });
+      assert.ok(await article.isVisible(), 'POST-04 accessible article');
+      await checkArticleStart(article, title, `cat ${decodeURIComponent(href.slice(1))}.md`);
       assert.equal(await navigation.getByRole('link', { name: 'Posts', exact: true }).getAttribute('aria-current'), null,
         'POST-01 index is not current page');
     };
@@ -61,12 +68,26 @@ try {
       const postsNavigation = navigation.getByRole('link', { name: 'Posts', exact: true });
       await page.mouse.move(0, 0);
       const inactivePosts = await postsNavigation.screenshot({ animations: 'disabled' });
+      const about = page.getByRole('region', { name: 'About', exact: true });
+      for (const domain of ['github.com', 'x.com', 'zenn.dev']) {
+        await checkExternalLink(about.getByRole('link', { name: `${domain}/daiksud`, exact: true }), `https://${domain}/daiksud`);
+      }
+      const commits = page.getByRole('region', { name: 'Recent Commits', exact: true });
+      for (const name of ['GitHub', 'View commit history on GitHub']) {
+        await checkExternalLink(commits.getByRole('link', { name, exact: true }), 'https://github.com/daiksudme/apex/commits/main/');
+      }
       const toc = page.getByRole('navigation', { name: 'On this page', exact: true });
+      const ls = page.getByRole('region', { name: 'Welcome', exact: true }).getByText('ls', { exact: true });
+      assert.ok(await ls.isVisible(), 'NAV-03 table of contents is ls output');
+      const commandBox = await ls.boundingBox();
+      assert.ok(commandBox.y + commandBox.height <= (await toc.boundingBox()).y,
+        'NAV-03 command precedes its output');
       for (const [name, hash] of [['About', '#about'], ['Latest Posts', '#posts'], ['Tags', '#tags'], ['Recent Commits', '#commits']]) {
         const target = page.getByRole('region', { name, exact: true });
         assert.equal(await target.count(), 1, 'NAV-03 unique named destination');
         const link = toc.getByRole('link', { name, exact: true });
         assert.equal(await link.getAttribute('href'), hash, 'NAV-03 Home anchor');
+        assert.match((await link.innerText()).trim(), /^#/, 'NAV-03 visible terminal output marker');
         // Observe the rendered focus indication without fixing its CSS implementation.
         await link.hover();
         await page.evaluate(() => document.activeElement?.blur());
@@ -81,6 +102,8 @@ try {
         await page.keyboard.press('Enter');
         assert.equal(new URL(page.url()).hash, hash, 'NAV-03 anchor destination');
         assert.ok(await target.evaluate((element) => element === document.activeElement), 'NAV-03 destination receives focus');
+        const destination = await target.boundingBox();
+        assert.ok(destination.y >= 0 && destination.y < page.viewportSize().height, 'NAV-03 reader is near the destination');
       }
       const skip = page.getByRole('link', { name: 'Skip to content', exact: true });
       await skip.focus();

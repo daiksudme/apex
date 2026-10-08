@@ -1,5 +1,14 @@
 import assert from 'node:assert/strict';
 
+export async function checkArticleStart(article, title, command) {
+  const terminal = article.getByText(command, { exact: true });
+  assert.ok(await terminal.isVisible(), 'POST-04 terminal command is visible');
+  const commandBox = await terminal.boundingBox();
+  const titleBox = await article.getByRole('heading', { level: 1, name: title, exact: true }).boundingBox();
+  assert.ok(commandBox.y + commandBox.height <= titleBox.y, 'POST-04 terminal command precedes the title');
+  assert.equal((await article.getByRole('heading').first().innerText()).trim(), title, 'POST-04 title is the first article heading');
+}
+
 async function tagColors(scope, reference) {
   const colors = new Map();
   for (const [slug, hue] of [
@@ -63,6 +72,7 @@ export async function checkFixtureContent(page, base) {
   await page.setViewportSize({ width: 390, height: 900 });
   await group.getByRole('link', { name: 'フィクスチャーの記事', exact: true }).click();
   const article = main.getByRole('article', { name: 'フィクスチャーの記事', exact: true });
+  await checkArticleStart(article, 'フィクスチャーの記事', 'cat fixture-post.md');
   await tagColors(article.getByRole('list', { name: 'Tags', exact: true }), colors);
   assert.ok(await article.getByRole('heading', { name: 'フィクスチャー本文', exact: true }).isVisible());
   assert.ok(await article.getByText('公開記事とは独立した検証用データです。', { exact: true }).isVisible());
@@ -87,7 +97,9 @@ export async function checkFixtureContent(page, base) {
   assert.ok(await main.getByRole('heading', { level: 1, name: 'second-post', exact: true }).isVisible());
   await navigation.getByRole('link', { name: 'Profile', exact: true }).click();
   const profile = main.getByRole('article', { name: 'フィクスチャーのプロフィール', exact: true });
-  assert.ok(await profile.getByText('cat profile.md', { exact: true }).isVisible());
+  await checkArticleStart(profile, 'フィクスチャーのプロフィール', 'cat profile.md');
+  assert.ok(await profile.getByRole('heading', { name: 'フィクスチャーの自己紹介', exact: true }).isVisible());
+  assert.ok(await profile.getByText('プロフィールも共通の記事です。', { exact: true }).isVisible(), 'Fixture Profile body is readable');
   assert.ok(await profile.getByText('January 1, 2026', { exact: true }).isVisible(), 'Profile publication date');
   assert.ok(await profile.getByText('January 5, 2026', { exact: true }).isVisible(), 'Profile update date');
   assert.ok(await profile.getByRole('link', { name: '#development', exact: true }).isVisible(), 'Profile follows tag rules');

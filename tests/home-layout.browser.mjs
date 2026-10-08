@@ -2,6 +2,12 @@ import assert from 'node:assert/strict';
 
 export async function checkHomeGeometry(page, width) {
   await page.evaluate(() => document.fonts.ready);
+  if (width === 1440 || width === 390) {
+    const menu = await page.getByRole('complementary', { name: 'Site menu', exact: true }).boundingBox();
+    const main = await page.getByRole('main').boundingBox();
+    assert.ok(width === 1440 ? menu.x + menu.width <= main.x + 1 : menu.y + menu.height <= main.y + 1,
+      'NAV-01 menu is beside desktop content and above mobile content');
+  }
   const names = ['Welcome', 'About', 'Latest Posts', 'Tags', 'Recent Commits'];
   const boxes = {};
   for (const name of names) {
