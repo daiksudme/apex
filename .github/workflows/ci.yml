@@ -201,7 +201,7 @@ jobs:
     timeout-minutes: 3
     permissions:
       actions: read
-      contents: read
+      contents: write
       pull-requests: write
     steps:
       - name: promote current validation
