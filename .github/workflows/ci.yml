@@ -51,12 +51,17 @@ jobs:
               const { data: latest } = await github.rest.actions.listWorkflowRuns({
                 ...context.repo, workflow_id: run.workflow_id, event: 'pull_request', branch: source.head.ref, per_page: 1,
               });
-              if (pr.state !== 'open' || pr.head.sha !== source.head.sha || pr.head.ref !== source.head.ref
-                || run.id !== context.runId || run.run_attempt !== attempt || run.head_sha !== source.head.sha
-                || run.head_branch !== source.head.ref || run.event !== 'pull_request' || run.status !== 'in_progress'
-                || latest.workflow_runs[0]?.id !== context.runId || latest.workflow_runs[0]?.run_attempt !== attempt) {
-                throw new Error('Obsolete PR source, run, or attempt');
-              }
+              const identities = {
+                prState: ['open', pr.state], prHead: [source.head.sha, pr.head.sha], prBranch: [source.head.ref, pr.head.ref],
+                runId: [context.runId, run.id], runAttempt: [attempt, run.run_attempt], runHead: [source.head.sha, run.head_sha],
+                runBranch: [source.head.ref, run.head_branch], runEvent: ['pull_request', run.event], runStatus: ['in_progress', run.status],
+                latestRunId: [context.runId, latest.workflow_runs[0]?.id ?? null],
+                latestRunAttempt: [attempt, latest.workflow_runs[0]?.run_attempt ?? null],
+              };
+              const mismatches = Object.fromEntries(Object.entries(identities)
+                .filter(([, [expected, actual]]) => expected !== actual)
+                .map(([name, [expected, actual]]) => [name, { expected, actual }]));
+              if (Object.keys(mismatches).length) throw new Error(`Obsolete PR source, run, or attempt: ${JSON.stringify(mismatches)}`);
               return pr;
             };
             let pr = await current();

@@ -99,6 +99,21 @@ test('STATE-01 is idempotent when the current PR is already Draft', async () => 
   assert.equal(value.mutations.length, 0);
 });
 
+test('STATE-01 identifies each mismatched expected and observed identity without mutating', async () => {
+  const value = fixture();
+  value.run.status = 'queued';
+  value.latest.id = 9;
+  await assert.rejects(value.execute(), (error) => {
+    const details = JSON.parse(error.message.split(': ')[1]);
+    assert.deepEqual(details, {
+      runStatus: { expected: 'in_progress', actual: 'queued' },
+      latestRunId: { expected: 10, actual: 9 },
+    });
+    return true;
+  });
+  assert.equal(value.mutations.length, 0);
+});
+
 test('STATE-01 stops a changed head immediately before mutation', async () => {
   const value = fixture();
   let reads = 0;

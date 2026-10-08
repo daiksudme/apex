@@ -123,7 +123,7 @@ Ready signals eligibility for an explicit user or coding-agent review request af
 
 Five minutes is a commit-path improvement target, not a failure deadline. Timing includes Draft control, queue/setup/build/test work, and observed Preview waiting. An overrun emits a warning, summary, and deduplicated PR notification while successful validation proceeds. Rerun reports explicitly use the original workflow-creation baseline, including earlier attempts.
 
-Candidate jobs are read-only and do not retain checkout credentials. Clean API-only state jobs execute no candidate checkout, dependencies, artifacts, or caches. Ready promotion succeeded in this repository with `contents: write` after read-scope trials failed; this scope is confined to its API-only job. Pre/post revision checks and cancellation detect supersession but do not make Draft/Ready mutations atomic or branch-based Preview URLs immutable.
+Candidate jobs are read-only and do not retain checkout credentials. Clean API-only state jobs execute no candidate checkout, dependencies, artifacts, or caches. Read-scope trials rejected Draft/Ready mutations in this repository; a confined, approved `contents: write` trial succeeded for preparation, Ready promotion, and terminal reconciliation. This scope remains limited to those API-only jobs. Identity failures report the mismatched expected and observed values. Pre/post revision checks and cancellation detect supersession but do not make Draft/Ready mutations atomic or branch-based Preview URLs immutable.
 
 ### Recording Cloudflare deployments
 
