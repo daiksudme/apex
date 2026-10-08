@@ -16,4 +16,4 @@ description: A minimal root HTTP check after matching the intended Preview deplo
 
 The requester reduced the initial smoke scope to this single HTTP check. Smoke does not inspect response content or request other routes. Preview source, branch, provider, and deployment identity validation remains required. Detailed reader journeys belong to separate browser acceptance scenarios.
 
-Verification corresponds to [smoke.node.mjs](../../tests/ci/smoke.node.mjs) and [smoke.mjs](../../scripts/ci/smoke.mjs).
+The actual [smoke command](../../scripts/ci/smoke.mjs) runs against the matched Preview in commit-stage. Smoke has no self-tests; detailed application behavior is checked by reader acceptance.

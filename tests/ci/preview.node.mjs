@@ -52,7 +52,7 @@ test('shared URL CLI prints the normalized URL and fails for invalid aliases', a
   });
 });
 
-test('Preview readiness rejects an unusable alias before calling GitHub', async () => {
+test('Preview readiness rejects an unusable alias', async () => {
   await assert.rejects(promisify(execFile)(process.execPath, ['scripts/ci/preview.mjs', sha, '123-feature']), (error) => {
     assert.equal(error.code, 1);
     assert.match(error.stderr, /cannot produce a Cloudflare Preview alias/);
@@ -90,7 +90,7 @@ test('does not infer a Preview from absent source identity or incomplete records
   assert.equal(matchPreview(evidence, { branch }), null);
 });
 
-test('consumes an already recorded matching deployment without waiting and retains exact evidence', async () => {
+test('consumes an already recorded matching deployment and retains its source evidence', async () => {
   const record = structuredClone(evidence);
   record.check.id = 45;
   record.check.check_suite = { id: 67 };
@@ -101,10 +101,7 @@ test('consumes an already recorded matching deployment without waiting and retai
     'check-suites/67': record.suite,
     'deployments/123/statuses?per_page=100': [record.status],
   };
-  const read = async (path) => {
-    assert.ok(Object.hasOwn(responses, path), `unexpected API path ${path}`);
-    return responses[path];
-  };
+  const read = async (path) => responses[path];
   const result = await findPreview(read, { sha, branch });
   assert.ok(result, 'matching existing Preview must be available immediately');
   assert.equal(result.url, url);
@@ -126,23 +123,20 @@ test('fails on the matching latest deployment status instead of reusing an older
 });
 
 test('waits for delayed evidence within an ordinary readiness limit', async () => {
-  let polls = 0;
   let elapsed = 0;
   const record = structuredClone(evidence);
   record.check.check_suite = { id: 67 };
   const read = async (path) => {
-    if (path.includes('/check-runs')) { polls++; return { check_runs: [record.check] }; }
+    if (path.includes('/check-runs')) return { check_runs: [record.check] };
     if (path.startsWith('check-suites/')) return record.suite;
     if (path.includes('/statuses')) return [record.status];
-    return polls >= 2 ? [record.deployment] : [];
+    return elapsed >= 5 ? [record.deployment] : [];
   };
   const result = await waitForPreview(read, { sha, branch }, {
     timeoutMs: 10, intervalMs: 5, now: () => elapsed, pause: async (ms) => { elapsed += ms; },
   });
   assert.ok(result, 'delayed matching evidence must become available');
   assert.equal(result.deployment.id, 123);
-  assert.equal(polls, 2);
-  assert.equal(elapsed, 5);
 });
 
 test('fails bounded waiting and preserves API errors', async () => {
@@ -150,7 +144,6 @@ test('fails bounded waiting and preserves API errors', async () => {
   const options = { timeoutMs: 10, intervalMs: 5, now: () => elapsed, pause: async (ms) => { elapsed += ms; } };
   const missing = async (path) => path.includes('/check-runs') ? { check_runs: [] } : [];
   await assert.rejects(waitForPreview(missing, { sha, branch }, options), /Preview readiness timed out/);
-  assert.equal(elapsed, 10);
   await assert.rejects(waitForPreview(async () => { throw new Error('API forbidden'); }, { sha, branch }, options), /API forbidden/);
 });
 
@@ -159,13 +152,8 @@ for (const [name, path, pages, expected] of [
   ['check-run objects', `commits/${sha}/check-runs?per_page=100`, [{ check_runs: [{ id: 1 }] }, { check_runs: [{ id: 2 }] }], { check_runs: [{ id: 1 }, { id: 2 }] }],
   ['single suite', 'check-suites/1', [{ id: 1, head_sha: sha }], { id: 1, head_sha: sha }],
 ]) {
-  test(`decodes native paginated ${name} with a bounded gh request`, async () => {
-    const execute = async (command, args, options) => {
-      assert.equal(command, 'gh');
-      assert.deepEqual(args, ['api', `repos/daiksudme/apex/${path}`, '--paginate', '--slurp']);
-      assert.equal(options.timeout, 30_000);
-      return { stdout: JSON.stringify(pages) };
-    };
+  test(`decodes paginated ${name}`, async () => {
+    const execute = async () => ({ stdout: JSON.stringify(pages) });
     assert.deepEqual(await readGithub(path, execute), expected);
   });
 }
@@ -190,8 +178,9 @@ for (const conclusion of ['failure', 'cancelled', 'timed_out', 'action_required'
       if (path.startsWith('check-suites/')) return record.suite;
       return [];
     };
+    let elapsed = 0;
     await assert.rejects(waitForPreview(read, { sha, branch }, {
-      pause: async () => { assert.fail('terminal provider failure must not wait'); },
+      timeoutMs: 10, intervalMs: 5, now: () => elapsed, pause: async (ms) => { elapsed += ms; },
     }), new RegExp(`Preview provider failed: ${conclusion}`));
     record.suite.head_branch = 'unrelated';
     assert.equal(await findPreview(read, { sha, branch }), null);
@@ -232,7 +221,7 @@ test('selects the latest matching provider attempt over an older failure', async
   assert.equal(await findPreview(read, { sha, branch }), null);
 });
 
-test('Preview CLI rejects invalid source identity before API access', async () => {
+test('Preview CLI rejects invalid source identity', async () => {
   for (const args of [[], ['not-a-sha', branch], [sha, ''], [sha, 'main']]) {
     await assert.rejects(promisify(execFile)(process.execPath, ['scripts/ci/preview.mjs', ...args]), (error) => {
       assert.equal(error.code, 1);

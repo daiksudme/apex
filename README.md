@@ -91,27 +91,28 @@ mise install
 mise exec -- pnpm install --frozen-lockfile
 mise exec -- pnpm check
 mise exec -- pnpm build
-mise exec -- pnpm test
+mise exec -- pnpm test:unit
 ```
 
-Post and tag tests use dedicated data in `tests/fixtures/`. Generated HTML tests copy the application source and fixtures into a temporary project and build it, without reading published posts or production tag definitions. In addition to successful builds, tests verify that an undefined tag in a post older than the latest three still causes failure.
+Tests protect public contracts with inputs and observable results. Unit tests cover dates, titles, post ordering, and content-backed tags. Fixture integration builds valid content and checks build-time diagnostics for duplicate tags, undefined tags in older posts, and route collisions. Its browser check observes readable Markdown, metadata, post/tag ordering, and navigation from isolated fixture content. Tests do not freeze source text, YAML shape, raw HTML/CSS, classes, generated identifiers, or internal invocation sequences. Acceptance runners, browser assertions, and smoke checks have no self-tests.
 
 ### Browser acceptance
 
-English reader scenarios live in [`docs/features`](docs/features). Author tag definitions and invalid-reference rules remain in [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md). The existing `pnpm test` retains the complete Vitest suite; `test:unit` and `test:integration` separate fast tests from fixture-generated HTML checks without dropping coverage.
+English reader scenarios live in [`docs/features`](docs/features). Author tag definitions and invalid-reference rules remain in [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md). `pnpm test` runs the public unit and fixture integration suite. `test:unit` runs fast public-interface tests; `test:integration` runs [`tests/content.build.test.mjs`](tests/content.build.test.mjs), including its real fixture browser checks. Install Chromium before running `test`, `test:integration`, or acceptance. `test:ci` tests Preview selection and rejection from provider/deployment inputs and returned results.
 
 Playwright is pinned in the lockfile. Install its matching Chromium shell before running acceptance:
 
 ```sh
 mise exec -- pnpm test:ci
 mise exec -- pnpm exec playwright install --only-shell chromium
+mise exec -- pnpm test
 mise exec -- pnpm test:acceptance
 mise exec -- pnpm test:acceptance "$PREVIEW_URL"
 ```
 
-On Linux, use Playwright's `install --with-deps --only-shell chromium` when browser system dependencies are absent. The acceptance command builds local `dist` before validation, then runs fixture integration tests, browser harness tests, and local reader journeys. Supplying the recorder-matched `PREVIEW_URL` adds the same journeys against the deployed Preview. PR CI must supply that URL; main-push acceptance uses the local build.
+On Linux, use Playwright's `install --with-deps --only-shell chromium` when browser system dependencies are absent. The acceptance command builds local `dist` before validation, then runs fixture integration tests and local reader journeys at 1440, 1100, 961, 960, and 390 pixels. Supplying the recorder-matched `PREVIEW_URL` adds the same journeys against the deployed Preview. PR CI must supply that URL; main-push acceptance uses the local build.
 
-Acceptance runs once and fails directly on an execution error or failed expectation. Command logs are retained under `test-results/acceptance`; browser failures retain screenshots and traces in the corresponding local/Preview directory. Harness-fixture diagnostics are separate from site-validation diagnostics. See the [acceptance scenarios](docs/features/acceptance.feature.md).
+Acceptance runs once and fails directly on an execution error or failed expectation. Command logs are retained under `test-results/acceptance`; browser failures retain screenshots and traces in the corresponding local/Preview directory. Fixture content diagnostics use the `fixtures` directory; site journeys use `local` and `preview`. The geometry helper is called by the reader journey; it has no separate server or browser command. Visible focus and selection compare the current rendered states without golden screenshots. See the [acceptance scenarios](docs/features/acceptance.feature.md).
 
 The initial smoke check is separate: [`test:smoke`](scripts/ci/smoke.mjs) requests only `/` on the matched Preview and requires HTTP 200 with a bounded request timeout. It does not follow redirects or inspect content.
 

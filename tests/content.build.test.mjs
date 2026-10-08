@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { promisify } from 'node:util';
-import { serveBuild } from '../../tests/acceptance/server.mjs';
+import { serveBuild } from './acceptance/server.mjs';
 
 const projectDirs = [];
 async function prepareProject() {
