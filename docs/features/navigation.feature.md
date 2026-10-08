@@ -10,7 +10,7 @@ Readers can distinguish navigation between site pages, the table of contents wit
 
 ### Rule: Shared navigation identifies the four site pages
 
-#### Scenario: Choose pages and external links
+#### Scenario: NAV-01 Choose pages and external links
 
 - Given: the reader is viewing any page on the site
 - Then: Home, Posts, Tags, and Profile link to `/`, `/posts`, `/tags`, and `/profile`, respectively
@@ -21,7 +21,7 @@ Readers can distinguish navigation between site pages, the table of contents wit
 
 ### Rule: Home's short introduction is read in About, and the detailed introduction in Profile
 
-#### Scenario: Navigate from the short introduction to the details
+#### Scenario: NAV-02 Navigate from the short introduction to the details
 
 - Given: the reader is viewing Home
 - Then: the short introduction is labeled About and retains the existing amount of introductory text
@@ -30,7 +30,7 @@ Readers can distinguish navigation between site pages, the table of contents wit
 
 ### Rule: On this page links to headings within Home
 
-#### Scenario: Use the table of contents with a keyboard
+#### Scenario: NAV-03 Use the table of contents with a keyboard
 
 - Given: Home's Welcome contains an ls command and an on-page table of contents presented as its output
 - Then: About, Latest Posts, Tags, and Recent Commits reference `#about`, `#posts`, `#tags`, and `#commits`, respectively
@@ -39,3 +39,13 @@ Readers can distinguish navigation between site pages, the table of contents wit
 - And: links can be operated with Tab and Enter, with visible focus and the existing skip-to-content link available
 
 Component verification corresponds to [SiteLayout.test.ts](../../src/layouts/SiteLayout.test.ts) and [Home.test.ts](../../src/components/Home.test.ts); generated HTML verification corresponds to [SiteLayout.build.test.mjs](../../src/layouts/SiteLayout.build.test.mjs). Also verify viewport widths and keyboard operation in a browser.
+
+### Scenario: NAV-04 Read Home at desktop and mobile widths
+
+- Given: Home has Welcome, About, Latest Posts, Tags, and Recent Commits panes
+- When: the reader uses widths 1440, 1100, 961, 960, and 390 pixels
+- Then: desktop pane pairs have matching row edges
+- And: mobile panes retain their reading order without overlap or horizontal overflow
+- And: pane content is not clipped
+
+Browser verification traces NAV-01 through NAV-04 in [reader.browser.mjs](../../tests/acceptance/reader.browser.mjs). It uses local generated content and the deployed Preview; failures retain a screenshot and Chromium trace.

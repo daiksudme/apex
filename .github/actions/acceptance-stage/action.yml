@@ -1,0 +1,42 @@
+name: acceptance-stage
+description: Fixture integration and browser reader journeys with diagnostics.
+inputs:
+  preview:
+    description: Require reader acceptance against the recorded PR Preview.
+    default: 'false'
+  preview-url:
+    description: The commit-stage matched Preview URL.
+runs:
+  using: composite
+  steps:
+    - name: install tools
+      uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+      with:
+        cache: false
+    - name: install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+    - name: install Chromium
+      shell: bash
+      run: pnpm exec playwright install --with-deps --only-shell chromium
+    - name: reader acceptance
+      shell: bash
+      env:
+        REQUIRE_PREVIEW: ${{ inputs.preview }}
+        PREVIEW_URL: ${{ inputs.preview-url }}
+      run: |
+        if [[ "$REQUIRE_PREVIEW" == true ]]; then
+          test -n "$PREVIEW_URL"
+          pnpm test:acceptance "$PREVIEW_URL"
+        else
+          pnpm test:acceptance
+        fi
+    - name: retain acceptance diagnostics
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: acceptance-${{ github.run_id }}-${{ github.run_attempt }}
+        path: test-results/acceptance
+        retention-days: 7
+        if-no-files-found: ignore
+

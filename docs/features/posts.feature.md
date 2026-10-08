@@ -10,7 +10,7 @@ Readers can read posts and the profile with the same presentation and navigate t
 
 ### Rule: The filename determines the individual post route
 
-#### Scenario: Navigate to multiple posts
+#### Scenario: POST-01 Navigate to multiple posts
 
 - Given: `fixture-post.md` and `second-post.md` exist
 - When: the site is generated
@@ -20,7 +20,7 @@ Readers can read posts and the profile with the same presentation and navigate t
 - And: the `/posts` and `/tags` indexes are retained
 - And: individual posts show the Posts navigation item as selected, without identifying the index as the current page
 
-#### Scenario: A post name conflicts with an existing route
+#### Scenario: POST-02 A post name conflicts with an existing route
 
 - Given: `posts.md` or `tags.md` exists
 - When: the site is generated
@@ -28,7 +28,7 @@ Readers can read posts and the profile with the same presentation and navigate t
 
 ### Rule: The profile is also presented as a shared post
 
-#### Scenario: Read the profile
+#### Scenario: POST-03 Read the profile
 
 - Given: the approved introduction article is renamed to `profile.md`, preserving its body and frontmatter
 - When: the reader navigates from the Profile menu
@@ -36,7 +36,7 @@ Readers can read posts and the profile with the same presentation and navigate t
 - And: it follows the same date, tag, and listing rules as other posts
 - And: Home's short introduction is retained as the About pane, with a link to the detailed Profile
 
-#### Scenario: Read the beginning of a post
+#### Scenario: POST-04 Read the beginning of a post
 
 - Given: `fixture-post.md` and `profile.md` exist
 - When: the reader views each post
@@ -45,3 +45,5 @@ Readers can read posts and the profile with the same presentation and navigate t
 - And: the post title heading and accessible post name are preserved
 
 Generated HTML verification corresponds to [SiteLayout.build.test.mjs](../../src/layouts/SiteLayout.build.test.mjs); shared presentation verification corresponds to [PostLayout.test.ts](../../src/layouts/PostLayout.test.ts).
+
+Browser verification traces POST-01, POST-03, and POST-04 in [reader.browser.mjs](../../tests/acceptance/reader.browser.mjs). Fixture build tests retain POST-02 and invalid tag coverage; deployed journeys choose links from the actual indexes rather than assume fixture content is published.
