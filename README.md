@@ -115,6 +115,16 @@ Acceptance has one budget of an initial attempt plus at most three retries, sepa
 
 The initial smoke check is separate: [`test:smoke`](scripts/ci/smoke.mjs) requests only `/` on the matched Preview and requires HTTP 200 with a bounded request timeout. It does not inspect content.
 
+### PR validation
+
+The single [CI workflow](.github/workflows/ci.yml) validates eligible same-repository team PRs through Draft reset, commit-stage, Ready promotion, acceptance-stage, terminal reconciliation, and the required native `ci` gate. A new source commit starts a fresh cycle; final acceptance failure returns the PR to Draft without starting another cycle. Fork and Dependabot PRs are outside this automatic lifecycle. Main-push validation runs local acceptance without changing PR state. See the [lifecycle scenarios](docs/features/pr-validation.feature.md).
+
+Ready signals eligibility for an explicit user or coding-agent review request after current-head commit-stage success. Acceptance starts automatically and can run alongside review. Ready does not authorize merge: required CI, Preview deployment, CodeQL, freshness, approvals, and resolved threads still apply.
+
+Five minutes is a commit-path improvement target, not a failure deadline. Timing includes Draft control, queue/setup/build/test work, and observed Preview waiting. An overrun emits a warning, summary, and deduplicated PR notification while successful validation proceeds. Rerun reports explicitly use the original workflow-creation baseline, including earlier attempts.
+
+Candidate jobs are read-only and do not retain checkout credentials. Clean API-only state jobs execute no candidate checkout, dependencies, artifacts, or caches. Ready promotion succeeded in this repository with `contents: write` after read-scope trials failed; this scope is confined to its API-only job. Pre/post revision checks and cancellation detect supersession but do not make Draft/Ready mutations atomic or branch-based Preview URLs immutable.
+
 ### Recording Cloudflare deployments
 
 When Cloudflare Workers Builds' `Workers Builds: apex` Check succeeds, the [synchronization workflow](.github/workflows/record-cloudflare-deployment.yml) records a GitHub Deployment and a `success` Status for that Check's SHA. If the Check Suite's branch is `main`, it records `production`; for any other nonempty branch, it records `preview`. Cloudflare Workers Builds performs the actual deployment.
