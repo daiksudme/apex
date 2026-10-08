@@ -6,11 +6,10 @@ const workflow = await readFile('.github/workflows/ci.yml', 'utf8');
 const sourceSha = 'a'.repeat(40);
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
-test('API state jobs confine the approved Ready write scope without executing candidate code', () => {
+test('API state jobs confine approved Draft and Ready write scopes without executing candidate code', () => {
   for (const name of ['prepare', 'ready', 'reconcile']) {
     const section = workflow.split(`\n  ${name}:\n`)[1].split(/\n  [a-z][a-z-]*:\n/)[0];
-    const contents = name === 'ready' ? 'write' : 'read';
-    assert.ok(section.includes(`permissions:\n      actions: read\n      contents: ${contents}\n      pull-requests: write\n`));
+    assert.ok(section.includes('permissions:\n      actions: read\n      contents: write\n      pull-requests: write\n'));
     assert.doesNotMatch(section, /secrets\.|actions\/checkout|install dependencies|upload-artifact|download-artifact|actions\/cache/);
   }
 });
