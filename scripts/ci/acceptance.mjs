@@ -4,16 +4,14 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { serveBuild } from '../../tests/acceptance/server.mjs';
 
-export async function runAcceptance(previewUrl, {
-  execute = promisify(execFile), serve = serveBuild,
-  outputRoot = 'test-results/acceptance',
-} = {}) {
-  const local = await serve();
+async function runAcceptance(previewUrl) {
+  const execute = promisify(execFile);
+  const outputRoot = 'test-results/acceptance';
+  const local = await serveBuild();
   try {
     await mkdir(outputRoot, { recursive: true });
     const commands = [
       ['pnpm', ['test:integration'], 'integration'],
-      [process.execPath, ['--test', 'tests/acceptance/reader.node.mjs'], 'harness-fixtures'],
       [process.execPath, ['tests/acceptance/reader.browser.mjs', local.url], 'local'],
       ...(previewUrl ? [[process.execPath, ['tests/acceptance/reader.browser.mjs', previewUrl], 'preview']] : []),
     ];

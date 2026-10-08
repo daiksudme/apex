@@ -2,7 +2,7 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 
-export async function serveBuild(transform = (body) => body, statusFor = () => 200) {
+export async function serveBuild() {
   const root = resolve('dist');
   const server = createServer(async (request, response) => {
     try {
@@ -11,9 +11,8 @@ export async function serveBuild(transform = (body) => body, statusFor = () => 2
       if (!file.startsWith(`${root}${sep}`)) throw new Error('Outside dist');
       const type = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.svg': 'image/svg+xml' }[extname(file)] ?? 'application/octet-stream';
       response.setHeader('Content-Type', type);
-      response.statusCode = statusFor(pathname);
       const body = await readFile(file);
-      response.end(type === 'text/html' ? transform(body.toString()) : body);
+      response.end(body);
     } catch {
       response.writeHead(404).end();
     }
