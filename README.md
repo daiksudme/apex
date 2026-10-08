@@ -26,7 +26,7 @@ Inspired by [tmux panes](https://github.com/tmux/tmux/wiki/Getting-Started#sessi
 
 The shared outer container is `pane`, and the shared inner elements are `pane-heading` / `pane-label` / `pane-link` / `pane-footnote`. Home consists of seven panes, all using `src/components/Pane.astro`. The Sidebar pane and Footer pane use `aside` / `footer` and occupy the site shell's `sidebar` / `footer` Grid Areas. The remaining five use `section` and are direct Grid Items of `dashboard`. The five panes in main display a shared header; only each pane's specific content is passed through its slot. The site Header is a top bar, distinct from the panes.
 
-The shared Navigation covers four pages: Home `/`, Posts `/posts`, Tags `/tags`, and Profile `/profile`. It appears in the Sidebar pane on desktop and in a site menu above the body on mobile. The header displays the brand and tagline. Welcome's on-page table of contents is presented as `ls` command output and links to About `#about`, Latest Posts `#posts`, Tags `#tags`, and Recent Commits `#commits`. The links display `#` to distinguish them from the current-page selection, and each destination can also receive keyboard focus. Shared GitHub / X / Zenn links appear in the Footer pane. See [site navigation and the Home table of contents](docs/behavior/navigation.feature.md) for detailed acceptance criteria.
+The shared Navigation covers four pages: Home `/`, Posts `/posts`, Tags `/tags`, and Profile `/profile`. It appears in the Sidebar pane on desktop and in a site menu above the body on mobile. The header displays the brand and tagline. Welcome's on-page table of contents is presented as `ls` command output and links to About `#about`, Latest Posts `#posts`, Tags `#tags`, and Recent Commits `#commits`. The links display `#` to distinguish them from the current-page selection, and each destination can also receive keyboard focus. Shared GitHub / X / Zenn links appear in the Footer pane. See [site navigation and the Home table of contents](docs/features/navigation.feature.md) for detailed acceptance criteria.
 
 These are design terms for the blog UI. They do not imply an actual terminal, session management, or pane splitting, movement, or resizing. Keep the site name `daiksud.me`, prompt `daiksud@kawasaki:~$`, and location `Kawasaki, Japan` unchanged.
 
@@ -36,7 +36,7 @@ Place posts in `src/content/posts/<slug>.md`. Astro's Content Collection statica
 
 All individual posts use the shared post layout, omit the Post pane heading, and begin with the terminal line `cat <slug>.md`. The profile is generated at `/profile` from `profile.md` and displays `cat profile.md`. The profile follows the same date, tag, and listing rules as other posts. The Profile menu points to `/profile`; Home's short introduction appears in the About pane with a link to the detailed Profile.
 
-To protect the existing index routes `/posts` and `/tags`, post names `posts` and `tags` cause a build error. No pages or redirects are generated at the old `/posts/<slug>` paths. See [individual post routes and shared presentation](docs/behavior/posts.feature.md) for detailed acceptance criteria.
+To protect the existing index routes `/posts` and `/tags`, post names `posts` and `tags` cause a build error. No pages or redirects are generated at the old `/posts/<slug>` paths. See [individual post routes and shared presentation](docs/features/posts.feature.md) for detailed acceptance criteria.
 
 Frontmatter uses the following format:
 
@@ -95,6 +95,25 @@ mise exec -- pnpm test
 ```
 
 Post and tag tests use dedicated data in `tests/fixtures/`. Generated HTML tests copy the application source and fixtures into a temporary project and build it, without reading published posts or production tag definitions. In addition to successful builds, tests verify that an undefined tag in a post older than the latest three still causes failure.
+
+### Browser acceptance
+
+English reader scenarios live in [`docs/features`](docs/features). Author tag definitions and invalid-reference rules remain in [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md). The existing `pnpm test` retains the complete Vitest suite; `test:unit` and `test:integration` separate fast tests from fixture-generated HTML checks without dropping coverage.
+
+Playwright is pinned in the lockfile. Install its matching Chromium shell before running acceptance:
+
+```sh
+mise exec -- pnpm test:ci
+mise exec -- pnpm exec playwright install --only-shell chromium
+mise exec -- pnpm test:acceptance
+mise exec -- pnpm test:acceptance "$PREVIEW_URL"
+```
+
+On Linux, use Playwright's `install --with-deps --only-shell chromium` when browser system dependencies are absent. The acceptance command builds local `dist` before validation, then runs fixture integration tests, browser harness tests, and local reader journeys. Supplying the recorder-matched `PREVIEW_URL` adds the same journeys against the deployed Preview. PR CI must supply that URL; main-push acceptance uses the local build.
+
+Acceptance has one budget of an initial attempt plus at most three retries, separated by five-second delays, for narrowly classified transport/upstream failures. Assertions, configuration/authentication errors, generic timeouts, and killed child processes fail immediately. Each complete attempt retains command logs under `test-results/acceptance/attempt-N`; browser failures retain screenshots and traces in the corresponding local/Preview directory. Harness-fixture diagnostics are separate from site-validation diagnostics.
+
+The initial smoke check is separate: [`test:smoke`](scripts/ci/smoke.mjs) requests only `/` on the matched Preview and requires HTTP 200 with a bounded request timeout. It does not inspect content.
 
 ### Recording Cloudflare deployments
 
