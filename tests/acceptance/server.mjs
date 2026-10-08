@@ -2,8 +2,8 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { resolve, sep, extname } from 'node:path';
 
-export async function serveBuild() {
-  const root = resolve('dist');
+export async function serveBuild(directory = 'dist') {
+  const root = resolve(directory);
   const server = createServer(async (request, response) => {
     try {
       const pathname = new URL(request.url, 'http://localhost').pathname;

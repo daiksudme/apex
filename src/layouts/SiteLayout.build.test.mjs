@@ -1,9 +1,11 @@
 // @ts-nocheck
-import { execFileSync, spawnSync } from 'node:child_process';
+import { execFile, execFileSync, spawnSync } from 'node:child_process';
 import { cp, mkdtemp, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
+import { promisify } from 'node:util';
+import { serveBuild } from '../../tests/acceptance/server.mjs';
 
 const projectDirs = [];
 async function prepareProject() {
@@ -27,13 +29,22 @@ afterAll(async () => {
   await Promise.all(projectDirs.map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
-it('builds valid fixture content successfully', async () => {
+it('builds valid content that readers can navigate and read', async () => {
   const projectDir = await prepareProject();
   execFileSync(process.execPath, [astroCli, 'build'], {
     cwd: projectDir,
     stdio: 'pipe',
   });
-}, 30_000);
+  const server = await serveBuild(join(projectDir, 'dist'));
+  try {
+    await promisify(execFile)(process.execPath, ['tests/acceptance/reader.browser.mjs', server.url, '--fixtures'], {
+      timeout: 120_000,
+      env: { ...process.env, ACCEPTANCE_ARTIFACT_DIR: 'test-results/acceptance/fixtures' },
+    });
+  } finally {
+    await server.close();
+  }
+}, 120_000);
 
 describe('tag references during build', () => {
   it('rejects duplicate catalog slugs before rendering conflicting tag groups', async () => {

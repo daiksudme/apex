@@ -5,6 +5,7 @@ publishedAt: 2026-01-01
 updatedAt: 2026-01-05
 tags:
   - development
+  - fixture-tag
 ---
 
 ## フィクスチャーの自己紹介
