@@ -30,8 +30,10 @@ test('matches the provider alias for punctuation and uppercase branch names', ()
 });
 
 test('preserves the provider DNS boundary and hashes the original long branch', () => {
-  assert.equal(previewUrl('a'.repeat(59)), `https://${'a'.repeat(59)}-apex.daiksud-a1f.workers.dev/`);
-  assert.equal(previewUrl('a'.repeat(60)), `https://${'a'.repeat(54)}-11ee-apex.daiksud-a1f.workers.dev/`);
+  assert.equal(new URL(previewUrl('a'.repeat(60))).hostname.split('.')[0].length, 63);
+  assert.equal(previewUrl('a'.repeat(58)), `https://${'a'.repeat(58)}-apex.daiksud-a1f.workers.dev/`);
+  assert.equal(previewUrl('a'.repeat(59)), `https://${'a'.repeat(53)}-111b-apex.daiksud-a1f.workers.dev/`);
+  assert.equal(previewUrl('a'.repeat(60)), `https://${'a'.repeat(53)}-11ee-apex.daiksud-a1f.workers.dev/`);
   assert.notEqual(previewUrl('A'.repeat(60)), previewUrl('a'.repeat(60)));
 });
 
