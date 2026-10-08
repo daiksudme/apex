@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile, mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 
 const read = (path) => readFile(path, 'utf8').catch((error) => {
@@ -13,6 +13,7 @@ const pr = await read('.github/workflows/ci-pr.yml');
 const push = await read('.github/workflows/ci-push.yml');
 const commit = await read('.github/actions/commit-stage/action.yml');
 const acceptance = await read('.github/actions/acceptance-stage/action.yml');
+const recorder = await read('.github/workflows/record-cloudflare-deployment.yml');
 const job = (workflow, name) => {
   const section = workflow.split(`\n  ${name}:\n`)[1]?.split(/\n  [a-z][a-z-]*:\n/)[0];
   assert.ok(section, `missing ${name} job`);
@@ -109,4 +110,27 @@ test('Unsupported PRs fail required ci without executing gh', async (t) => {
   assert.equal(result.status, 1, result.stderr);
   await assert.rejects(readFile(record), { code: 'ENOENT' });
   assert.match(job(pr, 'ci'), /if: always\(\)\n/);
+});
+
+test('Recorder uses the shared trusted helper and preserves CLI failure', async (t) => {
+  assert.match(recorder, /ref: \$\{\{ github.sha \}\}/);
+  assert.match(recorder, /sparse-checkout: scripts\/ci\/preview-url.mjs/);
+  assert.match(recorder, /persist-credentials: false/);
+  const script = recorder.split('      - name: Build preview URL\n')[1].split('      - name: Record successful deployment\n')[0]
+    .split('        run: |\n')[1].replace(/^ {10}/gm, '');
+  const directory = await mkdtemp(join(tmpdir(), 'apex-recorder-url-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  for (const [branch, expectedStatus, expectedOutput] of [
+    ['fix/api_v2', 0, 'environment_url=https://fix-api-v2-apex.daiksud-a1f.workers.dev/\n'],
+    ['123-feature', 1, null],
+  ]) {
+    const output = join(directory, branch.replaceAll('/', '-'));
+    const result = spawnSync('/bin/bash', ['-e', '-o', 'pipefail', '-c', script], {
+      env: { PATH: `${dirname(process.execPath)}:/usr/bin:/bin`, BRANCH: branch, GITHUB_OUTPUT: output },
+      encoding: 'utf8', timeout: 2_000,
+    });
+    assert.equal(result.status, expectedStatus, result.stderr);
+    if (expectedOutput) assert.equal(await readFile(output, 'utf8'), expectedOutput);
+    else await assert.rejects(readFile(output), { code: 'ENOENT' });
+  }
 });

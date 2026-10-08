@@ -1,6 +1,7 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { previewUrl } from './preview-url.mjs';
 
 export async function readGithub(path, execute = promisify(execFile)) {
   const { stdout } = await execute('gh', ['api', `repos/daiksudme/apex/${path}`, '--paginate', '--slurp'], {
@@ -82,16 +83,13 @@ export function matchPreview({ check, suite, deployment, status }, { sha, branch
   return matches ? status.environment_url : null;
 }
 
-function previewUrl(branch) {
-  return `https://${branch.replaceAll('/', '-')}-apex.daiksud-a1f.workers.dev/`;
-}
-
 if (import.meta.main) {
   try {
     const [sha, branch] = process.argv.slice(2);
     if (!/^[0-9a-f]{40}$/.test(sha ?? '') || !branch || branch === 'main') {
       throw new Error('A PR source SHA and non-main branch are required');
     }
+    if (!previewUrl(branch)) throw new Error('The source branch cannot produce a Cloudflare Preview alias');
     const started = Date.now();
     const result = await waitForPreview(readGithub, { sha, branch });
     console.log(JSON.stringify({

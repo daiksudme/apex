@@ -50,13 +50,22 @@ jobs:
           production_environment: ${{ env[fromJSON(steps.suite.outputs.data).head_branch] == 'apex-production-branch' }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: Checkout trusted URL helper
+        if: steps.deployment.outcome == 'success'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          sparse-checkout: scripts/ci/preview-url.mjs
+          sparse-checkout-cone-mode: false
       - name: Build preview URL
         id: preview_url
         if: steps.deployment.outcome == 'success'
         env:
           BRANCH: ${{ fromJSON(steps.suite.outputs.data).head_branch }}
         run: |
-          printf 'environment_url=https://%s-apex.daiksud-a1f.workers.dev/\n' "${BRANCH//\//-}" >> "$GITHUB_OUTPUT"
+          preview_url="$(node scripts/ci/preview-url.mjs "$BRANCH")"
+          printf 'environment_url=%s\n' "$preview_url" >> "$GITHUB_OUTPUT"
       - name: Record successful deployment
         if: steps.deployment.outcome == 'success'
         uses: octokit/request-action@b91aabaa861c777dcdb14e2387e30eddf04619ae # v3.0.0

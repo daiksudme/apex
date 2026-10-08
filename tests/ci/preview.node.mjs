@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { matchPreview, findPreview, waitForPreview, readGithub } from '../../scripts/ci/preview.mjs';
+import { previewUrl } from '../../scripts/ci/preview-url.mjs';
 
 const sha = 'a'.repeat(40);
 const branch = 'ci/161-pr-stages';
@@ -17,6 +18,44 @@ const evidence = {
 
 test('returns the recorded URL only from matching provider, suite, deployment and success status', () => {
   assert.equal(matchPreview(evidence, { sha, branch }), url);
+});
+
+test('matches the provider alias for punctuation and uppercase branch names', () => {
+  const sourceBranch = 'Fix/API_v2...---';
+  const expected = 'https://fix-api-v2-apex.daiksud-a1f.workers.dev/';
+  const record = structuredClone(evidence);
+  record.suite.head_branch = sourceBranch;
+  record.status.environment_url = expected;
+  assert.equal(matchPreview(record, { sha, branch: sourceBranch }), expected);
+});
+
+test('preserves the provider DNS boundary and hashes the original long branch', () => {
+  assert.equal(previewUrl('a'.repeat(59)), `https://${'a'.repeat(59)}-apex.daiksud-a1f.workers.dev/`);
+  assert.equal(previewUrl('a'.repeat(60)), `https://${'a'.repeat(54)}-11ee-apex.daiksud-a1f.workers.dev/`);
+  assert.notEqual(previewUrl('A'.repeat(60)), previewUrl('a'.repeat(60)));
+});
+
+test('rejects branch aliases without a leading letter instead of inventing a URL', () => {
+  for (const sourceBranch of ['123-feature', '___', '']) assert.equal(previewUrl(sourceBranch), null);
+});
+
+test('shared URL CLI prints the normalized URL and fails for invalid aliases', async () => {
+  const execute = promisify(execFile);
+  const result = await execute(process.execPath, ['scripts/ci/preview-url.mjs', 'fix/api_v2']);
+  assert.equal(result.stdout.trim(), 'https://fix-api-v2-apex.daiksud-a1f.workers.dev/');
+  await assert.rejects(execute(process.execPath, ['scripts/ci/preview-url.mjs', '123-feature']), (error) => {
+    assert.equal(error.code, 1);
+    assert.match(error.stderr, /cannot produce a Cloudflare Preview alias/);
+    return true;
+  });
+});
+
+test('Preview readiness rejects an unusable alias before calling GitHub', async () => {
+  await assert.rejects(promisify(execFile)(process.execPath, ['scripts/ci/preview.mjs', sha, '123-feature']), (error) => {
+    assert.equal(error.code, 1);
+    assert.match(error.stderr, /cannot produce a Cloudflare Preview alias/);
+    return true;
+  });
 });
 
 for (const [name, change] of [

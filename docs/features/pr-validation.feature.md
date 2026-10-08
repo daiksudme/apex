@@ -19,6 +19,8 @@ description: Native job sequencing, Draft and Ready commands, and required CI be
 - When: the Ready state job completes
 - Then: acceptance-stage starts through native job dependencies
 - And: the user or coding agent may explicitly request external review in parallel
+- And: GitHub may automatically request CODEOWNERS review as an inherent Ready side effect
+- And: the workflow does not explicitly request AI review through an API
 
 ### Scenario: STATE-03 Return failed validation to Draft
 
@@ -27,6 +29,13 @@ description: Native job sequencing, Draft and Ready commands, and required CI be
 - Then: it returns the PR to Draft and exits unsuccessfully
 - And: successful demotion cannot turn the validation result green
 - And: this state change does not start another validation cycle
+
+### Scenario: STATE-04 Restart the complete lifecycle after failure
+
+- Given: failed acceptance returned the PR to Draft
+- When: the maintainer reruns all jobs or pushes a new commit
+- Then: Draft, commit-stage, Ready, acceptance-stage, and final `ci` run in order
+- And: a failed-jobs-only rerun is outside the supported state recovery path
 
 ### Scenario: GATE-01 Require successful upstream results
 
