@@ -1,5 +1,24 @@
 import assert from 'node:assert/strict';
 
+export async function checkEmptyContent(page, base) {
+  const main = page.getByRole('main');
+  assert.ok(await page.getByRole('region', { name: 'Latest Posts', exact: true })
+    .getByRole('heading', { name: 'No posts yet.', exact: true }).isVisible(), 'Home explains the empty post collection');
+  assert.equal(await page.getByRole('region', { name: 'Tags', exact: true }).getByRole('link').count(), 0,
+    'Home omits unused catalog tags');
+  for (const path of ['/', '/posts', '/tags']) {
+    assert.equal((await page.goto(new URL(path, base).href)).status(), 200, 'Empty collection pages are available');
+    assert.equal(await page.getByRole('navigation', { name: 'Tags', exact: true }).getByRole('link').count(), 0,
+      'Sidebar omits unused catalog tags');
+    if (path === '/posts') {
+      assert.ok(await main.getByRole('heading', { name: 'No posts yet.', exact: true }).isVisible(), 'Posts explains the empty collection');
+    } else if (path === '/tags') {
+      assert.equal(await main.getByRole('heading', { name: /^#/ }).count(), 0, 'Tag index omits unused catalog groups');
+      assert.equal(await main.getByRole('link', { name: /^#/ }).count(), 0, 'Tag index has no unused tag links');
+    }
+  }
+}
+
 export async function checkArticleStart(article, title, command) {
   const terminal = article.getByText(command, { exact: true });
   assert.ok(await terminal.isVisible(), 'POST-04 terminal command is visible');

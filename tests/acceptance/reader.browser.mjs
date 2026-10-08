@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
-import { checkArticleStart, checkFixtureContent } from './content.browser.mjs';
+import { checkArticleStart, checkEmptyContent, checkFixtureContent } from './content.browser.mjs';
 import { checkHomeGeometry } from '../home-layout.browser.mjs';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const base = process.argv[2];
 const fixtures = process.argv[3] === '--fixtures';
+const empty = process.argv[3] === '--empty';
 async function checkExternalLink(link, href) {
   assert.ok(await link.isVisible(), 'NAV-01 external link is available');
   assert.equal(await link.getAttribute('href'), href, 'NAV-01 external destination');
@@ -17,7 +18,7 @@ async function checkExternalLink(link, href) {
 }
 const browser = await chromium.launch();
 try {
-  for (const width of fixtures ? [390] : [1440, 1100, 961, 960, 390]) {
+  for (const width of empty ? [1440] : fixtures ? [390] : [1440, 1100, 961, 960, 390]) {
     const context = await browser.newContext({ viewport: { width, height: 1200 } });
     await context.tracing.start({ screenshots: true, snapshots: true });
     const page = await context.newPage();
@@ -61,6 +62,10 @@ try {
     };
     try {
       await navigate(() => page.goto(base, { waitUntil: 'load' }));
+      if (empty) {
+        await checkEmptyContent(page, base);
+        continue;
+      }
       if (fixtures) {
         await checkFixtureContent(page, base);
         continue;
@@ -166,7 +171,7 @@ try {
       await context.close();
     }
   }
-  console.log(fixtures ? 'Fixture content acceptance passed'
+  console.log(empty ? 'Empty content acceptance passed' : fixtures ? 'Fixture content acceptance passed'
     : 'Reader acceptance passed: NAV-01 NAV-02 NAV-03 NAV-04 POST-01 POST-03 POST-04 TAG-01');
 } finally {
   await browser.close();

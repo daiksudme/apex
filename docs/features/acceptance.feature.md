@@ -11,6 +11,7 @@ description: One complete local and optional Preview validation with retained di
 - Given: the application build is available
 - When: acceptance-stage executes
 - Then: fixture content integration and local reader journeys validate the application
+- And: populated and empty fixture collections verify readable posts and the no-post/no-tag state
 - And: PR acceptance also runs the reader journeys against the matched Preview URL
 - And: command logs are retained separately from browser screenshots and traces
 

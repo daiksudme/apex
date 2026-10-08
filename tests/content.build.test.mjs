@@ -30,17 +30,18 @@ afterAll(async () => {
   await Promise.all(projectDirs.map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
-it('builds valid content that readers can navigate and read', async () => {
+it.each(['populated', 'empty'])('builds %s content that readers can navigate and read', async (content) => {
   const projectDir = await prepareProject();
+  if (content === 'empty') await rm(join(projectDir, 'src/content/posts'), { recursive: true });
   execFileSync(process.execPath, [astroCli, 'build'], {
     cwd: projectDir,
     stdio: 'pipe',
   });
   const server = await serveBuild(join(projectDir, 'dist'));
   try {
-    await promisify(execFile)(process.execPath, ['tests/acceptance/reader.browser.mjs', server.url, '--fixtures'], {
+    await promisify(execFile)(process.execPath, ['tests/acceptance/reader.browser.mjs', server.url, content === 'empty' ? '--empty' : '--fixtures'], {
       timeout: 120_000,
-      env: { ...process.env, ACCEPTANCE_ARTIFACT_DIR: 'test-results/acceptance/fixtures' },
+      env: { ...process.env, ACCEPTANCE_ARTIFACT_DIR: `test-results/acceptance/fixtures-${content}` },
     });
   } finally {
     await server.close();
