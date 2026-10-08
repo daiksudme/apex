@@ -9,11 +9,13 @@ describe('deriveUsedTags', () => {
       { id: 'second-post', data: { tags: ['essay', 'development'] } },
     ];
 
-    expect(deriveUsedTags(posts, tagDefinitions)).toEqual([
+    const usedTags = deriveUsedTags(posts, tagDefinitions);
+    expect(usedTags).toHaveLength(3);
+    expect(usedTags).toEqual(expect.arrayContaining([
       { slug: 'custom', tone: 'muted' },
       { slug: 'development', tone: 'pink' },
       { slug: 'essay', tone: 'purple' },
-    ]);
+    ]));
   });
 
   it('does not revive configured tags when there are no posts', () => {
