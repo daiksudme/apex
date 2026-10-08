@@ -29,6 +29,7 @@ jobs:
     timeout-minutes: 3
     permissions:
       actions: read
+      contents: read
       pull-requests: write
     steps:
       - name: start validation in draft
@@ -200,6 +201,7 @@ jobs:
     timeout-minutes: 3
     permissions:
       actions: read
+      contents: read
       pull-requests: write
     steps:
       - name: promote current validation
@@ -261,6 +263,7 @@ jobs:
     timeout-minutes: 3
     permissions:
       actions: read
+      contents: read
       pull-requests: write
     steps:
       - name: reconcile terminal validation

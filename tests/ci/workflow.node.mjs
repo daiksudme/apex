@@ -6,6 +6,14 @@ const workflow = await readFile('.github/workflows/ci.yml', 'utf8');
 const sourceSha = 'a'.repeat(40);
 const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
 
+test('API state jobs retain only API reads and PR writes without executing candidate code', () => {
+  for (const name of ['prepare', 'ready', 'reconcile']) {
+    const section = workflow.split(`\n  ${name}:\n`)[1].split(/\n  [a-z][a-z-]*:\n/)[0];
+    assert.match(section, /permissions:\n      actions: read\n      contents: read\n      pull-requests: write\n/);
+    assert.doesNotMatch(section, /contents: write|secrets\.|actions\/checkout|install dependencies|upload-artifact|download-artifact|actions\/cache/);
+  }
+});
+
 test('candidate graph runs fast checks, matched Preview smoke, and browser acceptance with read-only credentials', () => {
   const section = (name) => workflow.split(`\n  ${name}:\n`)[1].split(/\n  [a-z][a-z-]*:\n/)[0];
   const commit = section('commit-stage');
