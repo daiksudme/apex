@@ -117,7 +117,7 @@ The initial smoke check is separate: [`test:smoke`](scripts/ci/smoke.mjs) reques
 
 ### PR validation
 
-The [PR workflow](.github/workflows/ci-pr.yml) has five jobs: `draft` → `commit-stage` → `ready` → `acceptance-stage` → `ci`. Draft and Ready jobs use `gh pr ready --undo` and `gh pr ready`. The final `ci` evaluates native upstream results; on failure it returns the PR to Draft and still fails, even when demotion succeeds. Draft demotion does not start another cycle. Fork and Dependabot PRs are outside this automatic lifecycle.
+The [PR workflow](.github/workflows/ci-pr.yml) has five jobs: `draft` → `commit-stage` → `ready` → `acceptance-stage` → `ci`. Draft and Ready jobs use `gh pr ready --undo` and `gh pr ready`. The final `ci` evaluates native upstream results; on failure it returns the PR to Draft and still fails, even when demotion succeeds. Draft demotion does not start another cycle. Fork and Dependabot PRs are outside this automatic lifecycle: their final required `ci` fails without running candidate validation or PR operations.
 
 The [main-push workflow](.github/workflows/ci-push.yml) runs `commit-stage` → `acceptance-stage` → `ci` without PR operations. Both workflows preserve the required job name `ci` and reuse the [commit-stage](.github/actions/commit-stage/action.yml) and [acceptance-stage](.github/actions/acceptance-stage/action.yml) composites. See the [lifecycle scenarios](docs/features/pr-validation.feature.md).
 

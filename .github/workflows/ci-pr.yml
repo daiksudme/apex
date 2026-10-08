@@ -84,12 +84,7 @@ jobs:
   ci:
     name: ci
     needs: [draft, commit-stage, ready, acceptance-stage]
-    if: >-
-      always() &&
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      !github.event.pull_request.head.repo.fork &&
-      github.event.pull_request.user.login != 'dependabot[bot]' &&
-      github.actor != 'dependabot[bot]'
+    if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 3
     permissions:
@@ -99,10 +94,12 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       PR_NUMBER: ${{ github.event.pull_request.number }}
+      MUTATION_ELIGIBLE: ${{ github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.head.repo.fork && github.event.pull_request.user.login != 'dependabot[bot]' && github.actor != 'dependabot[bot]' }}
       VALIDATION_PASSED: ${{ needs.draft.result == 'success' && needs['commit-stage'].result == 'success' && needs.ready.result == 'success' && needs['acceptance-stage'].result == 'success' }}
     steps:
       - name: check validation
         run: |
+          if [[ "$MUTATION_ELIGIBLE" != true ]]; then exit 1; fi
           if [[ "$VALIDATION_PASSED" == true ]]; then exit 0; fi
           gh pr ready "$PR_NUMBER" --repo "$GH_REPO" --undo
           exit 1

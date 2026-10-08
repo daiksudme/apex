@@ -87,11 +87,26 @@ test('Final ci preserves failure after demotion and does not mutate on success',
   for (const [passed, ghExit, expected] of [['true', '0', 0], ['false', '0', 1], ['', '0', 1], ['false', '1', 1]]) {
     const record = join(directory, `calls-${passed}-${ghExit}`);
     const result = spawnSync('/bin/bash', ['-e', '-o', 'pipefail', '-c', script], {
-      env: { PATH: `${directory}:/usr/bin:/bin`, VALIDATION_PASSED: passed, GH_EXIT: ghExit, GH_RECORD: record, GH_REPO: 'daiksudme/apex', PR_NUMBER: '174' },
+      env: { PATH: `${directory}:/usr/bin:/bin`, MUTATION_ELIGIBLE: 'true', VALIDATION_PASSED: passed, GH_EXIT: ghExit, GH_RECORD: record, GH_REPO: 'daiksudme/apex', PR_NUMBER: '174' },
       encoding: 'utf8', timeout: 2_000,
     });
     assert.equal(result.status, expected, result.stderr);
     if (passed === 'true') await assert.rejects(readFile(record), { code: 'ENOENT' });
     else assert.deepEqual((await readFile(record, 'utf8')).trim().split('\n'), ['pr', 'ready', '174', '--repo', 'daiksudme/apex', '--undo']);
   }
+});
+
+test('Unsupported PRs fail required ci without executing gh', async (t) => {
+  const script = job(pr, 'ci').match(/        run: \|\n((?:          .*\n|\n)+)/)?.[1]?.replace(/^ {10}/gm, '');
+  const directory = await mkdtemp(join(tmpdir(), 'apex-ci-excluded-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const record = join(directory, 'gh-call');
+  await writeFile(join(directory, 'gh'), '#!/bin/sh\nprintf called > "$GH_RECORD"\n', { mode: 0o755 });
+  const result = spawnSync('/bin/bash', ['-e', '-o', 'pipefail', '-c', script], {
+    env: { PATH: `${directory}:/usr/bin:/bin`, MUTATION_ELIGIBLE: 'false', VALIDATION_PASSED: 'true', GH_RECORD: record },
+    encoding: 'utf8', timeout: 2_000,
+  });
+  assert.equal(result.status, 1, result.stderr);
+  await assert.rejects(readFile(record), { code: 'ENOENT' });
+  assert.match(job(pr, 'ci'), /if: always\(\)\n/);
 });

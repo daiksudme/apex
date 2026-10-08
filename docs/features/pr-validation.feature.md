@@ -42,6 +42,13 @@ description: Native job sequencing, Draft and Ready commands, and required CI be
 - And: the push workflow performs no PR operations
 - And: Cloudflare retains ownership of production deployment
 
+### Scenario: GATE-03 Reject unsupported PRs without mutation
+
+- Given: a fork or Dependabot PR is outside the automatic lifecycle
+- When: the final required `ci` job runs
+- Then: it fails rather than reporting skipped success
+- And: it executes no candidate code or PR mutation
+
 The two workflows share focused commit-stage and acceptance-stage composites only in read-only validation jobs. PR mutation jobs execute quoted `gh` commands without candidate checkout or local actions. Fork and Dependabot PRs are outside the automatic lifecycle. Native concurrency supplies cancellation; there are no custom run-history, timing, or state assertion checks. Cancellation is not an atomic state-mutation guarantee, and whole-run cancellation may prevent the final check from executing. Existing protected CI, deployment, review, and freshness conditions remain required for merge.
 
 Verification corresponds to [workflow.node.mjs](../../tests/ci/workflow.node.mjs), [ci-pr.yml](../../.github/workflows/ci-pr.yml), and [ci-push.yml](../../.github/workflows/ci-push.yml).
