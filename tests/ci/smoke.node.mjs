@@ -32,7 +32,18 @@ test('SMOKE-01 requires exactly HTTP 200 and returns a failure exit', async (t) 
   });
 });
 
-test('SMOKE-01 bounds a pending request separately from the stage soft target', async (t) => {
+test('SMOKE-01 rejects a root redirect without requesting its HTTP 200 destination', async (t) => {
+  const requested = [];
+  const base = await serve(t, (request, response) => {
+    requested.push(request.url);
+    if (request.url === '/') response.writeHead(302, { location: '/profile' }).end();
+    else response.writeHead(200).end('redirect destination');
+  });
+  await assert.rejects(smoke(base), /HTTP 302 for \//);
+  assert.deepEqual(requested, ['/']);
+});
+
+test('SMOKE-01 bounds a pending root request', async (t) => {
   const base = await serve(t, (_request, response) => {
     setTimeout(() => response.writeHead(200).end('any body'), 100);
   });

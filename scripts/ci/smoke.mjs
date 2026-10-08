@@ -1,5 +1,5 @@
 export async function smoke(baseUrl, { timeoutMs = 15_000 } = {}) {
-  const response = await fetch(new URL('/', baseUrl), { signal: AbortSignal.timeout(timeoutMs) });
+  const response = await fetch(new URL('/', baseUrl), { redirect: 'manual', signal: AbortSignal.timeout(timeoutMs) });
   await response.body?.cancel();
   if (response.status !== 200) throw new Error(`HTTP ${response.status} for /`);
 }
