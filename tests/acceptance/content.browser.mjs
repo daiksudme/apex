@@ -31,6 +31,10 @@ export async function checkFixtureContent(page, base) {
       return rect.width > 0 && rect.height > 0 && getComputedStyle(paint).backgroundColor === expected;
     }), color), `${slug} sidebar marker uses the same visible color`);
   }
+  await page.getByRole('region', { name: 'Tags', exact: true }).getByRole('link', { name: '#fixture-tag', exact: true }).click();
+  assert.equal(new URL(page.url()).pathname + new URL(page.url()).hash, '/tags#tag-fixture-tag', 'Home tag opens its group');
+  assert.ok(await main.getByRole('heading', { name: '#fixture-tag', exact: true }).isVisible());
+  await navigation.getByRole('link', { name: 'Home', exact: true }).click();
   const latest = page.getByRole('region', { name: 'Latest Posts', exact: true });
   assert.deepEqual(await latest.getByRole('heading', { level: 3 }).allTextContents(),
     ['フィクスチャーの記事', 'second-post', 'third-post'], 'Home shows the latest three posts');
@@ -66,7 +70,12 @@ export async function checkFixtureContent(page, base) {
   const table = article.getByRole('table');
   assert.deepEqual(await table.getByRole('columnheader').allTextContents(), ['Feature', 'Result']);
   assert.deepEqual(await table.getByRole('cell').allTextContents(), ['Markdown', 'Generated HTML']);
-  assert.ok(await article.getByRole('img', { name: 'Fixture diagram', exact: true }).isVisible(), 'Image has an accessible alternative');
+  const image = article.getByRole('img', { name: 'Fixture diagram', exact: true });
+  assert.ok(await image.isVisible(), 'Image has an accessible alternative');
+  assert.ok(await image.evaluate(async (element) => {
+    await element.decode();
+    return element.naturalWidth > 0 && element.naturalHeight > 0;
+  }), 'Fixture image loads and can be decoded');
   const external = article.getByRole('link', { name: 'Fixture reference', exact: true });
   assert.equal(await external.getAttribute('href'), 'https://example.com/fixture-reference');
   assert.equal(await external.getAttribute('target'), '_blank', 'External link opens a new window');

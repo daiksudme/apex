@@ -22,9 +22,28 @@ try {
       await page.waitForLoadState('load');
       const status = mainResponse?.status();
       assert.equal(status, 200, `Main document HTTP ${status}`);
+      await checkSharedNavigation();
     };
     const navigation = page.getByRole('navigation', { name: 'Page navigation', exact: true });
     const main = page.getByRole('main');
+    const checkSharedNavigation = async () => {
+      assert.equal(await navigation.getByRole('link').count(), 4, 'NAV-01 exactly four site pages');
+      for (const [name, href] of [['Home', '/'], ['Posts', '/posts'], ['Tags', '/tags'], ['Profile', '/profile']]) {
+        assert.equal(await navigation.getByRole('link', { name, exact: true }).getAttribute('href'), href, 'NAV-01 shared navigation');
+      }
+      const footer = page.getByRole('contentinfo');
+      for (const [name, href] of [
+        ['GitHub', 'https://github.com/daiksud'], ['X', 'https://x.com/daiksud'], ['Zenn', 'https://zenn.dev/daiksud'],
+      ]) {
+        const link = footer.getByRole('link', { name: `daiksud on ${name}`, exact: true });
+        assert.ok(await link.isVisible(), 'NAV-01 shared footer link is available');
+        assert.equal(await link.getAttribute('href'), href, 'NAV-01 external destination');
+        assert.equal(await link.getAttribute('target'), '_blank');
+        const relations = (await link.getAttribute('rel')).split(/\s+/);
+        assert.ok(relations.includes('noopener'), 'NAV-01 external link protects its opener');
+        assert.ok(!relations.includes('noreferrer'), 'NAV-01 external link preserves referral');
+      }
+    };
     const readArticle = async (title, href) => {
       const heading = main.getByRole('heading', { level: 1 });
       assert.equal((await heading.innerText()).trim(), title, 'POST-01 post title');
@@ -42,9 +61,6 @@ try {
       const postsNavigation = navigation.getByRole('link', { name: 'Posts', exact: true });
       await page.mouse.move(0, 0);
       const inactivePosts = await postsNavigation.screenshot({ animations: 'disabled' });
-      for (const [name, href] of [['Home', '/'], ['Posts', '/posts'], ['Tags', '/tags'], ['Profile', '/profile']]) {
-        assert.equal(await navigation.getByRole('link', { name, exact: true }).getAttribute('href'), href, 'NAV-01 shared navigation');
-      }
       const toc = page.getByRole('navigation', { name: 'On this page', exact: true });
       for (const [name, hash] of [['About', '#about'], ['Latest Posts', '#posts'], ['Tags', '#tags'], ['Recent Commits', '#commits']]) {
         const target = page.getByRole('region', { name, exact: true });

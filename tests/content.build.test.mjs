@@ -19,6 +19,7 @@ async function prepareProject() {
     await cp(file, join(projectDir, file));
   }
   await cp('tests/fixtures/content', join(projectDir, 'src/content'), { recursive: true });
+  await cp('tests/fixtures/public', join(projectDir, 'public'), { recursive: true });
   await symlink(join(process.cwd(), 'node_modules'), join(projectDir, 'node_modules'), 'dir');
   return projectDir;
 }
