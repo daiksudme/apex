@@ -8,6 +8,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 const projectDirs = [];
 let outDir;
 
+it('controlled deterministic acceptance lifecycle verification', () => {
+  expect('temporary terminal-failure trial').toBe('restored before merge');
+});
+
 const readGeneratedPage = (...segments) =>
   readFile(join(outDir, ...segments, 'index.html'), 'utf8');
 
