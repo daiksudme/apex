@@ -65,7 +65,7 @@ test('TAG-01 reader CLI rejects a post tag link to an absent tag group', async (
 });
 
 for (const status of [502, 503, 504, 401, 403]) {
-  test(`classifies main-document HTTP ${status} without blanket retries`, async (t) => {
+  test(`reader CLI rejects main-document HTTP ${status}`, async (t) => {
     const server = createServer((_request, response) => {
       response.setHeader('Content-Type', 'text/html');
       response.writeHead(status).end('upstream response');
@@ -74,29 +74,22 @@ for (const status of [502, 503, 504, 401, 403]) {
     t.after(() => new Promise((resolve) => server.close(resolve)));
     await assert.rejects(promisify(execFile)(process.execPath, ['tests/acceptance/reader.browser.mjs', `http://127.0.0.1:${server.address().port}`]), (error) => {
       assert.equal(error.code, 1);
-      const diagnostic = error.stderr.split('\n').find((line) => line.startsWith('ACCEPTANCE_FAILURE '));
-      assert.ok(diagnostic, 'machine-readable failure classification');
-      const failure = JSON.parse(diagnostic.slice('ACCEPTANCE_FAILURE '.length));
-      assert.equal(failure.kind, status >= 500 ? 'transient' : 'deterministic');
-      assert.equal(failure.code, `HTTP_${status}`);
+      assert.match(error.stderr, new RegExp(`Main document HTTP ${status}`));
       return true;
     });
   });
 }
 
-for (const [name, transform, statusFor, expectedKind, expectedCode] of [
-  ['clicked Profile 503', (body) => body, (path) => path === '/profile' ? 503 : 200, 'transient', 'HTTP_503'],
-  ['asset 503 with navigation assertion', (body) => body.replace(/<a href="\/posts" lang="en"[^>]*>/, '<a lang="en">'), (path) => path.startsWith('/_astro/') ? 503 : 200, 'deterministic', 'ERR_ASSERTION'],
+for (const [name, transform, statusFor, expectedMessage] of [
+  ['clicked Profile 503', (body) => body, (path) => path === '/profile' ? 503 : 200, /Main document HTTP 503/],
+  ['asset 503 with navigation assertion', (body) => body.replace(/<a href="\/posts" lang="en"[^>]*>/, '<a lang="en">'), (path) => path.startsWith('/_astro/') ? 503 : 200, /NAV-01 shared navigation/],
 ]) {
-  test(`classifies ${name} from the encountered main-document failure`, async (t) => {
+  test(`reader CLI rejects ${name}`, async (t) => {
     const server = await serveBuild(transform, statusFor);
     t.after(server.close);
     await assert.rejects(promisify(execFile)(process.execPath, ['tests/acceptance/reader.browser.mjs', server.url]), (error) => {
       assert.equal(error.code, 1);
-      const line = error.stderr.split('\n').find((line) => line.startsWith('ACCEPTANCE_FAILURE '));
-      const diagnostic = JSON.parse(line.slice('ACCEPTANCE_FAILURE '.length));
-      assert.equal(diagnostic.kind, expectedKind);
-      assert.equal(diagnostic.code, expectedCode);
+      assert.match(error.stderr, expectedMessage);
       return true;
     });
   });

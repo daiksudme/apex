@@ -1,0 +1,49 @@
+name: ci-push
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ci-push-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  commit-stage:
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/commit-stage
+
+  acceptance-stage:
+    needs: commit-stage
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/acceptance-stage
+
+  ci:
+    name: ci
+    needs: [commit-stage, acceptance-stage]
+    if: always()
+    runs-on: ubuntu-slim
+    timeout-minutes: 3
+    env:
+      VALIDATION_PASSED: ${{ needs['commit-stage'].result == 'success' && needs['acceptance-stage'].result == 'success' }}
+    steps:
+      - run: test "$VALIDATION_PASSED" = true
+

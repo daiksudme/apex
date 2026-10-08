@@ -1,0 +1,55 @@
+name: commit-stage
+description: Build, fast checks, and optional matched Preview root smoke.
+inputs:
+  preview:
+    description: Require the PR Preview evidence and root HTTP smoke.
+    default: 'false'
+  source-sha:
+    description: PR source head deployed by Cloudflare.
+  source-branch:
+    description: PR source branch recorded by the deployment recorder.
+outputs:
+  preview-url:
+    description: The matched Preview URL.
+    value: ${{ steps.preview.outputs.url }}
+runs:
+  using: composite
+  steps:
+    - name: install tools
+      uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
+      with:
+        cache: false
+    - name: install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+    - name: check
+      shell: bash
+      run: pnpm check
+    - name: build
+      shell: bash
+      run: pnpm build
+    - name: fast tests
+      shell: bash
+      run: pnpm test:unit
+    - name: CI helper tests
+      shell: bash
+      run: pnpm test:ci
+    - name: wait for matched Preview
+      id: preview
+      if: inputs.preview == 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        SOURCE_SHA: ${{ inputs.source-sha }}
+        SOURCE_BRANCH: ${{ inputs.source-branch }}
+      run: |
+        node scripts/ci/preview.mjs "$SOURCE_SHA" "$SOURCE_BRANCH" > preview-evidence.json
+        cat preview-evidence.json
+        jq -er '"url=" + .previewUrl' preview-evidence.json >> "$GITHUB_OUTPUT"
+    - name: root HTTP smoke
+      if: inputs.preview == 'true'
+      shell: bash
+      env:
+        PREVIEW_URL: ${{ steps.preview.outputs.url }}
+      run: pnpm test:smoke "$PREVIEW_URL"
+

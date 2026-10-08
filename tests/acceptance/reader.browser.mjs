@@ -3,7 +3,6 @@ import { chromium } from 'playwright';
 import { checkHomeGeometry } from '../home-layout.browser.mjs';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { failureKind } from '../../scripts/ci/acceptance.mjs';
 
 const base = process.argv[2];
 const browser = await chromium.launch();
@@ -17,24 +16,10 @@ try {
       if (response.request().isNavigationRequest() && response.frame() === page.mainFrame()) mainResponse = response;
     });
     const navigate = async (operation) => {
-      try {
-        await operation();
-        await page.waitForLoadState('load');
-      } catch (error) {
-        const transport = error.name === 'Error'
-          && /^(?:page\.goto|locator\.click): net::ERR_CONNECTION_(RESET|CLOSED)\b/.exec(error.message);
-        if (transport) {
-          error.name = 'TransportError';
-          error.code = `NET_CONNECTION_${transport[1]}`;
-        }
-        throw error;
-      }
+      await operation();
+      await page.waitForLoadState('load');
       const status = mainResponse?.status();
-      if (status !== 200) {
-        throw Object.assign(new Error(`Main document HTTP ${status}`), {
-          name: [502, 503, 504].includes(status) ? 'TransportError' : 'HttpError', code: `HTTP_${status}`,
-        });
-      }
+      assert.equal(status, 200, `Main document HTTP ${status}`);
     };
     try {
       await navigate(() => page.goto(base, { waitUntil: 'load' }));
@@ -109,9 +94,6 @@ try {
     }
   }
   console.log('Reader acceptance passed: NAV-01 NAV-02 NAV-03 NAV-04 POST-01 POST-03 POST-04 TAG-01');
-} catch (error) {
-  console.error(`ACCEPTANCE_FAILURE ${JSON.stringify({ kind: failureKind(error), name: error.name, code: error.code ?? error.name })}`);
-  throw error;
 } finally {
   await browser.close();
 }

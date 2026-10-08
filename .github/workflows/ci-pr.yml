@@ -1,0 +1,109 @@
+name: ci-pr
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions: {}
+defaults:
+  run:
+    shell: bash
+concurrency:
+  group: ci-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  draft:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.head.repo.fork &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-slim
+    timeout-minutes: 3
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - run: gh pr ready "$PR_NUMBER" --repo "$GH_REPO" --undo
+
+  commit-stage:
+    needs: draft
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      checks: read
+      deployments: read
+    outputs:
+      preview-url: ${{ steps.validation.outputs.preview-url }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/commit-stage
+        id: validation
+        with:
+          preview: 'true'
+          source-sha: ${{ github.event.pull_request.head.sha }}
+          source-branch: ${{ github.event.pull_request.head.ref }}
+
+  ready:
+    needs: commit-stage
+    runs-on: ubuntu-slim
+    timeout-minutes: 3
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - run: gh pr ready "$PR_NUMBER" --repo "$GH_REPO"
+
+  acceptance-stage:
+    needs: [commit-stage, ready]
+    runs-on: ubuntu-slim
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/acceptance-stage
+        with:
+          preview: 'true'
+          preview-url: ${{ needs['commit-stage'].outputs.preview-url }}
+
+  ci:
+    name: ci
+    needs: [draft, commit-stage, ready, acceptance-stage]
+    if: >-
+      always() &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      !github.event.pull_request.head.repo.fork &&
+      github.event.pull_request.user.login != 'dependabot[bot]' &&
+      github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-slim
+    timeout-minutes: 3
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      VALIDATION_PASSED: ${{ needs.draft.result == 'success' && needs['commit-stage'].result == 'success' && needs.ready.result == 'success' && needs['acceptance-stage'].result == 'success' }}
+    steps:
+      - name: check validation
+        run: |
+          if [[ "$VALIDATION_PASSED" == true ]]; then exit 0; fi
+          gh pr ready "$PR_NUMBER" --repo "$GH_REPO" --undo
+          exit 1
+

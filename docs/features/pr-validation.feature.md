@@ -1,35 +1,36 @@
 ---
 type: Feature
 title: PR validation lifecycle
-description: Current-revision Draft, Ready, terminal failure, and required CI behavior.
+description: Native job sequencing, Draft and Ready commands, and required CI behavior.
 ---
 
-## Feature: Maintainers validate the current PR revision before merging
+## Feature: Maintainers validate team PRs before merging
 
 ### Scenario: STATE-01 Start source validation in Draft
 
 - Given: an eligible same-repository team PR is open
 - When: a new source commit starts validation
 - Then: the PR is Draft before commit-stage runs
-- And: obsolete heads, runs, and attempts cannot change its state
+- And: PR-scoped native concurrency cancels superseded validation
 
 ### Scenario: STATE-02 Promote successful commit validation
 
-- Given: the current commit-stage passes and identifies the intended Preview
+- Given: commit-stage passes and identifies the intended Preview
 - When: the Ready state job completes
 - Then: acceptance-stage starts through native job dependencies
 - And: the user or coding agent may explicitly request external review in parallel
 
-### Scenario: STATE-03 Stop after terminal acceptance failure
+### Scenario: STATE-03 Return failed validation to Draft
 
-- Given: current acceptance-stage fails finally
-- When: terminal reconciliation runs
-- Then: the PR returns to Draft and required CI fails
+- Given: a required upstream job fails or is skipped or canceled
+- When: the final `ci` job evaluates native dependency results
+- Then: it returns the PR to Draft and exits unsuccessfully
+- And: successful demotion cannot turn the validation result green
 - And: this state change does not start another validation cycle
 
-### Scenario: GATE-01 Fail closed on incomplete or obsolete work
+### Scenario: GATE-01 Require successful upstream results
 
-- Given: required validation or state work fails, is canceled, is absent, or is unexpectedly skipped
+- Given: required validation or state work lacks a successful native result
 - When: the native required `ci` job evaluates the results
 - Then: it cannot report success for that PR revision
 
@@ -38,19 +39,9 @@ description: Current-revision Draft, Ready, terminal failure, and required CI be
 - Given: a commit is pushed to main
 - When: CI runs
 - Then: build, fast checks, fixture integration, and local browser acceptance run
-- And: PR state jobs are explicitly inapplicable
+- And: the push workflow performs no PR operations
 - And: Cloudflare retains ownership of production deployment
 
-### Scenario: TIMING-01 Report a slow successful commit path
+The two workflows share focused commit-stage and acceptance-stage composites only in read-only validation jobs. PR mutation jobs execute quoted `gh` commands without candidate checkout or local actions. Fork and Dependabot PRs are outside the automatic lifecycle. Native concurrency supplies cancellation; there are no custom run-history, timing, or state assertion checks. Cancellation is not an atomic state-mutation guarantee, and whole-run cancellation may prevent the final check from executing. Existing protected CI, deployment, review, and freshness conditions remain required for merge.
 
-- Given: the complete trigger-to-commit-stage path exceeds five minutes
-- When: functional commit validation passes
-- Then: Actions warning and summary report queue/control, runner execution, and observed Preview waiting separately
-- And: an English PR notification is deduplicated for source revision, run, and attempt
-- And: the PR still proceeds to Ready and acceptance
-
-Timing uses native workflow creation through commit completion, including Draft reset and waiting. A rerun explicitly labels this baseline as since workflow creation, including earlier attempts; it does not claim a separately observable rerun-trigger duration. Missing timestamps or notification API errors produce warnings without fabricating timing or blocking functional promotion.
-
-Fork and Dependabot PRs are outside the automatic state-mutation model. The final required gate does not silently treat them as a completed supported PR lifecycle. GitHub mutations lack an atomic expected-source-SHA condition; pre/post checks and cancellation reduce and detect races, while current-revision required checks and existing protections remain the merge boundary.
-
-Verification corresponds to [workflow.node.mjs](../../tests/ci/workflow.node.mjs) and the single native [CI workflow](../../.github/workflows/ci.yml).
+Verification corresponds to [workflow.node.mjs](../../tests/ci/workflow.node.mjs), [ci-pr.yml](../../.github/workflows/ci-pr.yml), and [ci-push.yml](../../.github/workflows/ci-push.yml).
