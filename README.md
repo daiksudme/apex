@@ -116,6 +116,14 @@ Acceptance runs once and fails directly on an execution error or failed expectat
 
 The initial smoke check is separate: [`test:smoke`](scripts/ci/smoke.mjs) requests only `/` on the matched Preview and requires HTTP 200 with a bounded request timeout. It does not follow redirects or inspect content.
 
+### Codex approval automation
+
+[The approval workflow](.github/workflows/approve-codex-review.yml) matches the [agents workflow](https://github.com/daiksud/agents/blob/main/.github/workflows/approve-codex-review.yml). When `chatgpt-codex-connector[bot]` creates or edits a Codex Review Summary comment on a PR, it fetches that Summary again and requires both Code Review and Security Review to show `Completed`. It approves with `gh pr review --approve` only when the same Codex account also has a thumbs-up reaction on the PR body; other users' reactions do not count.
+
+If both reviews are complete but the thumbs-up is missing, it retries every 30 seconds, at most six times after the initial check (180 seconds of waiting). Each retry rereads the Summary and stops without approval if either review is incomplete. Exhausting the polling window exits normally; an API or approval error fails the run. Another Summary creation or edit is needed to trigger another check after the polling window ends.
+
+As in agents, the workflow does not compare reviewed commits with HEAD, filter reactions by timestamp, or withdraw existing approvals. An older completed Summary and existing thumbs-up can therefore approve newer code; freshness is deliberately not guaranteed. The workflow does not check out PR code, wait for CI, or merge PRs. Required CI, Preview, CodeQL, and review protections remain separate and unchanged.
+
 ### PR validation
 
 The [PR workflow](.github/workflows/ci-pr.yml) has five jobs: `draft` → `commit-stage` → `ready` → `acceptance-stage` → `ci`. Draft and Ready jobs use `gh pr ready --undo` and `gh pr ready`. The final `ci` evaluates native upstream results; on failure it returns the PR to Draft and still fails, even when demotion succeeds. Draft demotion does not start another cycle. Fork and Dependabot PRs are outside this automatic lifecycle: their final required `ci` fails without running candidate validation or PR operations.
