@@ -10,10 +10,10 @@ description: One complete local and optional Preview validation with retained di
 
 - Given: the application build is available
 - When: acceptance-stage executes
-- Then: fixture integration, browser harness checks, and local reader journeys run once
+- Then: fixture content integration and local reader journeys validate the application
+- And: populated and empty fixture collections verify readable posts and the no-post/no-tag state
 - And: PR acceptance also runs the reader journeys against the matched Preview URL
 - And: command logs are retained separately from browser screenshots and traces
-- And: the local server closes after execution
 
 ### Scenario: ACCEPT-02 Stop on failure
 
@@ -23,4 +23,4 @@ description: One complete local and optional Preview validation with retained di
 - And: diagnostics are retained and the local server closes
 - And: the PR workflow's final check returns the PR to Draft and remains unsuccessful
 
-Verification corresponds to [acceptance.node.mjs](../../tests/ci/acceptance.node.mjs), [reader.node.mjs](../../tests/acceptance/reader.node.mjs), and the [acceptance composite](../../.github/actions/acceptance-stage/action.yml).
+Application checks run through [the acceptance command](../../scripts/ci/acceptance.mjs), [fixture content integration](../../tests/content.build.test.mjs), [reader journeys](../../tests/acceptance/reader.browser.mjs), and the [acceptance composite](../../.github/actions/acceptance-stage/action.yml). The runner and browser assertions are not tested through deliberately broken pages or invocation self-tests.

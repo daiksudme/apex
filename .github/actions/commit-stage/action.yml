@@ -31,7 +31,7 @@ runs:
     - name: fast tests
       shell: bash
       run: pnpm test:unit
-    - name: CI helper tests
+    - name: Preview selection tests
       shell: bash
       run: pnpm test:ci
     - name: wait for matched Preview

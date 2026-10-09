@@ -12,10 +12,10 @@
     "check": "astro check",
     "build": "astro build",
     "test": "vitest run",
-    "test:ci": "node --test tests/ci/*.node.mjs",
+    "test:ci": "node --test tests/ci/preview.node.mjs",
     "test:smoke": "node scripts/ci/smoke.mjs",
-    "test:unit": "vitest run --exclude src/layouts/SiteLayout.build.test.mjs",
-    "test:integration": "vitest run src/layouts/SiteLayout.build.test.mjs",
+    "test:unit": "vitest run --exclude tests/content.build.test.mjs",
+    "test:integration": "vitest run tests/content.build.test.mjs",
     "test:acceptance": "pnpm build && node scripts/ci/acceptance.mjs"
   },
   "dependencies": {

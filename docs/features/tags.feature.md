@@ -14,4 +14,4 @@ description: Acceptance criteria for finding posts through tag index links.
 - And: a listed post link opens the corresponding root-level post route
 - And: the post retains its title and tag links
 
-Browser verification traces TAG-01 in [reader.browser.mjs](../../tests/acceptance/reader.browser.mjs). Author tag definitions, ordering, unused tags, and invalid references remain specified in [post tag definitions and references](../behavior/tags.feature.md) and verified with isolated fixture builds.
+Browser verification traces TAG-01 in [reader.browser.mjs](../../tests/acceptance/reader.browser.mjs). Author tag definitions, ordering, unused tags, and invalid references remain specified in [post tag definitions and references](../behavior/tags.feature.md) and verified through public [tag functions](../../src/lib/tags.test.ts) and isolated [fixture content integration](../../tests/content.build.test.mjs).

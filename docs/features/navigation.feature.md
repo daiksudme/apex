@@ -38,8 +38,6 @@ Readers can distinguish navigation between site pages, the table of contents wit
 - And: the table of contents displays `#` to distinguish its links from the global navigation's selection state
 - And: links can be operated with Tab and Enter, with visible focus and the existing skip-to-content link available
 
-Component verification corresponds to [SiteLayout.test.ts](../../src/layouts/SiteLayout.test.ts) and [Home.test.ts](../../src/components/Home.test.ts); generated HTML verification corresponds to [SiteLayout.build.test.mjs](../../src/layouts/SiteLayout.build.test.mjs). Also verify viewport widths and keyboard operation in a browser.
-
 ### Scenario: NAV-04 Read Home at desktop and mobile widths
 
 - Given: Home has Welcome, About, Latest Posts, Tags, and Recent Commits panes

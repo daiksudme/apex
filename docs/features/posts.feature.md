@@ -44,6 +44,6 @@ Readers can read posts and the profile with the same presentation and navigate t
 - And: the first terminal lines are `cat fixture-post.md` and `cat profile.md`, respectively
 - And: the post title heading and accessible post name are preserved
 
-Generated HTML verification corresponds to [SiteLayout.build.test.mjs](../../src/layouts/SiteLayout.build.test.mjs); shared presentation verification corresponds to [PostLayout.test.ts](../../src/layouts/PostLayout.test.ts).
+Build success and rejection contracts correspond to [content.build.test.mjs](../../tests/content.build.test.mjs). Its fixture browser check observes readable Markdown, metadata, tag lists, internal article links, and the absence of old nested routes.
 
 Browser verification traces POST-01, POST-03, and POST-04 in [reader.browser.mjs](../../tests/acceptance/reader.browser.mjs). Fixture build tests retain POST-02 and invalid tag coverage; deployed journeys choose links from the actual indexes rather than assume fixture content is published.

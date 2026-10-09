@@ -51,4 +51,4 @@ When there are no posts, no tags are displayed either. Home, the tag index, and 
 
 ## Verification data
 
-Automated tests use dedicated tag definitions and post fixtures. Do not use published posts or production tag definitions as test input; generated HTML verification also runs in a temporary project.
+Automated tests use dedicated tag definitions and post fixtures. Do not use published posts or production tag definitions as test input; content integration builds a temporary project and observes its reader-visible output in a browser. Build errors are checked through the public build operation; unit tests supply fixture inputs to the public tag functions.
