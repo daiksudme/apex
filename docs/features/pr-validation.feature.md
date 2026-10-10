@@ -1,63 +1,66 @@
 ---
 type: Feature
 title: PR validation lifecycle
-description: Native job sequencing, Draft and Ready commands, and required CI behavior.
+description: Native job sequencing, Draft and Ready commands, and required pass/CI behavior.
 ---
 
 ## Feature: Maintainers validate team PRs before merging
 
-### Scenario: STATE-01 Start source validation in Draft
+### Scenario: STATE-01 Start each PR validation in Draft
 
-- Given: an eligible same-repository team PR is open
-- When: a new source commit starts validation
-- Then: the PR is Draft before commit-stage runs
+- Given: a PR is opened, synchronized, reopened, or edited
+- When: the PR workflow runs
+- Then: it attempts to convert the PR to Draft before commit-stage
 - And: PR-scoped native concurrency cancels superseded validation
+- And: it does not compare HEAD or apply author/fork-specific skip conditions
 
-### Scenario: STATE-02 Promote successful commit validation
+### Scenario: STATE-02 Promote successful source validation
 
-- Given: commit-stage passes and identifies the intended Preview
-- When: the Ready state job completes
+- Given: commit-stage passes and selects the matched Cloudflare Preview
+- When: the Ready job completes
 - Then: acceptance-stage starts through native job dependencies
-- And: the user or coding agent may explicitly request external review in parallel
-- And: GitHub may automatically request CODEOWNERS review as an inherent Ready side effect
+- And: it receives commit-stage's matched Preview URL
+- And: the user or coding agent may request external review in parallel
+- And: GitHub may request CODEOWNERS review as an inherent Ready side effect
 - And: the workflow does not explicitly request AI review through an API
 
-### Scenario: STATE-03 Return failed validation to Draft
+### Scenario: STATE-03 Reject validation failures without state recovery
 
-- Given: a required upstream job fails or is skipped or canceled
-- When: the final `ci` job evaluates native dependency results
-- Then: it returns the PR to Draft and exits unsuccessfully
-- And: successful demotion cannot turn the validation result green
-- And: this state change does not start another validation cycle
+- Given: any mandatory upstream stage fails, is canceled, or is skipped
+- When: the final `pass` job evaluates its required predecessor's result
+- Then: `pass` cannot report success for that revision
+- And: no failure-handling step changes the PR back to Draft
+- And: acceptance failure after Ready leaves the PR Ready with a failed check
 
-### Scenario: STATE-04 Restart the complete lifecycle after failure
+### Scenario: STATE-04 Restart the complete lifecycle
 
-- Given: failed acceptance returned the PR to Draft
-- When: the maintainer reruns all jobs or pushes a new commit
-- Then: Draft, commit-stage, Ready, acceptance-stage, and final `ci` run in order
-- And: a failed-jobs-only rerun is outside the supported state recovery path
+- Given: validation failed at any stage
+- When: the maintainer reruns all jobs or pushes another commit
+- Then: Draft, commit-stage, Ready, acceptance-stage, and `pass` run in order
+- And: a failed-jobs-only rerun is not a complete state-transition restart
 
-### Scenario: GATE-01 Require successful upstream results
+### Scenario: GATE-01 Preserve native success requirements
 
-- Given: required validation or state work lacks a successful native result
-- When: the native required `ci` job evaluates the results
-- Then: it cannot report success for that PR revision
+- Given: Draft, commit-stage, Ready, or acceptance-stage did not succeed
+- When: the required `pass` check concludes
+- Then: GitHub cannot treat that PR revision as passing validation
 
-### Scenario: GATE-02 Preserve main validation
+### Scenario: GATE-02 Preserve main-push validation
 
 - Given: a commit is pushed to main
-- When: CI runs
+- When: the independent push workflow runs
 - Then: build, fast checks, fixture integration, and local browser acceptance run
-- And: the push workflow performs no PR operations
-- And: Cloudflare retains ownership of production deployment
+- And: its terminal check remains named `ci`
+- And: it performs no PR state operations or Cloudflare deployment
 
-### Scenario: GATE-03 Reject unsupported PRs without mutation
+### Scenario: GATE-03 Reject failed state changes without exceptions
 
-- Given: a fork or Dependabot PR is outside the automatic lifecycle
-- When: the final required `ci` job runs
-- Then: it fails rather than reporting skipped success
-- And: it executes no candidate code or PR mutation
+- Given: the PR workflow cannot perform a required Draft or Ready transition
+- When: that state-mutation job fails
+- Then: later dependent stages do not report success
+- And: the final required `pass` check fails
+- And: no special fallback lets a fork or Dependabot PR bypass state changes
 
-The two workflows share focused commit-stage and acceptance-stage composites only in read-only validation jobs. PR mutation jobs execute quoted `gh` commands without candidate checkout or local actions. Fork and Dependabot PRs are outside the automatic lifecycle. Native concurrency supplies cancellation; there are no custom run-history, timing, or state assertion checks. Cancellation is not an atomic state-mutation guarantee, and whole-run cancellation may prevent the final check from executing. Existing protected CI, deployment, review, and freshness conditions remain required for merge.
+Candidate validation jobs are read-only, check out without persisted credentials, and invoke the shared commit-stage and acceptance-stage composites. The PR commit-stage also reads Checks and Deployments to identify and validate the matched Preview. Mutation jobs execute only quoted `gh` commands without checking out candidate code. Cancellation is not an atomic state-mutation guarantee; a cancelled workflow may not finish its final check or restore Draft. Protected PR checks, Preview deployment, CodeQL, review approval, and branch freshness remain required for merging.
 
-Validate these outcomes in actual [PR](../../.github/workflows/ci-pr.yml) and [main-push](../../.github/workflows/ci-push.yml) runs. Workflow-source and extracted-shell assertions are not a test boundary. Preview selection contracts are covered by [preview.node.mjs](../../tests/ci/preview.node.mjs).
+Verify these outcomes using actual [PR](../../.github/workflows/ci-pr.yml) and [main-push](../../.github/workflows/ci-push.yml) runs. Workflow-source and extracted-shell assertions are not a substitute for real GitHub execution. Preview-selection behavior is covered by [preview.node.mjs](../../tests/ci/preview.node.mjs).
