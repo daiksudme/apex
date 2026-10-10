@@ -36,14 +36,14 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/acceptance-stage
 
-  ci:
-    name: ci
-    needs: [commit-stage, acceptance-stage]
+  pass:
+    needs: acceptance-stage
     if: always()
     runs-on: ubuntu-slim
     timeout-minutes: 3
-    env:
-      VALIDATION_PASSED: ${{ needs['commit-stage'].result == 'success' && needs['acceptance-stage'].result == 'success' }}
+    permissions: {}
     steps:
-      - run: test "$VALIDATION_PASSED" = true
+      - name: Reject failed or cancelled validation
+        if: cancelled() || needs['acceptance-stage'].result != 'success'
+        run: exit 1
 
