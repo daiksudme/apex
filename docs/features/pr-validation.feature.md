@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: PR validation lifecycle
-description: Native job sequencing, Draft and Ready commands, and required pass/CI behavior.
+description: Native job sequencing, Draft and Ready commands, and final pass checks.
 ---
 
 ## Feature: Maintainers validate team PRs before merging
@@ -50,7 +50,7 @@ description: Native job sequencing, Draft and Ready commands, and required pass/
 - Given: a commit is pushed to main
 - When: the independent push workflow runs
 - Then: build, fast checks, fixture integration, and local browser acceptance run
-- And: its terminal check remains named `ci`
+- And: its terminal check is named `pass`
 - And: it performs no PR state operations or Cloudflare deployment
 
 ### Scenario: GATE-03 Reject failed state changes without exceptions
