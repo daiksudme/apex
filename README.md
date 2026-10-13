@@ -8,7 +8,7 @@ description: Overview of the Astro static site and how to check, test, and build
 
 This is a static site built with Astro. Its output directory is `dist/`. Cloudflare deployment settings are managed in [wrangler.jsonc](wrangler.jsonc).
 
-The live site is available at <https://apex.daiksud-a1f.workers.dev/>.
+The production origin is <https://daiksud.me>, configured once through Astro's `site` setting. DNS and Cloudflare custom-domain setup are managed separately from this setting.
 
 ### Home design terminology
 
@@ -53,6 +53,12 @@ tags:
 ```
 
 Use the Markdown filename directly as the `slug` rather than duplicating it in frontmatter. The layout renders the post title as `h1`, so do not use a `#` heading in the Markdown body. Start body headings at `##`.
+
+### RSS subscription
+
+The shared footer links to `/rss.xml`, and each page's HTML head advertises `https://daiksud.me/rss.xml` for feed discovery. The static feed contains summaries for the same posts as `/posts`, including Profile, newest publication date first. Article links and GUIDs use the production origin without trailing slashes, even in local and Preview builds. Editing a summary or update date preserves the original publication date and feed identity.
+
+See [RSS subscription and discovery](docs/features/rss.feature.md) for acceptance criteria. The feed contains no full article HTML; readers follow its links to the original posts.
 
 ### Tag definitions
 

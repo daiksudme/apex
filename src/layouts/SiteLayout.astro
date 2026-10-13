@@ -34,6 +34,7 @@ const isActiveNavigationItem = (href: string) =>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#1a1b26" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={site.name} href={new URL('/rss.xml', Astro.site)} />
     <title>{pageTitle}</title>
   </head>
   <body>
@@ -78,6 +79,7 @@ const isActiveNavigationItem = (href: string) =>
           <a href={profile.githubUrl} target="_blank" rel="noopener" aria-label="daiksud on GitHub"><BrandLogo name="github" size={20} /><span>GitHub</span></a>
           <a href={profile.xUrl} target="_blank" rel="noopener" aria-label="daiksud on X"><BrandLogo name="x" size={20} /><span>X</span></a>
           <a href={profile.zennUrl} target="_blank" rel="noopener" aria-label="daiksud on Zenn"><BrandLogo name="zenn" size={20} /><span>Zenn</span></a>
+          <a href="/rss.xml">RSS</a>
         </div>
         <p>&copy; {year} {site.name}</p>
       </div>

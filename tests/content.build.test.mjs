@@ -1,10 +1,12 @@
 // @ts-nocheck
 import { execFile, execFileSync, spawnSync } from 'node:child_process';
-import { cp, mkdtemp, rm, symlink } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { promisify } from 'node:util';
+import { chromium } from 'playwright';
+import { parseFeed } from './acceptance/rss.browser.mjs';
 import { serveBuild } from './acceptance/server.mjs';
 
 const projectDirs = [];
@@ -25,6 +27,48 @@ async function prepareProject() {
 }
 
 const astroCli = join(process.cwd(), 'node_modules', 'astro', 'bin', 'astro.mjs');
+
+it('RSS-03 preserves Japanese and XML-sensitive title and summary text', async () => {
+  const projectDir = await prepareProject();
+  const postPath = join(projectDir, 'src/content/posts/fixture-post.md');
+  await writeFile(postPath, (await readFile(postPath, 'utf8'))
+    .replace(/^title:.*$/m, `title: ${JSON.stringify('日本語 & <記事> "引用" \'例\'')}`)
+    .replace(/^description:.*$/m, `description: ${JSON.stringify('要約 & <説明> "引用" \'例\'')}`));
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    const item = (await parseFeed(page, await readFile(join(projectDir, 'dist/rss.xml'), 'utf8'))).items[0];
+    expect(item.title).toBe('日本語 & <記事> "引用" \'例\'');
+    expect(item.description).toBe('要約 & <説明> "引用" \'例\'');
+  } finally {
+    await browser.close();
+  }
+}, 30_000);
+
+it('RSS-02 preserves identity and publication date after a summary edit', async () => {
+  const projectDir = await prepareProject();
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    const buildFeed = async () => {
+      execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+      return parseFeed(page, await readFile(join(projectDir, 'dist/rss.xml'), 'utf8'));
+    };
+    const before = (await buildFeed()).items[0];
+    const postPath = join(projectDir, 'src/content/posts/fixture-post.md');
+    await writeFile(postPath, (await readFile(postPath, 'utf8'))
+      .replace('description: 生成HTMLを検証するための記事。', 'description: An edited fixture summary.\nupdatedAt: 2026-01-06'));
+    const after = (await buildFeed()).items[0];
+    expect(after.description).toBe('An edited fixture summary.');
+    expect(after.guid).toBe(before.guid);
+    expect(after.date).toBe(before.date);
+    expect(after.guid).toBe('https://daiksud.me/fixture-post');
+    expect(after.date).toBe('2026-01-04T00:00:00.000Z');
+  } finally {
+    await browser.close();
+  }
+}, 30_000);
 
 afterAll(async () => {
   await Promise.all(projectDirs.map((dir) => rm(dir, { recursive: true, force: true })));

@@ -1,7 +1,7 @@
 ---
 type: Reference
 title: Blog terminology
-description: Terms for tags used to classify posts and for what is displayed.
+description: Terms for post classification and RSS subscription.
 ---
 
 ## Post classification
@@ -13,3 +13,14 @@ description: Terms for tags used to classify posts and for what is displayed.
 | Tag reference | A tag identifier specified by a post. An undefined identifier causes a build error | Blog post classification | posts.data.tags |
 
 See [post tag definitions and references](behavior/tags.feature.md) for details.
+
+## RSS subscription
+
+| Term | Definition | Model boundary | Code name |
+| --- | --- | --- | --- |
+| RSS feed | Static subscription document containing site metadata and one item per listed post, including Profile | Blog subscription | `/rss.xml` |
+| Summary | Post description supplied to a feed reader, without the full article body | Blog subscription | `description` |
+| Feed identity | Stable identifier equal to the absolute production article URL; unchanged by summary or update-date edits | Blog subscription | `guid` |
+| Production origin | Selected `https://daiksud.me` origin used for absolute subscription URLs in every build environment | Site publishing | Astro `site` |
+
+See [RSS subscription and discovery](features/rss.feature.md) for details.
