@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { checkArticleStart, checkEmptyContent, checkFixtureContent } from './content.browser.mjs';
 import { checkHomeGeometry } from '../home-layout.browser.mjs';
-import { checkFixtureFeed } from './rss.browser.mjs';
+import { checkFeedDiscovery, checkFixtureFeed } from './rss.browser.mjs';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -37,6 +37,7 @@ try {
     const navigation = page.getByRole('navigation', { name: 'Page navigation', exact: true });
     const main = page.getByRole('main');
     const checkSharedNavigation = async () => {
+      await checkFeedDiscovery(page);
       assert.equal(await navigation.getByRole('link').count(), 4, 'NAV-01 exactly four site pages');
       for (const [name, href] of [['Home', '/'], ['Posts', '/posts'], ['Tags', '/tags'], ['Profile', '/profile']]) {
         assert.equal(await navigation.getByRole('link', { name, exact: true }).getAttribute('href'), href, 'NAV-01 shared navigation');
@@ -71,6 +72,7 @@ try {
       if (fixtures) {
         await checkFixtureFeed(page, base);
         await checkFixtureContent(page, base);
+        await navigate(() => page.goto(new URL('/fixture-post', base).href));
         continue;
       }
       const postsNavigation = navigation.getByRole('link', { name: 'Posts', exact: true });

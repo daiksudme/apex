@@ -1,5 +1,12 @@
 import assert from 'node:assert/strict';
 
+export async function checkFeedDiscovery(page) {
+  const discovery = page.locator('head link[rel="alternate"][type="application/rss+xml"]');
+  assert.equal(await discovery.count(), 1, 'RSS-05 one RSS discovery link');
+  assert.equal(await discovery.getAttribute('href'), 'https://daiksud.me/rss.xml', 'RSS-05 production discovery URL');
+  assert.equal(await discovery.getAttribute('title'), 'daiksud.me', 'RSS-05 feed title');
+}
+
 export async function checkFixtureFeed(page, base, { empty = false } = {}) {
   const response = await page.request.get(new URL('/rss.xml', base).href);
   assert.equal(response.status(), 200, 'RSS-01 feed is available');
