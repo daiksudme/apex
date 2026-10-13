@@ -3,6 +3,7 @@ import { defineConfig } from 'astro/config';
 import { hastExternalLinks } from './src/hast/external-links';
 
 export default defineConfig({
+  site: 'https://daiksud.me',
   trailingSlash: 'never',
   markdown: {
     processor: satteri({

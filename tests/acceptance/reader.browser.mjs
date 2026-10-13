@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { checkArticleStart, checkEmptyContent, checkFixtureContent } from './content.browser.mjs';
 import { checkHomeGeometry } from '../home-layout.browser.mjs';
+import { checkFixtureFeed } from './rss.browser.mjs';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -67,6 +68,7 @@ try {
         continue;
       }
       if (fixtures) {
+        await checkFixtureFeed(page, base);
         await checkFixtureContent(page, base);
         continue;
       }

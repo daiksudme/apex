@@ -9,7 +9,7 @@ export async function serveBuild(directory = 'dist') {
       const pathname = new URL(request.url, 'http://localhost').pathname;
       const file = resolve(root, `.${pathname}`, extname(pathname) ? '' : 'index.html');
       if (!file.startsWith(`${root}${sep}`)) throw new Error('Outside dist');
-      const type = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.svg': 'image/svg+xml' }[extname(file)] ?? 'application/octet-stream';
+      const type = { '.html': 'text/html', '.css': 'text/css', '.js': 'application/javascript', '.svg': 'image/svg+xml', '.xml': 'application/rss+xml' }[extname(file)] ?? 'application/octet-stream';
       response.setHeader('Content-Type', type);
       const body = await readFile(file);
       response.end(body);
