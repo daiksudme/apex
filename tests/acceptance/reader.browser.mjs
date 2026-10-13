@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { checkArticleStart, checkEmptyContent, checkFixtureContent } from './content.browser.mjs';
 import { checkHomeGeometry } from '../home-layout.browser.mjs';
-import { checkFeedDiscovery, checkFixtureFeed } from './rss.browser.mjs';
+import { checkFeedDiscovery, checkFixtureFeed, checkFooterFeed } from './rss.browser.mjs';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -64,6 +64,7 @@ try {
     };
     try {
       await navigate(() => page.goto(base, { waitUntil: 'load' }));
+      await checkFooterFeed(page, base);
       if (empty) {
         await checkFixtureFeed(page, base, { empty: true });
         await checkEmptyContent(page, base);

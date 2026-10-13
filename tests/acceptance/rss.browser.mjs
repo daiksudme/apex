@@ -1,5 +1,28 @@
 import assert from 'node:assert/strict';
 
+export async function checkFooterFeed(page, base) {
+  const link = page.getByRole('contentinfo').getByRole('link', { name: 'RSS', exact: true });
+  assert.ok(await link.isVisible(), 'RSS-06 visible footer RSS link');
+  assert.equal(await link.getAttribute('href'), '/rss.xml', 'RSS-06 current host feed path');
+  await page.mouse.move(0, 0);
+  await link.scrollIntoViewIfNeeded();
+  const box = await link.boundingBox();
+  const clip = { x: box.x - 10, y: box.y - 10, width: box.width + 20, height: box.height + 20 };
+  const unfocused = await page.screenshot({ clip, animations: 'disabled' });
+  await page.getByRole('contentinfo').getByRole('link', { name: 'daiksud on Zenn', exact: true }).focus();
+  await page.keyboard.press('Tab');
+  const focused = await page.screenshot({ clip, animations: 'disabled' });
+  assert.ok(await link.evaluate((node) => node === document.activeElement), 'RSS-06 keyboard focus reaches RSS');
+  assert.notDeepEqual(focused, unfocused, 'RSS-06 focus is visibly indicated');
+  const [response] = await Promise.all([page.waitForNavigation(), page.keyboard.press('Enter')]);
+  assert.equal(new URL(page.url()).pathname, '/rss.xml', 'RSS-06 feed destination');
+  assert.equal(response.status(), 200, 'RSS-06 keyboard activation opens feed');
+  assert.match(response.headers()['content-type'], /^(application\/(rss\+xml|xml)|text\/xml)(;|$)/i, 'RSS-06 XML media type');
+  const feed = await parseFeed(page, await response.text());
+  assert.equal(feed.link, 'https://daiksud.me', 'RSS-06 feed keeps production origin');
+  await page.goto(base);
+}
+
 export async function checkFeedDiscovery(page) {
   const discovery = page.locator('head link[rel="alternate"][type="application/rss+xml"]');
   assert.equal(await discovery.count(), 1, 'RSS-05 one RSS discovery link');
