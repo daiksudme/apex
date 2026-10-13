@@ -22,6 +22,7 @@ async function prepareProject() {
   }
   await cp('tests/fixtures/content', join(projectDir, 'src/content'), { recursive: true });
   await cp('tests/fixtures/public', join(projectDir, 'public'), { recursive: true });
+  await cp('public/og-image.png', join(projectDir, 'public/og-image.png'));
   await symlink(join(process.cwd(), 'node_modules'), join(projectDir, 'node_modules'), 'dir');
   return projectDir;
 }
@@ -133,3 +134,74 @@ describe('root article route collisions', () => {
     expect(result.stdout + result.stderr).toContain(`Post slug "${slug}" conflicts with an existing page`);
   }, 30_000);
 });
+
+it('OG-01 describes each static page with production Open Graph metadata', async () => {
+  const projectDir = await prepareProject();
+  const postPath = join(projectDir, 'src/content/posts/fixture-post.md');
+  const title = '日本語 & <記事> "引用"';
+  const description = '要約 & <説明> "引用"';
+  await writeFile(postPath, (await readFile(postPath, 'utf8'))
+    .replace(/^title:.*$/m, `title: ${JSON.stringify(title)}`)
+    .replace(/^description:.*$/m, `description: ${JSON.stringify(description)}`));
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    for (const [path, expectedTitle, expectedDescription, type] of [
+      ['/', 'daiksud.me', 'A blog about experiments with technology, personal projects, and what I learn and think along the way.', 'website'],
+      ['/posts', 'Posts | daiksud.me', 'Posts about things I build, learn, and think about.', 'website'],
+      ['/tags', 'Tags | daiksud.me', 'Browse posts by tag, with the latest posts for each tag.', 'website'],
+      ['/profile', 'フィクスチャーのプロフィール | daiksud.me', '共通記事表示を確認するプロフィール。', 'article'],
+      ['/fixture-post', `${title} | daiksud.me`, description, 'article'],
+    ]) {
+      const html = await readFile(join(projectDir, 'dist', path, 'index.html'), 'utf8');
+      const parsed = await page.evaluate((html) => {
+        const document = new DOMParser().parseFromString(html, 'text/html');
+        return {
+          title: document.title,
+          description: document.querySelector('meta[name="description"]').content,
+          metadata: [...document.head.querySelectorAll('meta[property^="og:"]')]
+            .map((meta) => [meta.getAttribute('property'), meta.content]),
+        };
+      }, html);
+      const expected = [
+        ['og:title', expectedTitle], ['og:description', expectedDescription],
+        ['og:type', type], ['og:url', `https://daiksud.me${path}`], ['og:site_name', 'daiksud.me'],
+      ];
+      const metadata = parsed.metadata.filter(([name]) => expected.some(([property]) => property === name));
+      expect(metadata.sort()).toEqual(expected.sort());
+      expect(parsed.title).toBe(expectedTitle);
+      expect(parsed.description).toBe(expectedDescription);
+    }
+  } finally {
+    await browser.close();
+  }
+}, 30_000);
+
+it('OG-02 shares one decodable branded image across pages', async () => {
+  const projectDir = await prepareProject();
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    for (const path of ['/', '/posts', '/tags', '/profile', '/fixture-post']) {
+      const html = await readFile(join(projectDir, 'dist', path, 'index.html'), 'utf8');
+      const images = await page.evaluate((html) => [...new DOMParser()
+        .parseFromString(html, 'text/html').head.querySelectorAll('meta[property^="og:image"]')]
+        .map((meta) => [meta.getAttribute('property'), meta.content]), html);
+      expect(images).toEqual([
+        ['og:image', 'https://daiksud.me/og-image.png'],
+        ['og:image:alt', 'daiksud.me with a blue terminal cursor and the words Build. Learn. Write. Repeat. on a dark background.'],
+      ]);
+    }
+    const image = await readFile(join(projectDir, 'dist/og-image.png'));
+    expect(image.equals(await readFile('public/og-image.png'))).toBe(true);
+    const dimensions = await page.evaluate(async (bytes) => {
+      const image = await createImageBitmap(new Blob([new Uint8Array(bytes)], { type: 'image/png' }));
+      return [image.width, image.height];
+    }, [...image]);
+    expect(dimensions).toEqual([1200, 630]);
+  } finally {
+    await browser.close();
+  }
+}, 30_000);

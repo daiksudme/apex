@@ -1,3 +1,4 @@
+import { checkSharedPreview } from './open-graph.browser.mjs';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { checkArticleStart, checkEmptyContent, checkFixtureContent } from './content.browser.mjs';
@@ -70,6 +71,7 @@ try {
         await checkEmptyContent(page, base);
         continue;
       }
+      if (width === (fixtures ? 390 : 1440)) await checkSharedPreview(page, base);
       if (fixtures) {
         await checkFixtureFeed(page, base);
         await checkFixtureContent(page, base);
