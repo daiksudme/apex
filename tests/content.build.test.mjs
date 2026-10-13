@@ -28,6 +28,24 @@ async function prepareProject() {
 
 const astroCli = join(process.cwd(), 'node_modules', 'astro', 'bin', 'astro.mjs');
 
+it('RSS-03 preserves Japanese and XML-sensitive title and summary text', async () => {
+  const projectDir = await prepareProject();
+  const postPath = join(projectDir, 'src/content/posts/fixture-post.md');
+  await writeFile(postPath, (await readFile(postPath, 'utf8'))
+    .replace(/^title:.*$/m, `title: ${JSON.stringify('日本語 & <記事> "引用" \'例\'')}`)
+    .replace(/^description:.*$/m, `description: ${JSON.stringify('要約 & <説明> "引用" \'例\'')}`));
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    const item = (await parseFeed(page, await readFile(join(projectDir, 'dist/rss.xml'), 'utf8'))).items[0];
+    expect(item.title).toBe('日本語 & <記事> "引用" \'例\'');
+    expect(item.description).toBe('要約 & <説明> "引用" \'例\'');
+  } finally {
+    await browser.close();
+  }
+}, 30_000);
+
 it('RSS-02 preserves identity and publication date after a summary edit', async () => {
   const projectDir = await prepareProject();
   const browser = await chromium.launch();
