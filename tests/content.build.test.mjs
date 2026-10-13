@@ -205,3 +205,31 @@ it('OG-02 shares one decodable branded image across pages', async () => {
     await browser.close();
   }
 }, 30_000);
+
+it('TOC-01 shows an ordered article outline before the body', async () => {
+  const projectDir = await prepareProject();
+  await cp('tests/fixtures/toc/basic.md', join(projectDir, 'src/content/posts/toc.md'));
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const server = await serveBuild(join(projectDir, 'dist'));
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    await page.goto(`${server.url}/toc`);
+    const toc = page.getByRole('navigation', { name: 'Table of contents', exact: true });
+    expect(await toc.locator('a').allTextContents()).toEqual(['First section', 'Details']);
+    expect(await toc.locator('li').count()).toBe(2);
+    const outline = await toc.evaluate((nav) => {
+      const links = [...nav.querySelectorAll('a')];
+      return {
+        beforeBody: Boolean(nav.compareDocumentPosition(document.querySelector('.post-content')) & Node.DOCUMENT_POSITION_FOLLOWING),
+        afterHeader: Boolean(document.querySelector('.post-header').compareDocumentPosition(nav) & Node.DOCUMENT_POSITION_FOLLOWING),
+        targets: links.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1)))?.textContent),
+        indented: links[1].getBoundingClientRect().left > links[0].getBoundingClientRect().left,
+      };
+    });
+    expect(outline).toEqual({ beforeBody: true, afterHeader: true, targets: ['First section', 'Details'], indented: true });
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+}, 30_000);

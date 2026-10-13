@@ -1,4 +1,5 @@
 ---
+import type { MarkdownHeading } from 'astro';
 import Pane from '../components/Pane.astro';
 import PostTags from '../components/PostTags.astro';
 import TerminalPrompt from '../components/TerminalPrompt.astro';
@@ -7,6 +8,7 @@ import type { TagDefinition } from '../lib/tags';
 import SiteLayout from './SiteLayout.astro';
 
 interface Props {
+  headings: MarkdownHeading[];
   title: string;
   description: string;
   slug: string;
@@ -17,6 +19,7 @@ interface Props {
 }
 
 const {
+  headings,
   title,
   description,
   slug,
@@ -54,6 +57,16 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
         </div>
         <PostTags tags={tags} tagDefinitions={siteTags} sourceId={slug} />
       </header>
+      <nav class="table-of-contents" aria-label="Table of contents">
+        <p class="toc-label" lang="en">Table of contents</p>
+        <ul>
+          {headings.map((heading) => (
+            <li class:list={{ 'toc-subheading': heading.depth === 3 }}>
+              <a href={`#${heading.slug}`}>{heading.text}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
       <div class="post-content">
         <slot />
       </div>
@@ -114,6 +127,24 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
       .post-meta-label {
         color: var(--green);
       }
+    }
+  }
+
+  .table-of-contents {
+    max-inline-size: 72ch;
+    margin-inline: auto;
+    padding-block: 1rem;
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+
+    .toc-label {
+      margin-bottom: 0.5rem;
+      color: var(--muted);
+    }
+
+    .toc-subheading {
+      padding-inline-start: 1.25rem;
     }
   }
 
