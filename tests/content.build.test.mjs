@@ -270,3 +270,24 @@ it('TOC-02b includes only h2 and h3, including on Profile', async () => {
     await browser.close();
   }
 }, 30_000);
+
+it('TOC-03 preserves readable text and renderer destinations', async () => {
+  const projectDir = await prepareProject();
+  await cp('tests/fixtures/toc/labels.md', join(projectDir, 'src/content/posts/toc.md'));
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    await page.setContent(await readFile(join(projectDir, 'dist/toc/index.html'), 'utf8'));
+    const toc = page.getByRole('navigation', { name: 'Table of contents', exact: true });
+    const labels = await toc.locator('a').allTextContents();
+    expect(labels).toEqual(['日本語の見出し', '日本語の見出し', 'With emphasis and code', '<span> & “quoted”']);
+    expect(await toc.locator('a > *').count()).toBe(0);
+    const destinations = await toc.locator('a').evaluateAll((links) => links.map((link) => decodeURIComponent(link.hash.slice(1))));
+    expect(new Set(destinations).size).toBe(4);
+    expect(destinations).toEqual(await page.locator('.post-content h2, .post-content h3').evaluateAll((headings) => headings.map((heading) => heading.id)));
+    expect(labels).toEqual(await page.locator('.post-content h2, .post-content h3').allTextContents());
+  } finally {
+    await browser.close();
+  }
+}, 30_000);
