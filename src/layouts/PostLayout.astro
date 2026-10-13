@@ -57,16 +57,18 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
         </div>
         <PostTags tags={tags} tagDefinitions={siteTags} sourceId={slug} />
       </header>
-      <nav class="table-of-contents" aria-label="Table of contents">
-        <p class="toc-label" lang="en">Table of contents</p>
-        <ul>
-          {headings.map((heading) => (
-            <li class:list={{ 'toc-subheading': heading.depth === 3 }}>
-              <a href={`#${heading.slug}`}>{heading.text}</a>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {headings.length >= 2 && (
+        <nav class="table-of-contents" aria-label="Table of contents">
+          <p class="toc-label" lang="en">Table of contents</p>
+          <ul>
+            {headings.map((heading) => (
+              <li class:list={{ 'toc-subheading': heading.depth === 3 }}>
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
       <div class="post-content">
         <slot />
       </div>

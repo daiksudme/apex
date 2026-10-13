@@ -233,3 +233,19 @@ it('TOC-01 shows an ordered article outline before the body', async () => {
     await server.close();
   }
 }, 30_000);
+
+it('TOC-02a omits outlines for zero or one heading', async () => {
+  const projectDir = await prepareProject();
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    for (const slug of ['second-post', 'profile']) {
+      await page.setContent(await readFile(join(projectDir, 'dist', slug, 'index.html'), 'utf8'));
+      expect(await page.getByRole('navigation', { name: 'Table of contents', exact: true }).count()).toBe(0);
+      expect(await page.locator('.table-of-contents').count()).toBe(0);
+    }
+  } finally {
+    await browser.close();
+  }
+}, 30_000);
