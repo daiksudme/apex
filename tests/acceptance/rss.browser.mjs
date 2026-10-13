@@ -20,6 +20,10 @@ export async function checkFooterFeed(page, base) {
   assert.match(response.headers()['content-type'], /^(application\/(rss\+xml|xml)|text\/xml)(;|$)/i, 'RSS-06 XML media type');
   const feed = await parseFeed(page, await response.text());
   assert.equal(feed.link, 'https://daiksud.me', 'RSS-06 feed keeps production origin');
+  for (const item of feed.items) {
+    assert.match(item.link, /^https:\/\/daiksud\.me\/[^/?#]+$/, 'RSS-05 production article URL without trailing slash');
+    assert.equal(item.guid, item.link, 'RSS-05 production article identity');
+  }
   await page.goto(base);
 }
 
