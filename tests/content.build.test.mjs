@@ -249,3 +249,24 @@ it('TOC-02a omits outlines for zero or one heading', async () => {
     await browser.close();
   }
 }, 30_000);
+
+it('TOC-02b includes only h2 and h3, including on Profile', async () => {
+  const projectDir = await prepareProject();
+  for (const slug of ['toc', 'profile']) {
+    await cp('tests/fixtures/toc/mixed.md', join(projectDir, `src/content/posts/${slug}.md`));
+  }
+  await cp('tests/fixtures/toc/excluded.md', join(projectDir, 'src/content/posts/excluded.md'));
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    for (const slug of ['toc', 'profile', 'excluded']) {
+      await page.setContent(await readFile(join(projectDir, 'dist', slug, 'index.html'), 'utf8'));
+      const toc = page.getByRole('navigation', { name: 'Table of contents', exact: true });
+      expect(await toc.locator('a').allTextContents()).toEqual(slug === 'excluded' ? [] : ['First section', 'Details']);
+      expect(await page.locator('.table-of-contents').count()).toBe(slug === 'excluded' ? 0 : 1);
+    }
+  } finally {
+    await browser.close();
+  }
+}, 30_000);

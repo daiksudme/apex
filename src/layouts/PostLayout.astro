@@ -29,6 +29,7 @@ const {
   siteTags = [],
 } = Astro.props;
 
+const tocHeadings = headings.filter(({ depth }) => depth === 2 || depth === 3);
 const sourcePath = `${slug}.md`;
 const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
 ---
@@ -57,11 +58,11 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
         </div>
         <PostTags tags={tags} tagDefinitions={siteTags} sourceId={slug} />
       </header>
-      {headings.length >= 2 && (
+      {tocHeadings.length >= 2 && (
         <nav class="table-of-contents" aria-label="Table of contents">
           <p class="toc-label" lang="en">Table of contents</p>
           <ul>
-            {headings.map((heading) => (
+            {tocHeadings.map((heading) => (
               <li class:list={{ 'toc-subheading': heading.depth === 3 }}>
                 <a href={`#${heading.slug}`}>{heading.text}</a>
               </li>
