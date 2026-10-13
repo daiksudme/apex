@@ -64,6 +64,7 @@ try {
     try {
       await navigate(() => page.goto(base, { waitUntil: 'load' }));
       if (empty) {
+        await checkFixtureFeed(page, base, { empty: true });
         await checkEmptyContent(page, base);
         continue;
       }
