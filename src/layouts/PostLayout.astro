@@ -134,6 +134,9 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
   }
 
   .table-of-contents {
+    width: 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
     max-inline-size: 72ch;
     margin-inline: auto;
     padding-block: 1rem;

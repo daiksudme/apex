@@ -1,7 +1,7 @@
 ---
 type: Reference
 title: Blog terminology
-description: Terms for post classification and RSS subscription.
+description: Terms for post classification, subscription, and article navigation.
 ---
 
 ## Post classification
@@ -24,3 +24,12 @@ See [post tag definitions and references](behavior/tags.feature.md) for details.
 | Production origin | Selected `https://daiksud.me` origin used for absolute subscription URLs in every build environment | Site publishing | Astro `site` |
 
 See [RSS subscription and discovery](features/rss.feature.md) for details.
+
+## Article navigation
+
+| Term | Definition | Model boundary | Code name |
+| --- | --- | --- | --- |
+| Table of contents | Static list of article section links shown when at least two eligible headings exist | Article reading | `tocHeadings` |
+| Eligible heading | Body h2 or h3 heading; its label and ID come from the existing Markdown renderer | Article reading | `headings` |
+
+See [article table of contents](features/table-of-contents.feature.md) for details.

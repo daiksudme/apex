@@ -311,3 +311,31 @@ it('TOC-03 preserves readable text and renderer destinations', async () => {
     await server.close();
   }
 }, 30_000);
+
+it('TOC-04 fits long labels within mobile and desktop articles', async () => {
+  const projectDir = await prepareProject();
+  await cp('tests/fixtures/toc/long.md', join(projectDir, 'src/content/posts/toc.md'));
+  execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const server = await serveBuild(join(projectDir, 'dist'));
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ javaScriptEnabled: false });
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`${server.url}/toc`);
+      const geometry = await page.getByRole('navigation', { name: 'Table of contents', exact: true }).evaluate((nav) => {
+        const article = nav.closest('article').getBoundingClientRect();
+        const box = nav.getBoundingClientRect();
+        return {
+          documentFits: document.documentElement.scrollWidth <= innerWidth,
+          tocFits: box.left >= article.left && box.right <= article.right && nav.scrollWidth <= nav.clientWidth,
+          linksFit: [...nav.querySelectorAll('a')].every((link) => [...link.getClientRects()].every((rect) => rect.left >= box.left && rect.right <= box.right + 1)),
+        };
+      });
+      expect(geometry).toEqual({ documentFits: true, tocFits: true, linksFit: true });
+    }
+  } finally {
+    await browser.close();
+    await server.close();
+  }
+}, 30_000);
