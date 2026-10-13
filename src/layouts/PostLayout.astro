@@ -30,7 +30,7 @@ const sourcePath = `${slug}.md`;
 const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
 ---
 
-<SiteLayout title={title} description={description} siteTags={siteTags} activeSection="posts">
+<SiteLayout type="article" title={title} description={description} siteTags={siteTags} activeSection="posts">
   <div class="post-page">
     <Pane as="article" class="post-pane" ariaLabelledBy="post-title">
       <header class="post-header">

@@ -9,11 +9,12 @@ import { navigation, profile, site } from '../config/site';
 import '../styles/global.css';
 interface Props {
   title?: string;
+  type?: 'website' | 'article';
   description?: string;
   siteTags?: TagDefinition[];
   activeSection?: 'posts';
 }
-const { title, description = site.description, siteTags = [], activeSection } = Astro.props;
+const { title, description = site.description, type = 'website', siteTags = [], activeSection } = Astro.props;
 const pageTitle = getPageTitle(title);
 const year = new Date().getFullYear();
 const pathname = Astro.url.pathname;
@@ -32,6 +33,13 @@ const isActiveNavigationItem = (href: string) =>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={new URL(pathname, Astro.site)} />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:image" content={new URL('/og-image.png', Astro.site)} />
+    <meta property="og:image:alt" content="daiksud.me with a blue terminal cursor and the words Build. Learn. Write. Repeat. on a dark background." />
     <meta name="theme-color" content="#1a1b26" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={site.name} href={new URL('/rss.xml', Astro.site)} />
