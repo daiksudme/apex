@@ -275,10 +275,11 @@ it('TOC-03 preserves readable text and renderer destinations', async () => {
   const projectDir = await prepareProject();
   await cp('tests/fixtures/toc/labels.md', join(projectDir, 'src/content/posts/toc.md'));
   execFileSync(process.execPath, [astroCli, 'build'], { cwd: projectDir, stdio: 'pipe' });
+  const server = await serveBuild(join(projectDir, 'dist'));
   const browser = await chromium.launch();
   try {
-    const page = await browser.newPage();
-    await page.setContent(await readFile(join(projectDir, 'dist/toc/index.html'), 'utf8'));
+    const page = await browser.newPage({ javaScriptEnabled: false, viewport: { width: 390, height: 600 } });
+    await page.goto(`${server.url}/toc`);
     const toc = page.getByRole('navigation', { name: 'Table of contents', exact: true });
     const labels = await toc.locator('a').allTextContents();
     expect(labels).toEqual(['日本語の見出し', '日本語の見出し', 'With emphasis and code', '<span> & “quoted”']);
@@ -287,7 +288,26 @@ it('TOC-03 preserves readable text and renderer destinations', async () => {
     expect(new Set(destinations).size).toBe(4);
     expect(destinations).toEqual(await page.locator('.post-content h2, .post-content h3').evaluateAll((headings) => headings.map((heading) => heading.id)));
     expect(labels).toEqual(await page.locator('.post-content h2, .post-content h3').allTextContents());
+    const repeated = toc.locator('a').nth(1);
+    await repeated.click();
+    expect(await page.locator(':target').getAttribute('id')).toBe(destinations[1]);
+    expect(await page.locator(':target').textContent()).toBe('日本語の見出し');
+    expect(await page.locator(':target').evaluate((heading) => {
+      const rect = heading.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < innerHeight;
+    })).toBe(true);
+    await page.goto(`${server.url}/toc`);
+    for (let step = 0; step < 40 && !await toc.locator('a').first().evaluate((link) => link === document.activeElement); step++) {
+      await page.keyboard.press('Tab');
+    }
+    expect(await toc.locator('a').first().evaluate((link) => {
+      const style = getComputedStyle(link);
+      return link === document.activeElement && link.matches(':focus-visible') && style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0;
+    })).toBe(true);
+    await page.keyboard.press('Enter');
+    expect(await page.locator(':target').getAttribute('id')).toBe(destinations[0]);
   } finally {
     await browser.close();
+    await server.close();
   }
 }, 30_000);
