@@ -14,7 +14,12 @@ export async function serveBuild(directory = 'dist') {
       const body = await readFile(file);
       response.end(body);
     } catch {
-      response.writeHead(404).end();
+      try {
+        const body = await readFile(resolve(root, '404.html'));
+        response.writeHead(404, { 'Content-Type': 'text/html' }).end(body);
+      } catch {
+        response.writeHead(404).end();
+      }
     }
   });
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
