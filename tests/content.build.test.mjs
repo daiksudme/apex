@@ -122,7 +122,7 @@ describe('tag references during build', () => {
 
 
 describe('root article route collisions', () => {
-  it.each(['posts', 'tags'])('rejects an article that would occupy /%s', async (slug) => {
+  it.each(['posts', 'tags', '404'])('rejects an article that would occupy /%s', async (slug) => {
     const projectDir = await prepareProject();
     await cp('tests/fixtures/content/posts/fixture-post.md', join(projectDir, `src/content/posts/${slug}.md`));
     const result = spawnSync(process.execPath, [astroCli, 'build'], {
