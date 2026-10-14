@@ -1,0 +1,53 @@
+---
+import Pane from '../components/Pane.astro';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { getBlogContent } from '../lib/content';
+import { deriveUsedTags, orderTagsByPostCount } from '../lib/tags';
+
+const { posts, tagDefinitions } = await getBlogContent();
+const siteTags = orderTagsByPostCount(deriveUsedTags(posts, tagDefinitions), posts);
+---
+
+<SiteLayout
+  title="Page not found"
+  description="This page could not be found. Return to Home or browse all posts."
+  siteTags={siteTags}
+>
+  <Pane as="section" class="not-found-pane" ariaLabelledBy="not-found-title">
+    <h1 id="not-found-title">404 — Page not found</h1>
+    <p>The page you are looking for does not exist or has moved.</p>
+    <nav aria-label="Page recovery">
+      <a href="/">Home</a>
+      <a href="/posts">All posts</a>
+    </nav>
+  </Pane>
+</SiteLayout>
+
+<style>
+  .not-found-pane {
+    min-height: 100%;
+    align-content: start;
+    gap: 1.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+
+  p {
+    color: var(--muted);
+    font-family: var(--sans);
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+</style>
