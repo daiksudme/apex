@@ -6,7 +6,7 @@ import { deriveUsedTags, orderTagsByPostCount, type TagDefinition } from '../lib
 
 export async function getStaticPaths() {
   const { posts, tagDefinitions } = await getBlogContent();
-  const conflictingPost = posts.find((post) => post.id === 'posts' || post.id === 'tags');
+  const conflictingPost = posts.find((post) => ['posts', 'tags', '404'].includes(post.id));
   if (conflictingPost) {
     throw new Error(`Post slug "${conflictingPost.id}" conflicts with an existing page`);
   }
