@@ -73,6 +73,9 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
       <div class="post-content">
         <slot />
       </div>
+      <nav class="post-navigation" aria-label="Article navigation" lang="en">
+        <a href="/posts">All posts</a>
+      </nav>
     </Pane>
   </div>
 </SiteLayout>
@@ -85,6 +88,22 @@ const hasUpdatedAt = updatedAt && updatedAt.getTime() !== publishedAt.getTime();
   .post-page {
     min-width: 0;
     min-height: 100%;
+  }
+
+  .post-navigation {
+    width: 100%;
+    min-width: 0;
+    max-inline-size: 72ch;
+    margin-inline: auto;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+    font-family: var(--sans);
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
   }
 
   .post-header {
