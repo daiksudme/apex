@@ -26,6 +26,25 @@ export async function checkArticleStart(article, title, command) {
   const titleBox = await article.getByRole('heading', { level: 1, name: title, exact: true }).boundingBox();
   assert.ok(commandBox.y + commandBox.height <= titleBox.y, 'POST-04 terminal command precedes the title');
   assert.equal((await article.getByRole('heading').first().innerText()).trim(), title, 'POST-04 title is the first article heading');
+  await checkArticleNavigation(article);
+}
+
+async function checkArticleNavigation(article) {
+  const navigation = article.getByRole('navigation', { name: 'Article navigation', exact: true });
+  assert.equal(await navigation.count(), 1, 'POST-05 article has dedicated end navigation');
+  assert.equal(await navigation.getByRole('link').count(), 1, 'POST-05 one recovery destination');
+  const link = navigation.getByRole('link', { name: 'All posts', exact: true });
+  assert.ok(await link.isVisible(), 'POST-05 All posts is readable');
+  assert.equal(await link.getAttribute('href'), '/posts', 'POST-05 root-relative post index');
+  assert.equal(await link.getAttribute('target'), null, 'POST-05 same-tab link');
+  assert.ok(await navigation.evaluate((element) => {
+    const content = element.closest('article').querySelector('.post-content');
+    return content && !content.contains(element)
+      && Boolean(content.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING)
+      && element.getBoundingClientRect().top >= content.getBoundingClientRect().bottom;
+  }),
+  'POST-05 navigation follows all article content');
+  return link;
 }
 
 async function tagColors(scope, reference) {
@@ -125,5 +144,49 @@ export async function checkFixtureContent(page, base) {
   for (const slug of ['fixture-post', 'second-post', 'third-post']) {
     assert.equal((await page.request.get(new URL(`/posts/${slug}`, base).href, { maxRedirects: 0 })).status(), 404,
       'Old nested article route is absent');
+  }
+
+  for (const width of [390, 1440]) {
+    const context = await page.context().browser().newContext({
+      javaScriptEnabled: false, viewport: { width, height: 800 },
+    });
+    try {
+      for (const slug of ['fixture-post', 'second-post', 'profile']) {
+        const direct = await context.newPage();
+        try {
+          assert.equal((await direct.goto(new URL(`/${slug}`, base).href)).status(), 200);
+          const article = direct.getByRole('article');
+          assert.equal(await article.getByRole('navigation', { name: 'Table of contents', exact: true }).count(),
+            slug === 'fixture-post' ? 1 : 0, 'POST-05 with and without an article outline');
+          const link = await checkArticleNavigation(article);
+          await link.scrollIntoViewIfNeeded();
+          await direct.mouse.move(0, 0);
+          await link.focus();
+          await direct.keyboard.press('Tab');
+          await direct.keyboard.press('Shift+Tab');
+          assert.ok(await link.evaluate((node) => node === document.activeElement), 'POST-05 keyboard focus');
+          assert.ok(await link.evaluate((node) => {
+            const style = getComputedStyle(node);
+            return node.matches(':focus-visible') && !['none', 'hidden'].includes(style.outlineStyle)
+              && parseFloat(style.outlineWidth) > 0 && style.outlineColor !== 'transparent'
+              && !/^rgba\([^)]*,\s*0(?:\.0+)?\)$/.test(style.outlineColor);
+          }), 'POST-05 visible focus');
+          assert.ok(await direct.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+            'POST-05 article navigation fits the viewport');
+          await Promise.all([
+            direct.waitForURL(new URL('/posts', base).href),
+            direct.keyboard.press('Enter'),
+          ]);
+          assert.equal(context.pages().length, 1, 'POST-05 no new tab');
+          assert.equal(new URL(direct.url()).origin, new URL(base).origin, 'POST-05 remains on the current host');
+          assert.ok(await direct.getByRole('main').getByRole('link', { name: 'フィクスチャーの記事', exact: true }).isVisible(),
+            'POST-05 reader reaches the post index');
+        } finally {
+          await direct.close();
+        }
+      }
+    } finally {
+      await context.close();
+    }
   }
 }
