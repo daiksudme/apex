@@ -159,12 +159,16 @@ export async function checkFixtureContent(page, base) {
           const link = await checkArticleNavigation(article);
           await link.scrollIntoViewIfNeeded();
           await direct.mouse.move(0, 0);
-          const unfocused = await direct.screenshot({ animations: 'disabled' });
           await link.focus();
           await direct.keyboard.press('Tab');
           await direct.keyboard.press('Shift+Tab');
           assert.ok(await link.evaluate((node) => node === document.activeElement), 'POST-05 keyboard focus');
-          assert.notDeepEqual(await direct.screenshot({ animations: 'disabled' }), unfocused, 'POST-05 visible focus');
+          assert.ok(await link.evaluate((node) => {
+            const style = getComputedStyle(node);
+            return node.matches(':focus-visible') && !['none', 'hidden'].includes(style.outlineStyle)
+              && parseFloat(style.outlineWidth) > 0 && style.outlineColor !== 'transparent'
+              && !/^rgba\([^)]*,\s*0(?:\.0+)?\)$/.test(style.outlineColor);
+          }), 'POST-05 visible focus');
           assert.ok(await direct.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
             'POST-05 article navigation fits the viewport');
           await Promise.all([
