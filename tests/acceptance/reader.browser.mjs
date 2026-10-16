@@ -2,6 +2,7 @@ import { checkSharedPreview } from './open-graph.browser.mjs';
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 import { checkArticleStart, checkEmptyContent, checkFixtureContent } from './content.browser.mjs';
+import { checkNotFound } from './not-found.browser.mjs';
 import { checkHomeGeometry } from '../home-layout.browser.mjs';
 import { checkFeedDiscovery, checkFixtureFeed, checkFooterFeed } from './rss.browser.mjs';
 import { mkdir } from 'node:fs/promises';
@@ -65,6 +66,7 @@ try {
     };
     try {
       await navigate(() => page.goto(base, { waitUntil: 'load' }));
+      if (width === 1440 || width === 390) await checkNotFound(browser, base, width);
       await checkFooterFeed(page, base);
       if (empty) {
         await checkFixtureFeed(page, base, { empty: true });
@@ -180,7 +182,7 @@ try {
     }
   }
   console.log(empty ? 'Empty content acceptance passed' : fixtures ? 'Fixture content acceptance passed'
-    : 'Reader acceptance passed: NAV-01 NAV-02 NAV-03 NAV-04 POST-01 POST-03 POST-04 TAG-01');
+    : 'Reader acceptance passed: NAV-01 NAV-02 NAV-03 NAV-04 POST-01 POST-03 POST-04 TAG-01 NOTFOUND-01 NOTFOUND-02');
 } finally {
   await browser.close();
 }
