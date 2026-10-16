@@ -37,10 +37,12 @@ async function checkArticleNavigation(article) {
   assert.ok(await link.isVisible(), 'POST-05 All posts is readable');
   assert.equal(await link.getAttribute('href'), '/posts', 'POST-05 root-relative post index');
   assert.equal(await link.getAttribute('target'), null, 'POST-05 same-tab link');
-  assert.ok(await navigation.evaluate((element) => [...element.closest('article')
-    .querySelectorAll('h1, h2, h3, h4, h5, h6, p, pre, table, img, blockquote')]
-    .filter((content) => !element.contains(content))
-    .every((content) => content.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING)),
+  assert.ok(await navigation.evaluate((element) => {
+    const content = element.closest('article').querySelector('.post-content');
+    return content && !content.contains(element)
+      && Boolean(content.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING)
+      && element.getBoundingClientRect().top >= content.getBoundingClientRect().bottom;
+  }),
   'POST-05 navigation follows all article content');
   return link;
 }
