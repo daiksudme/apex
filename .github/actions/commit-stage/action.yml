@@ -31,7 +31,7 @@ runs:
     - name: fast tests
       shell: bash
       run: bun run test:unit
-    - name: Preview selection tests
+    - name: CI tooling tests
       shell: bash
       run: bun run test:ci
     - name: wait for matched Preview
