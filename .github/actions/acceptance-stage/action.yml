@@ -15,10 +15,10 @@ runs:
         cache: false
     - name: install dependencies
       shell: bash
-      run: pnpm install --frozen-lockfile
+      run: bun install --frozen-lockfile
     - name: install Chromium
       shell: bash
-      run: pnpm exec playwright install --with-deps --only-shell chromium
+      run: bun run --bun playwright install --with-deps --only-shell chromium
     - name: reader acceptance
       shell: bash
       env:
@@ -27,9 +27,9 @@ runs:
       run: |
         if [[ "$REQUIRE_PREVIEW" == true ]]; then
           test -n "$PREVIEW_URL"
-          pnpm test:acceptance "$PREVIEW_URL"
+          bun run test:acceptance "$PREVIEW_URL"
         else
-          pnpm test:acceptance
+          bun run test:acceptance
         fi
     - name: retain acceptance diagnostics
       if: always()

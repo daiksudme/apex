@@ -1,5 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { sortPostsByPublishedAt } from './posts';
 
 describe('post publication order', () => {

@@ -1,5 +1,5 @@
 import { tagDefinitions } from '../../tests/fixtures/tags';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'bun:test';
 import { deriveUsedTags, orderTagsByPostCount } from './tags';
 
 describe('deriveUsedTags', () => {

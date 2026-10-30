@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { test } from 'bun:test';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { matchPreview, findPreview, waitForPreview, readGithub } from '../../scripts/ci/preview.mjs';
