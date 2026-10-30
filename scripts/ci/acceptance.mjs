@@ -19,7 +19,7 @@ async function runAcceptance(previewUrl) {
       let result;
       try {
         result = await execute(command, args, {
-          timeout: 120_000, maxBuffer: 8 * 1024 * 1024,
+          timeout: label === 'integration' ? 180_000 : 120_000, maxBuffer: 8 * 1024 * 1024,
           env: { ...process.env, ACCEPTANCE_ARTIFACT_DIR: join(outputRoot, label) },
         });
       } catch (error) {

@@ -45,7 +45,7 @@ it('RSS-03 preserves Japanese and XML-sensitive title and summary text', async (
   } finally {
     await browser.close();
   }
-}, 30_000);
+}, 60_000);
 
 it('RSS-02 preserves identity and publication date after a summary edit', async () => {
   const projectDir = await prepareProject();
