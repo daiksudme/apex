@@ -108,7 +108,7 @@ Tests protect public contracts with inputs and observable results. Unit tests co
 
 ### Browser acceptance
 
-English reader scenarios live in [`docs/features`](docs/features). Author tag definitions and invalid-reference rules remain in [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md). `bun run test` runs the public unit and fixture integration suite with Bun's test runner. `test:unit` runs fast public-interface tests; `test:integration` runs [`tests/content.build.test.mjs`](tests/content.build.test.mjs), including its real fixture browser checks. Install Chromium before running `test`, `test:integration`, or acceptance. `test:ci` separately tests Preview selection and rejection, and Workers Builds configuration synchronization, through their public inputs and observable results.
+English reader scenarios live in [`docs/features`](docs/features). Author tag definitions and invalid-reference rules remain in [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md). `bun run test` runs the public unit and fixture integration suite with Bun's test runner. `test:unit` runs fast public-interface tests; `test:integration` runs [`tests/content.build.test.mjs`](tests/content.build.test.mjs), including its real fixture browser checks. Install Chromium before running `test`, `test:integration`, or acceptance. `test:ci` separately tests Preview selection and rejection from provider/deployment inputs and returned results.
 
 Playwright is pinned in the lockfile. Install its matching Chromium shell before running acceptance:
 
@@ -128,29 +128,9 @@ The initial smoke check is separate: [`test:smoke`](scripts/ci/smoke.mjs) reques
 
 ### Cloudflare Workers Builds settings
 
-[cloudflare-builds.json](cloudflare-builds.json) declares `build_command` for all existing production and Preview triggers of the Worker named in [wrangler.jsonc](wrangler.jsonc). The [synchronization script](scripts/cloudflare/builds.mjs) resolves that Worker's tag, displays the differences, and updates only `build_command` through the Workers Builds API. Apply reads the configuration back to verify the result. Existing deploy commands, branch filters, build tokens, and other settings are preserved; deployment commands continue to run Wrangler under Node.js. Synchronizing configuration does not start a build or deployment.
+In the Worker's **Settings → Build**, set the build command to `bun run build`. Keep the existing production deploy and Preview commands and their Wrangler behavior; those commands run Wrangler under Node.js. A previously configured pnpm build command must be updated when switching to Bun.
 
-For local use, provide `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` in the environment. Create a **user-scoped API token** with **Workers Builds Configuration: Edit** and **Workers Scripts: Read** access for the target account. The Builds API does not support account-scoped tokens. This API token is separate from the build token that Cloudflare uses to deploy the Worker. See the [Builds API reference](https://developers.cloudflare.com/workers/ci-cd/builds/api-reference/).
-
-```sh
-mise exec -- bun run cloudflare:builds:plan
-mise exec -- bun run cloudflare:builds:apply
-```
-
-`plan` reads the current settings without changing them. `apply` updates differing commands and verifies them; applying an already matching configuration makes no changes. Both commands target the existing triggers and leave their creation and deletion to Cloudflare.
-
-For GitHub Actions, configure these repository values under **Settings → Secrets and variables → Actions**:
-
-| Kind | Name | Value |
-| --- | --- | --- |
-| Variable | `CLOUDFLARE_ACCOUNT_ID` | The account containing this Worker |
-| Secret | `CLOUDFLARE_BUILDS_API_TOKEN` | The user-scoped API token described above |
-
-The [cloudflare-builds workflow](.github/workflows/cloudflare-builds.yml) applies relevant changes pushed to `main`. It can also be dispatched on `main` with `plan` or `apply`, defaulting to `plan`. Runs are serialized and read the latest `main`; they use Bun's built-in APIs without installing project dependencies. The API token is supplied only to the synchronization step.
-
-For the initial Bun migration, run the local commands from the PR branch before retrying its failed Cloudflare Preview build. The new manual workflow becomes available [after it reaches the default branch](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow). After the Preview succeeds, rerun all PR CI jobs. Workers Builds and the settings workflow start independently on a push, so a build that starts before synchronization may still use the previous command; retry it after synchronization succeeds. Future PRs that require a changed build command for their Preview need the same local application before retrying.
-
-Workers Builds selects the dependency installer from [bun.lock](bun.lock) and the Bun version from `packageManager` in [package.json](package.json). Workers Builds does not consume Wrangler's `build.command`; repository settings reach the service through the synchronization script. See Cloudflare's [build configuration](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/) and [build image/version selection](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/).
+Workers Builds selects the dependency installer from [bun.lock](bun.lock) and the Bun version from `packageManager` in [package.json](package.json). The build command is an external Cloudflare setting: changing repository files does not update it. Check both the build settings and the actual Preview build log when applying this migration. See Cloudflare's [build configuration](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/) and [build image/version selection](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/).
 
 ### Codex approval automation
 
