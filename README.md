@@ -89,31 +89,35 @@ Reference: https://developer.chrome.com/blog/css-i18n-features
 
 ### Testing and building
 
-Use Node.js `26.10.0` and pnpm `12.6.0`. Versions are pinned in [mise.toml](mise.toml) and [package.json](package.json). Keep [.node-version](.node-version), which Cloudflare Workers Builds reads, aligned with the same Node.js version.
+Use Bun `1.4.4` for dependency installation, Astro development and builds, and tests. Versions are pinned in [mise.toml](mise.toml) and [package.json](package.json), with dependencies locked in [bun.lock](bun.lock). Astro commands explicitly select the Bun runtime. Type checking still uses `astro check` so it covers `.astro` files.
+
+Node.js `26.10.0` remains available for Wrangler. Keep [.node-version](.node-version), which Cloudflare Workers Builds reads, aligned with the Node.js pin in `mise.toml`. Run Wrangler with its Node.js shebang; do not force the Bun runtime for deployment commands. The deployment recorder separately uses the GitHub runner's preinstalled Node.js for its trusted, dependency-free URL helper.
 
 ```sh
 mise trust mise.toml
 mise install
-mise exec -- pnpm install --frozen-lockfile
-mise exec -- pnpm check
-mise exec -- pnpm build
-mise exec -- pnpm test:unit
+mise exec -- bun install --frozen-lockfile
+mise exec -- bun run check
+mise exec -- bun run build
+mise exec -- bun run test:unit
 ```
+
+Start the local Astro development server with `mise exec -- bun run dev`. Use `bun run check` and `bun run test` to invoke this project's scripts: Bun's built-in `check` and `test` commands have their own behavior.
 
 Tests protect public contracts with inputs and observable results. Unit tests cover dates, titles, post ordering, and content-backed tags. Fixture integration builds valid content and checks build-time diagnostics for duplicate tags, undefined tags in older posts, and route collisions. Its browser check observes readable Markdown, metadata, post/tag ordering, and navigation from isolated fixture content. Tests do not freeze source text, YAML shape, raw HTML/CSS, classes, generated identifiers, or internal invocation sequences. Acceptance runners, browser assertions, and smoke checks have no self-tests.
 
 ### Browser acceptance
 
-English reader scenarios live in [`docs/features`](docs/features). Author tag definitions and invalid-reference rules remain in [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md). `pnpm test` runs the public unit and fixture integration suite. `test:unit` runs fast public-interface tests; `test:integration` runs [`tests/content.build.test.mjs`](tests/content.build.test.mjs), including its real fixture browser checks. Install Chromium before running `test`, `test:integration`, or acceptance. `test:ci` tests Preview selection and rejection from provider/deployment inputs and returned results.
+English reader scenarios live in [`docs/features`](docs/features). Author tag definitions and invalid-reference rules remain in [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md). `bun run test` runs the public unit and fixture integration suite with Bun's test runner. `test:unit` runs fast public-interface tests; `test:integration` runs [`tests/content.build.test.mjs`](tests/content.build.test.mjs), including its real fixture browser checks. Install Chromium before running `test`, `test:integration`, or acceptance. `test:ci` separately tests Preview selection and rejection from provider/deployment inputs and returned results.
 
 Playwright is pinned in the lockfile. Install its matching Chromium shell before running acceptance:
 
 ```sh
-mise exec -- pnpm test:ci
-mise exec -- pnpm exec playwright install --only-shell chromium
-mise exec -- pnpm test
-mise exec -- pnpm test:acceptance
-mise exec -- pnpm test:acceptance "$PREVIEW_URL"
+mise exec -- bun run test:ci
+mise exec -- bun run --bun playwright install --only-shell chromium
+mise exec -- bun run test
+mise exec -- bun run test:acceptance
+mise exec -- bun run test:acceptance "$PREVIEW_URL"
 ```
 
 On Linux, use Playwright's `install --with-deps --only-shell chromium` when browser system dependencies are absent. The acceptance command builds local `dist` before validation, then runs fixture integration tests and local reader journeys at 1440, 1100, 961, 960, and 390 pixels. Supplying the recorder-matched `PREVIEW_URL` adds the same journeys against the deployed Preview. PR CI must supply that URL; main-push acceptance uses the local build.
@@ -121,6 +125,12 @@ On Linux, use Playwright's `install --with-deps --only-shell chromium` when brow
 Acceptance runs once and fails directly on an execution error or failed expectation. Command logs are retained under `test-results/acceptance`; browser failures retain screenshots and traces in the corresponding local/Preview directory. Fixture content diagnostics use the `fixtures-populated` and `fixtures-empty` directories; site journeys use `local` and `preview`. The geometry helper is called by the reader journey; it has no separate server or browser command. Visible focus and selection compare the current rendered states without golden screenshots. See the [acceptance scenarios](docs/features/acceptance.feature.md).
 
 The initial smoke check is separate: [`test:smoke`](scripts/ci/smoke.mjs) requests only `/` on the matched Preview and requires HTTP 200 with a bounded request timeout. It does not follow redirects or inspect content.
+
+### Cloudflare Workers Builds settings
+
+In the Worker's **Settings → Build**, set the build command to `bun run build`. Keep the existing production deploy and Preview commands and their Wrangler behavior; those commands run Wrangler under Node.js. A previously configured pnpm build command must be updated when switching to Bun.
+
+Workers Builds selects the dependency installer from [bun.lock](bun.lock) and the Bun version from `packageManager` in [package.json](package.json). The build command is an external Cloudflare setting: changing repository files does not update it. Check both the build settings and the actual Preview build log when applying this migration. See Cloudflare's [build configuration](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/) and [build image/version selection](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/).
 
 ### Codex approval automation
 

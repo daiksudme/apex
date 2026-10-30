@@ -11,7 +11,7 @@ async function runAcceptance(previewUrl) {
   try {
     await mkdir(outputRoot, { recursive: true });
     const commands = [
-      ['pnpm', ['test:integration'], 'integration'],
+      [process.execPath, ['run', 'test:integration'], 'integration'],
       [process.execPath, ['tests/acceptance/reader.browser.mjs', local.url], 'local'],
       ...(previewUrl ? [[process.execPath, ['tests/acceptance/reader.browser.mjs', previewUrl], 'preview']] : []),
     ];

@@ -21,19 +21,19 @@ runs:
         cache: false
     - name: install dependencies
       shell: bash
-      run: pnpm install --frozen-lockfile
+      run: bun install --frozen-lockfile
     - name: check
       shell: bash
-      run: pnpm check
+      run: bun run check
     - name: build
       shell: bash
-      run: pnpm build
+      run: bun run build
     - name: fast tests
       shell: bash
-      run: pnpm test:unit
+      run: bun run test:unit
     - name: Preview selection tests
       shell: bash
-      run: pnpm test:ci
+      run: bun run test:ci
     - name: wait for matched Preview
       id: preview
       if: inputs.preview == 'true'
@@ -43,7 +43,7 @@ runs:
         SOURCE_SHA: ${{ inputs.source-sha }}
         SOURCE_BRANCH: ${{ inputs.source-branch }}
       run: |
-        node scripts/ci/preview.mjs "$SOURCE_SHA" "$SOURCE_BRANCH" > preview-evidence.json
+        bun scripts/ci/preview.mjs "$SOURCE_SHA" "$SOURCE_BRANCH" > preview-evidence.json
         cat preview-evidence.json
         jq -er '"url=" + .previewUrl' preview-evidence.json >> "$GITHUB_OUTPUT"
     - name: root HTTP smoke
@@ -51,5 +51,5 @@ runs:
       shell: bash
       env:
         PREVIEW_URL: ${{ steps.preview.outputs.url }}
-      run: pnpm test:smoke "$PREVIEW_URL"
+      run: bun run test:smoke "$PREVIEW_URL"
 
