@@ -1,39 +1,33 @@
 ---
 type: Feature
-title: End-of-article navigation
-description: Readers can open the post index after finishing any article.
+title: 記事末尾のナビゲーション
+description: 読者がどの記事を読み終えた後でも記事一覧を開ける。
 ---
 
-## Feature: End-of-article navigation
+## Feature: 記事末尾のナビゲーション
 
-Readers who finish an article can continue to the post index without scrolling
-back to the shared site menu. The same behavior applies to Profile.
+記事を読み終えた読者は、共通のサイトメニューまでスクロールして戻らずに、記事一覧へ進めます。プロフィールも同じ動作にします。
 
 ```gherkin
-Scenario: POST-05 Return to the post index after reading an article
-  Given I open an article directly
-  When I reach the end of its body
-  Then an Article navigation region contains one All posts link
-  And the link follows all article content
-  And its destination is /posts on the current host
-  When I activate the link
-  Then the post index opens in the same tab
+Scenario: POST-05 記事を読み終えて記事一覧へ戻る
+  Given 記事を直接開く
+  When 本文の末尾まで読む
+  Then 「記事ナビゲーション」領域に「記事一覧」リンクが1つある
+  And リンクは記事のすべての内容の後に配置されている
+  And リンク先は現在のホストの /posts である
+  When リンクを選択する
+  Then 同じタブで記事一覧が開く
 
-Scenario: POST-05 Use the link without JavaScript or browsing history
-  Given JavaScript is disabled
-  And I open a short article, a longer article with an outline, or Profile directly
-  When I focus the All posts link with the keyboard
-  Then its focus is visible at mobile and desktop widths
-  And the article fits within the viewport
-  When I press Enter
-  Then I reach the post index in the same tab
+Scenario: POST-05 JavaScriptや閲覧履歴がなくてもリンクを利用する
+  Given JavaScriptが無効になっている
+  And 短い記事、目次のある長い記事、またはプロフィールを直接開く
+  When キーボードで「記事一覧」リンクにフォーカスを当てる
+  Then モバイル幅でもデスクトップ幅でもフォーカスが見える
+  And 記事がビューポート内に収まる
+  When Enterを押す
+  Then 同じタブで記事一覧に移動する
 ```
 
-The link belongs to the shared article layout, not individual Markdown files.
-It preserves the existing article outline, metadata, tags, site menu, and footer.
-It does not select previous, next, or related articles.
+このリンクは個別のMarkdownファイルではなく、共通の記事レイアウトに含めます。既存の記事の目次、メタデータ、タグ、サイトメニュー、フッターは維持します。前後の記事や関連記事を選ぶ機能は含みません。
 
-Coverage: `tests/acceptance/content.browser.mjs` observes the dedicated link during
-existing article journeys and exercises direct visits with JavaScript disabled
-against the existing isolated content fixtures. Existing local and Preview reader
-journeys also verify that rendered articles contain the link.
+検証範囲: `tests/acceptance/content.browser.mjs` は既存の記事閲覧操作の中でこの専用リンクを確認し、既存の独立したコンテンツフィクスチャを使って、JavaScriptを無効にした直接アクセスも検証します。既存のローカルおよびPreviewでの読者の操作でも、表示された記事にリンクが含まれることを確認します。

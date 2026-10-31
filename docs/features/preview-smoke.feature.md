@@ -1,19 +1,19 @@
 ---
 type: Feature
-title: Preview HTTP availability
-description: A minimal root HTTP check after matching the intended Preview deployment.
+title: PreviewのHTTP応答
+description: 対象のPreviewデプロイを照合した後に行う、ルートへの最小限のHTTPチェック。
 ---
 
-## Feature: Maintainers confirm the matched Preview responds
+## Feature: メンテナーが照合済みのPreviewの応答を確認する
 
-### Scenario: SMOKE-01 Require HTTP 200 from the Preview root
+### Scenario: SMOKE-01 PreviewのルートにHTTP 200を要求する
 
-- Given: the recorded Preview belongs to the current PR source head and branch
-- When: commit-stage requests `/` with a bounded request timeout
-- Then: the response status is exactly 200
-- And: a different status or request error fails smoke validation
-- And: redirects are not followed or counted as a successful root response
+- Given: 記録されたPreviewが、現在のPRのソースHEADとブランチに対応している
+- When: commit-stageがリクエストのタイムアウトを設定して `/` を要求する
+- Then: 応答ステータスが正確に200である
+- And: 別のステータスやリクエストエラーの場合はスモークテストが失敗する
+- And: リダイレクトには追従せず、ルートへの正常な応答として数えない
 
-The requester reduced the initial smoke scope to this single HTTP check. Smoke does not inspect response content or request other routes. Preview source, branch, provider, and deployment identity validation remains required. Detailed reader journeys belong to separate browser acceptance scenarios.
+依頼者の指示により、最初のスモークテストの範囲はこの1つのHTTPチェックに絞っています。応答の内容を調べたり、他のルートを要求したりはしません。Previewのソース、ブランチ、プロバイダー、デプロイの識別情報の検証は引き続き必要です。詳細な読者の操作は、別のブラウザー受入シナリオで扱います。
 
-The actual [smoke command](../../scripts/ci/smoke.mjs) runs against the matched Preview in commit-stage. Smoke has no self-tests; detailed application behavior is checked by reader acceptance.
+実際の[スモークテストコマンド](../../scripts/ci/smoke.mjs)は、commit-stage内で照合済みのPreviewに対して実行します。スモークテスト自体の自己テストは設けず、アプリケーションの詳しい動作は読者向け受入テストで検証します。

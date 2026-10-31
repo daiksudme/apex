@@ -1,60 +1,60 @@
 ---
 type: Feature
-title: RSS subscription and discovery
-description: Readers discover a summary feed and open the original posts using stable production URLs.
+title: RSSの購読と検出
+description: 読者が要約フィードを見つけ、安定した本番URLで元の記事を開ける。
 ---
 
-## Feature: Subscribe to posts
+## Feature: 記事を購読する
 
-Readers can discover the RSS feed from any shared site page and open the original article from their feed reader.
+読者は共通レイアウトを使うサイトのどのページからでもRSSフィードを見つけ、フィードリーダーから元の記事を開けます。
 
-### Rule: The feed follows the post listing
+### Rule: フィードを記事一覧に合わせる
 
-#### Scenario: RSS-01 Read the published post feed
+#### Scenario: RSS-01 公開記事のフィードを読む
 
-- Given: posts include the Profile entry and have different publication dates
-- When: the static site is built
-- Then: `/rss.xml` contains the site's title, description, and production link
-- And: each listed post appears once, newest publication date first
-- And: each item contains its title, summary, original publication date, and absolute article link
-- And: article links and GUIDs use `https://daiksud.me/<slug>` without a trailing slash
-- And: the feed contains summaries rather than full article HTML
+- Given: 記事にプロフィールが含まれ、それぞれ公開日が異なる
+- When: 静的サイトをビルドする
+- Then: `/rss.xml` にサイトのタイトル、説明、本番へのリンクが含まれる
+- And: 一覧に掲載される各記事が、公開日の新しい順で1回ずつ現れる
+- And: 各項目にタイトル、要約、最初の公開日、記事への絶対リンクが含まれる
+- And: 記事のリンクとGUIDは末尾にスラッシュのない `https://daiksud.me/<slug>` を使用する
+- And: フィードには記事のHTML全文ではなく要約を含める
 
-#### Scenario: RSS-02 Keep identity when a summary changes
+#### Scenario: RSS-02 要約が変わっても識別子を維持する
 
-- Given: a published post has an existing feed item
-- When: its description and update date change and the site is rebuilt
-- Then: its summary changes while its GUID and original publication date stay unchanged
+- Given: 公開済みの記事に既存のフィード項目がある
+- When: その説明と更新日を変更し、サイトを再ビルドする
+- Then: 要約は変わるが、GUIDと最初の公開日は変わらない
 
-#### Scenario: RSS-03 Preserve text in XML
+#### Scenario: RSS-03 XML内のテキストを維持する
 
-- Given: a post title and summary contain Japanese text and XML-sensitive characters
-- When: a reader parses the feed as XML
-- Then: the original title and summary text are preserved
+- Given: 記事のタイトルと要約に日本語とXMLで特別な意味を持つ文字が含まれる
+- When: リーダーがフィードをXMLとして解析する
+- Then: 元のタイトルと要約のテキストが維持される
 
-#### Scenario: RSS-04 Read an empty feed
+#### Scenario: RSS-04 空のフィードを読む
 
-- Given: the post collection is empty
-- When: the site is built
-- Then: `/rss.xml` is valid RSS with the site metadata and no items
+- Given: 記事コレクションが空である
+- When: サイトをビルドする
+- Then: `/rss.xml` が、サイトのメタデータを持ち、項目がない有効なRSSになる
 
-### Rule: Readers can discover and open the feed
+### Rule: 読者がフィードを見つけて開ける
 
-#### Scenario: RSS-05 Discover the production feed
+#### Scenario: RSS-05 本番フィードを検出する
 
-- Given: a reader visits Home, Posts, Tags, Profile, or an article
-- When: their reader inspects the page's HTML head
-- Then: one RSS alternate link identifies `https://daiksud.me/rss.xml`
-- And: local and Preview hosts do not replace the production origin in discovery, channel links, article links, or GUIDs
+- Given: 読者がホーム、記事一覧、タグ一覧、プロフィール、または記事を開く
+- When: リーダーがページのHTMLのheadを調べる
+- Then: RSSのalternateリンクが1つあり、`https://daiksud.me/rss.xml` を指す
+- And: 検出用リンク、チャンネルのリンク、記事のリンク、GUIDで、本番オリジンがローカルやPreviewのホストに置き換わらない
 
-#### Scenario: RSS-06 Open the feed from the footer
+#### Scenario: RSS-06 フッターからフィードを開く
 
-- Given: a reader uses a desktop or mobile viewport
-- When: they reach the shared footer with the keyboard
-- Then: a visible RSS link can receive focus and open `/rss.xml`
-- And: the response succeeds with an RSS/XML content type
-- And: the existing navigation and footer links remain available
+- Given: 読者がデスクトップまたはモバイルのビューポートを使用している
+- When: キーボードで共通フッターに移動する
+- Then: 表示されたRSSリンクにフォーカスを当て、`/rss.xml` を開ける
+- And: RSSまたはXMLのContent-Typeで応答が成功する
+- And: 既存のナビゲーションとフッターのリンクを引き続き利用できる
 
-### Validation boundary
+### 検証範囲
 
-Fixture integration checks RSS-01 through RSS-04 using isolated content and parsed XML. Shared reader journeys check RSS-05 and RSS-06 on local and matched Preview builds. Deployed response checks also verify `X-Robots-Tag: noindex`; the local test server does not emulate Cloudflare headers. Production verification uses `https://daiksud.me/rss.xml`. Configuring the production origin does not configure DNS or the Cloudflare custom domain.
+フィクスチャによる結合テストでは、独立したコンテンツと解析したXMLを使ってRSS-01〜RSS-04を検証します。共通の読者の操作では、ローカルと照合済みのPreviewビルドでRSS-05とRSS-06を検証します。デプロイ先の応答では `X-Robots-Tag: noindex` も確認します。ローカルのテストサーバーはCloudflareのヘッダーを再現しません。本番の検証には `https://daiksud.me/rss.xml` を使用します。本番オリジンを設定しても、DNSやCloudflareのカスタムドメインは設定されません。

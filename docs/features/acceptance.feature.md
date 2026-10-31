@@ -1,26 +1,26 @@
 ---
 type: Feature
-title: Reader acceptance execution
-description: One complete local and optional Preview validation with retained diagnostics.
+title: 読者向け受入テストの実行
+description: 診断情報を保存しながら、ローカルと必要に応じてPreviewで一連の検証を実行する。
 ---
 
-## Feature: Maintainers validate documented reader journeys
+## Feature: メンテナーが文書化された読者の操作を検証する
 
-### Scenario: ACCEPT-01 Execute acceptance once
+### Scenario: ACCEPT-01 受入テストを1回実行する
 
-- Given: the application build is available
-- When: acceptance-stage executes
-- Then: fixture content integration and local reader journeys validate the application
-- And: populated and empty fixture collections verify readable posts and the no-post/no-tag state
-- And: PR acceptance also runs the reader journeys against the matched Preview URL
-- And: command logs are retained separately from browser screenshots and traces
+- Given: アプリケーションのビルドが利用できる
+- When: acceptance-stageを実行する
+- Then: フィクスチャによるコンテンツの結合テストとローカルでの読者の操作でアプリケーションを検証する
+- And: 記事を含むコレクションと空のコレクションのフィクスチャで、記事の読みやすさと記事・タグがない状態を検証する
+- And: PRの受入テストでは、照合済みのPreview URLに対しても読者の操作を実行する
+- And: コマンドのログはブラウザーのスクリーンショットやトレースとは別に保存する
 
-### Scenario: ACCEPT-02 Stop on failure
+### Scenario: ACCEPT-02 失敗したら停止する
 
-- Given: a required acceptance command fails
-- When: acceptance-stage receives its result
-- Then: the original failure stops the stage without automatic retries
-- And: diagnostics are retained and the local server closes
-- And: the PR workflow's final check returns the PR to Draft and remains unsuccessful
+- Given: 必須の受入テストコマンドが失敗する
+- When: acceptance-stageがその結果を受け取る
+- Then: 自動再試行をせず、最初の失敗でステージを停止する
+- And: 診断情報を保存し、ローカルサーバーを終了する
+- And: PRワークフローの最終チェックでPRをDraftに戻し、失敗のままにする
 
-Application checks run through [the acceptance command](../../scripts/ci/acceptance.mjs), [fixture content integration](../../tests/content.build.test.mjs), [reader journeys](../../tests/acceptance/reader.browser.mjs), and the [acceptance composite](../../.github/actions/acceptance-stage/action.yml). The runner and browser assertions are not tested through deliberately broken pages or invocation self-tests.
+アプリケーションの検証には、[受入テストコマンド](../../scripts/ci/acceptance.mjs)、[フィクスチャによるコンテンツの結合テスト](../../tests/content.build.test.mjs)、[読者の操作](../../tests/acceptance/reader.browser.mjs)、[受入テストの複合アクション](../../.github/actions/acceptance-stage/action.yml)を使用します。意図的に壊したページや呼び出し自体を検査する自己テストで、ランナーやブラウザーのアサーションをテストすることはしません。

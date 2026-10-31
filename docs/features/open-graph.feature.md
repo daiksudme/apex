@@ -1,33 +1,33 @@
 ---
 type: Feature
-title: Shared link previews
-description: Shared pages expose static Open Graph metadata and a common branded image.
+title: 共通のリンクプレビュー
+description: 共有されたページが静的なOpen Graphメタデータと共通のブランド画像を提供する。
 ---
 
-## Feature: Share a recognizable page
+## Feature: 内容が伝わるページを共有する
 
-Readers sharing a site or article URL provide consumers with a meaningful title, summary, and representative image without executing JavaScript.
+読者がサイトや記事のURLを共有すると、取得側はJavaScriptを実行せずに、内容が分かるタイトル、要約、代表画像を取得できます。
 
-### Scenario: OG-01 Identify each shared page
+### Scenario: OG-01 共有された各ページを識別する
 
-- Given: Home, Posts, Tags, Profile, and article pages
-- When: a consumer parses the generated HTML head
-- Then: exactly one title, description, type, URL, and site name property describes that page
-- And: title and description reuse the existing page values, including site defaults
-- And: Home, Posts, and Tags use `website`, while post-layout pages including Profile use `article`
-- And: page URLs use the RSS production origin `https://daiksud.me` and existing paths without a trailing slash except Home
-- And: query strings, fragments, and local or Preview origins are excluded
-- And: Japanese text, quotes, and ampersands survive parsing unchanged
+- Given: ホーム、記事一覧、タグ一覧、プロフィール、記事の各ページがある
+- When: 取得側が生成されたHTMLのheadを解析する
+- Then: title、description、type、URL、site nameの各プロパティがそれぞれ1つだけあり、そのページを説明する
+- And: タイトルと説明には、サイトの既定値を含む既存のページの値を再利用する
+- And: ホーム、記事一覧、タグ一覧は `website`、プロフィールを含む記事レイアウトのページは `article` を使用する
+- And: ページのURLはRSSと同じ本番オリジン `https://daiksud.me` と既存のパスを使用し、ホーム以外では末尾にスラッシュを付けない
+- And: クエリ文字列、フラグメント、ローカルまたはPreviewのオリジンを含めない
+- And: 日本語、引用符、アンパサンドを解析後もそのまま維持する
 
-### Scenario: OG-02 Retrieve the shared image
+### Scenario: OG-02 共通の画像を取得する
 
-- Given: any shared page
-- When: a consumer reads its image metadata
-- Then: one absolute image URL under the same production origin identifies the common checked-in PNG
-- And: descriptive alternative text explains the image
-- And: the built and hosted image decodes successfully
-- And: any declared dimensions match the asset
+- Given: 共有された任意のページがある
+- When: 取得側が画像メタデータを読む
+- Then: 同じ本番オリジン配下の1つの画像の絶対URLが、リポジトリに含まれる共通のPNGを指す
+- And: 画像の内容が分かる代替テキストがある
+- And: ビルドされた画像とホスティングされた画像を正常にデコードできる
+- And: 寸法が宣言されている場合は画像の実寸と一致する
 
-### Validation boundary
+### 検証範囲
 
-Fixture build tests parse static HTML for OG-01 and OG-02. Hosting checks retrieve the shared image through the existing static hosting setup. Existing reader journeys protect visible content, titles, routes, RSS discovery, and deployed `X-Robots-Tag: noindex`. Third-party preview rendering and cache invalidation are outside this contract, as is custom-domain activation.
+フィクスチャのビルドテストで静的HTMLを解析し、OG-01とOG-02を検証します。ホスティングの検証では、既存の静的ホスティング構成を通じて共通画像を取得します。既存の読者の操作で、表示内容、タイトル、ルート、RSSの検出、デプロイ先の `X-Robots-Tag: noindex` を保護します。外部サービスでのプレビュー表示、キャッシュの無効化、カスタムドメインの有効化は、この契約の範囲外です。
