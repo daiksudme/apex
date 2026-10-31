@@ -148,9 +148,9 @@ it('OG-01 describes each static page with production Open Graph metadata', async
   try {
     const page = await browser.newPage();
     for (const [path, expectedTitle, expectedDescription, type] of [
-      ['/', 'daiksud.me', 'A blog about experiments with technology, personal projects, and what I learn and think along the way.', 'website'],
-      ['/posts', 'Posts | daiksud.me', 'Posts about things I build, learn, and think about.', 'website'],
-      ['/tags', 'Tags | daiksud.me', 'Browse posts by tag, with the latest posts for each tag.', 'website'],
+      ['/', 'daiksud.me', '技術の実験や個人プロジェクト、そこから学んだこと・考えたことを綴るブログです。', 'website'],
+      ['/posts', '記事一覧 | daiksud.me', 'つくったもの、学んだこと、考えたことを綴った記事の一覧です。', 'website'],
+      ['/tags', 'タグ一覧 | daiksud.me', 'タグごとに新しい記事から探せます。', 'website'],
       ['/profile', 'フィクスチャーのプロフィール | daiksud.me', '共通記事表示を確認するプロフィール。', 'article'],
       ['/fixture-post', `${title} | daiksud.me`, description, 'article'],
     ]) {
@@ -158,6 +158,7 @@ it('OG-01 describes each static page with production Open Graph metadata', async
       const parsed = await page.evaluate((html) => {
         const document = new DOMParser().parseFromString(html, 'text/html');
         return {
+          language: document.documentElement.lang,
           title: document.title,
           description: document.querySelector('meta[name="description"]').content,
           metadata: [...document.head.querySelectorAll('meta[property^="og:"]')]
@@ -167,9 +168,11 @@ it('OG-01 describes each static page with production Open Graph metadata', async
       const expected = [
         ['og:title', expectedTitle], ['og:description', expectedDescription],
         ['og:type', type], ['og:url', `https://daiksud.me${path}`], ['og:site_name', 'daiksud.me'],
+        ['og:locale', 'ja_JP'],
       ];
       const metadata = parsed.metadata.filter(([name]) => expected.some(([property]) => property === name));
       expect(metadata.sort()).toEqual(expected.sort());
+      expect(parsed.language).toBe('ja');
       expect(parsed.title).toBe(expectedTitle);
       expect(parsed.description).toBe(expectedDescription);
     }
@@ -191,7 +194,7 @@ it('OG-02 shares one decodable branded image across pages', async () => {
         .map((meta) => [meta.getAttribute('property'), meta.content]), html);
       expect(images).toEqual([
         ['og:image', 'https://daiksud.me/og-image.png'],
-        ['og:image:alt', 'daiksud.me with a blue terminal cursor and the words Build. Learn. Write. Repeat. on a dark background.'],
+        ['og:image:alt', '暗い背景に青いターミナルカーソルと daiksud.me、Build. Learn. Write. Repeat. の文字を配置した画像。'],
       ]);
     }
     const image = await readFile(join(projectDir, 'dist/og-image.png'));
@@ -215,7 +218,7 @@ it('TOC-01 shows an ordered article outline before the body', async () => {
   try {
     const page = await browser.newPage();
     await page.goto(`${server.url}/toc`);
-    const toc = page.getByRole('navigation', { name: 'Table of contents', exact: true });
+    const toc = page.getByRole('navigation', { name: '目次', exact: true });
     expect(await toc.locator('a').allTextContents()).toEqual(['First section', 'Details']);
     expect(await toc.locator('li').count()).toBe(2);
     const outline = await toc.evaluate((nav) => {
@@ -242,7 +245,7 @@ it('TOC-02a omits outlines for zero or one heading', async () => {
     const page = await browser.newPage();
     for (const slug of ['second-post', 'profile']) {
       await page.setContent(await readFile(join(projectDir, 'dist', slug, 'index.html'), 'utf8'));
-      expect(await page.getByRole('navigation', { name: 'Table of contents', exact: true }).count()).toBe(0);
+      expect(await page.getByRole('navigation', { name: '目次', exact: true }).count()).toBe(0);
       expect(await page.locator('.table-of-contents').count()).toBe(0);
     }
   } finally {
@@ -262,7 +265,7 @@ it('TOC-02b includes only h2 and h3, including on Profile', async () => {
     const page = await browser.newPage();
     for (const slug of ['toc', 'profile', 'excluded']) {
       await page.setContent(await readFile(join(projectDir, 'dist', slug, 'index.html'), 'utf8'));
-      const toc = page.getByRole('navigation', { name: 'Table of contents', exact: true });
+      const toc = page.getByRole('navigation', { name: '目次', exact: true });
       expect(await toc.locator('a').allTextContents()).toEqual(slug === 'excluded' ? [] : ['First section', 'Details']);
       expect(await page.locator('.table-of-contents').count()).toBe(slug === 'excluded' ? 0 : 1);
     }
@@ -280,7 +283,7 @@ it('TOC-03 preserves readable text and renderer destinations', async () => {
   try {
     const page = await browser.newPage({ javaScriptEnabled: false, viewport: { width: 390, height: 600 } });
     await page.goto(`${server.url}/toc`);
-    const toc = page.getByRole('navigation', { name: 'Table of contents', exact: true });
+    const toc = page.getByRole('navigation', { name: '目次', exact: true });
     const labels = await toc.locator('a').allTextContents();
     expect(labels).toEqual(['日本語の見出し', '日本語の見出し', 'With emphasis and code', '<span> & “quoted”']);
     expect(await toc.locator('a > *').count()).toBe(0);
@@ -323,7 +326,7 @@ it('TOC-04 fits long labels within mobile and desktop articles', async () => {
     for (const width of [390, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(`${server.url}/toc`);
-      const geometry = await page.getByRole('navigation', { name: 'Table of contents', exact: true }).evaluate((nav) => {
+      const geometry = await page.getByRole('navigation', { name: '目次', exact: true }).evaluate((nav) => {
         const article = nav.closest('article').getBoundingClientRect();
         const box = nav.getBoundingClientRect();
         return {
