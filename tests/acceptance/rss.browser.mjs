@@ -9,7 +9,7 @@ export async function checkFooterFeed(page, base) {
   const box = await link.boundingBox();
   const clip = { x: box.x - 10, y: box.y - 10, width: box.width + 20, height: box.height + 20 };
   const unfocused = await page.screenshot({ clip, animations: 'disabled' });
-  await page.getByRole('contentinfo').getByRole('link', { name: 'daiksud on Zenn', exact: true }).focus();
+  await page.getByRole('contentinfo').getByRole('link', { name: 'Zenn の daiksud', exact: true }).focus();
   await page.keyboard.press('Tab');
   const focused = await page.screenshot({ clip, animations: 'disabled' });
   assert.ok(await link.evaluate((node) => node === document.activeElement), 'RSS-06 keyboard focus reaches RSS');
@@ -39,7 +39,8 @@ export async function checkFixtureFeed(page, base, { empty = false } = {}) {
   assert.equal(response.status(), 200, 'RSS-01 feed is available');
   const feed = await parseFeed(page, await response.text());
   assert.equal(feed.title, 'daiksud.me', 'RSS-01 channel title');
-  assert.equal(feed.description, 'A blog about experiments with technology, personal projects, and what I learn and think along the way.', 'RSS-01 channel description');
+  assert.equal(feed.language, 'ja', 'RSS-01 Japanese channel language');
+  assert.equal(feed.description, '技術の実験や個人プロジェクト、そこから学んだこと・考えたことを綴るブログです。', 'RSS-01 channel description');
   assert.equal(feed.link, 'https://daiksud.me', 'RSS-01 production channel link');
   assert.deepEqual(feed.items, empty ? [] : [
     { title: 'フィクスチャーの記事', description: '生成HTMLを検証するための記事。', date: '2026-01-04T00:00:00.000Z', link: 'https://daiksud.me/fixture-post', guid: 'https://daiksud.me/fixture-post' },
@@ -59,6 +60,7 @@ export async function parseFeed(page, xml) {
     const text = (node, name) => node.querySelector(name)?.textContent;
     return {
       title: text(channel, ':scope > title'),
+      language: text(channel, ':scope > language'),
       description: text(channel, ':scope > description'),
       link: text(channel, ':scope > link'),
       items: [...channel.querySelectorAll('item')].map((item) => ({
