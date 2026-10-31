@@ -194,7 +194,7 @@ it('OG-02 shares one decodable branded image across pages', async () => {
         .map((meta) => [meta.getAttribute('property'), meta.content]), html);
       expect(images).toEqual([
         ['og:image', 'https://daiksud.me/og-image.png'],
-        ['og:image:alt', '暗い背景に青いターミナルカーソルと daiksud.me、Build. Learn. Write. Repeat. の文字を配置した画像。'],
+        ['og:image:alt', '暗い背景のターミナル風ウィンドウに青いカーソルと daiksud.me、つくる。学ぶ。書く。繰り返す。の文字を配置した画像。'],
       ]);
     }
     const image = await readFile(join(projectDir, 'dist/og-image.png'));
@@ -203,7 +203,7 @@ it('OG-02 shares one decodable branded image across pages', async () => {
       const image = await createImageBitmap(new Blob([new Uint8Array(bytes)], { type: 'image/png' }));
       return [image.width, image.height];
     }, [...image]);
-    expect(dimensions).toEqual([1200, 630]);
+    expect(dimensions).toEqual([1536, 864]);
   } finally {
     await browser.close();
   }
