@@ -10,7 +10,7 @@ export async function checkSharedPreview(page, base) {
   }, await response.text());
   assert.deepEqual(metadata.urls, ['https://daiksud.me/profile'], 'OG-01 production URL excludes query, fragment and serving origin');
   assert.deepEqual(metadata.images, ['https://daiksud.me/og-image.png'], 'OG-02 shared production image URL');
-  assert.deepEqual(metadata.alternatives, ['暗い背景に青いターミナルカーソルと daiksud.me、Build. Learn. Write. Repeat. の文字を配置した画像。'], 'OG-02 descriptive image alternative');
+  assert.deepEqual(metadata.alternatives, ['暗い背景のターミナル風ウィンドウに青いカーソルと daiksud.me、つくる。学ぶ。書く。繰り返す。の文字を配置した画像。'], 'OG-02 descriptive image alternative');
   const image = await page.request.get(new URL('/og-image.png', base).href);
   assert.equal(image.status(), 200, 'OG-02 shared image is served');
   if (new URL(base).protocol === 'https:') {
@@ -21,5 +21,5 @@ export async function checkSharedPreview(page, base) {
     const image = await createImageBitmap(new Blob([new Uint8Array(bytes)], { type: 'image/png' }));
     return [image.width, image.height];
   }, [...await image.body()]);
-  assert.deepEqual(dimensions, [1200, 630], 'OG-02 hosted image decodes at its intended size');
+  assert.deepEqual(dimensions, [1536, 864], 'OG-02 hosted image decodes at its intended size');
 }
