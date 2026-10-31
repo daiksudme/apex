@@ -1,19 +1,19 @@
 ---
-title: About Daiki Sudo
-description: I’m a software engineer in Japan interested in XP, TDD/BDD, DDD, Lean, DevOps, and Team Topologies. I especially enjoy finding better ways to build software.
+title: Daiki Sudoのプロフィール
+description: 日本でソフトウェアエンジニアをしています。XP、TDD/BDD、DDD、リーン、DevOps、チームトポロジーに関心があり、よりよいソフトウェア開発の方法を探ることが好きです。
 publishedAt: 2026-10-01
 updatedAt: 2026-10-05
 tags:
   - essay
 ---
 
-Hi, I’m Daiki Sudo, a software engineer in Japan.
+はじめまして。日本でソフトウェアエンジニアをしているDaiki Sudoです。
 
-I started my career at a video game company in 2012. I loved playing games and wanted to work in the gaming industry, but I wasn’t very good at coming up with ideas for fun games. I wanted to help people with great game ideas focus on making those games. Looking back, that may have been where my interest in creating an environment for efficient development began.
+2012年にゲーム会社でキャリアをスタートしました。ゲームが好きでゲーム業界で働きたいと思っていましたが、面白いゲームのアイデアを考えるのはあまり得意ではありませんでした。そこで、素晴らしいアイデアを持つ人がゲームづくりに集中できるように支えたいと考えました。振り返ると、効率よく開発できる環境づくりに関心を持ったのは、この頃からだったのかもしれません。
 
-For over ten years, I’ve kept asking myself, “How can we develop software efficiently?” Then one day, I came across a book that changed my life as an engineer: *Accelerate*. Reading it made me realize that I hadn’t really understood DevOps, CI/CD, and the ideas behind them. It also helped me recognize the kind of engineer I wanted to be.
+それから10年以上、「どうすれば効率よくソフトウェアを開発できるのか」を考え続けてきました。そんなある日、エンジニアとしての人生を変える一冊、*Accelerate* に出会いました。この本を読み、DevOpsやCI/CD、そしてそれらの背景にある考え方を、自分は十分に理解できていなかったのだと気づきました。同時に、自分がどんなエンジニアになりたいのかも見えてきました。
 
-Since then, I’ve read the following books:
+それ以来、次のような本を読んできました。
 
 - *Team Topologies*
 - *Continuous Delivery*
@@ -24,11 +24,11 @@ Since then, I’ve read the following books:
 - *Test Driven Development: By Example*
 - *Extreme Programming Explained*
 
-These books have deeply influenced the way I think about software development.
+これらの本は、ソフトウェア開発に対する私の考え方に大きな影響を与えています。
 
-These days, I’m especially interested in XP, TDD, and incremental design, and how AI tools can support them. I’m still exploring the question that first drew me to this work: how can we develop software efficiently?
+最近は特に、XP、TDD、漸進的な設計と、それらをAIツールでどう支えられるかに関心があります。「どうすれば効率よくソフトウェアを開発できるのか」。この仕事に惹かれた頃からの問いを、今も探り続けています。
 
-## Links
+## リンク
 
 - [GitHub](https://github.com/daiksud)
 - [Zenn](https://zenn.dev/daiksud)
