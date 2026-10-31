@@ -1,39 +1,39 @@
 ---
 type: Feature
-title: Article table of contents
-description: Readers scan article headings and jump to a section using static links.
+title: 記事の目次
+description: 読者が記事の見出しを見渡し、静的なリンクで節に移動できる。
 ---
 
-## Feature: Navigate an article by its headings
+## Feature: 見出しを使って記事内を移動する
 
-### Scenario: TOC-01 Scan the article structure
+### Scenario: TOC-01 記事の構成を見渡す
 
-- Given: an article has at least two body h2 or h3 headings
-- When: a reader opens the article
-- Then: a compact navigation labelled Table of contents appears after the header and before the body
-- And: its list follows document order and visually distinguishes h3 entries
+- Given: 記事本文にh2またはh3の見出しが2件以上ある
+- When: 読者が記事を開く
+- Then: ヘッダーと本文の間に「目次」とラベル付けされたコンパクトなナビゲーションが表示される
+- And: 一覧は文書内の順序に従い、h3の項目を視覚的に区別する
 
-### Scenario: TOC-02 Include only useful article outlines
+### Scenario: TOC-02 役立つ場合にだけ記事の目次を表示する
 
-- Given: any article using the shared post layout, including Profile
-- When: its body has zero or one eligible heading
-- Then: no table of contents or empty wrapper appears
-- And: the article title and h4 through h6 headings never become entries
+- Given: プロフィールを含む、共通の記事レイアウトを使う任意の記事がある
+- When: 本文の対象となる見出しが0件または1件である
+- Then: 目次も空の囲み要素も表示しない
+- And: 記事タイトルとh4〜h6の見出しは目次の項目に含めない
 
-### Scenario: TOC-03 Preserve rendered heading identity
+### Scenario: TOC-03 表示された見出しの識別情報を維持する
 
-- Given: Japanese, repeated, emphasized, code, or escaped-text headings
-- When: the table of contents is rendered
-- Then: readable labels are escaped text and links target the corresponding rendered heading IDs
-- And: the existing Markdown renderer remains the only source of heading IDs
+- Given: 日本語、重複、強調、コード、エスケープされたテキストを含む見出しがある
+- When: 目次を表示する
+- Then: 読みやすい表示名はエスケープされたテキストで、リンク先は対応する表示済みの見出しIDである
+- And: 見出しIDの生成元は既存のMarkdownレンダラーだけとする
 
-### Scenario: TOC-04 Follow links on desktop and mobile
+### Scenario: TOC-04 デスクトップとモバイルでリンクをたどる
 
-- Given: JavaScript is disabled and an article includes repeated headings and long labels
-- When: a reader follows a link or activates it with the keyboard
-- Then: navigation reaches the intended section and keyboard focus is visible
-- And: the table of contents fits within the article without horizontal overflow
+- Given: JavaScriptが無効で、記事に重複した見出しと長い表示名がある
+- When: 読者がリンクをたどるか、キーボードでリンクを選択する
+- Then: 目的の節に移動し、キーボードのフォーカスが見える
+- And: 目次が横方向にはみ出さず、記事の幅に収まる
 
-### Validation boundary
+### 検証範囲
 
-Dedicated fixture build tests and Playwright checks cover TOC-01 through TOC-04. Existing reader journeys protect metadata, tags, content, Home navigation, routes, and hosting noindex policy. Sticky navigation, active-section tracking, scripts, and per-post configuration are outside this feature.
+専用のフィクスチャのビルドテストとPlaywrightの検証でTOC-01〜TOC-04を確認します。既存の読者の操作で、メタデータ、タグ、コンテンツ、ホームのナビゲーション、ルート、ホスティング環境のnoindexポリシーを保護します。追従表示のナビゲーション、現在の節の追跡、スクリプト、記事ごとの設定は、この機能の範囲外です。

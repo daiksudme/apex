@@ -36,12 +36,12 @@ try {
       assert.equal(status, 200, `Main document HTTP ${status}`);
       await checkSharedNavigation();
     };
-    const navigation = page.getByRole('navigation', { name: 'Page navigation', exact: true });
+    const navigation = page.getByRole('navigation', { name: 'ページナビゲーション', exact: true });
     const main = page.getByRole('main');
     const checkSharedNavigation = async () => {
       await checkFeedDiscovery(page);
       assert.equal(await navigation.getByRole('link').count(), 4, 'NAV-01 exactly four site pages');
-      for (const [name, href] of [['Home', '/'], ['Posts', '/posts'], ['Tags', '/tags'], ['Profile', '/profile']]) {
+      for (const [name, href] of [['ホーム', '/'], ['記事一覧', '/posts'], ['タグ一覧', '/tags'], ['プロフィール', '/profile']]) {
         assert.equal(await navigation.getByRole('link', { name, exact: true }).getAttribute('href'), href, 'NAV-01 shared navigation');
         assert.equal(await page.getByRole('banner').getByRole('link', { name, exact: true }).count(), 0,
           'NAV-01 header does not duplicate page navigation');
@@ -52,7 +52,7 @@ try {
       for (const [name, href] of [
         ['GitHub', 'https://github.com/daiksud'], ['X', 'https://x.com/daiksud'], ['Zenn', 'https://zenn.dev/daiksud'],
       ]) {
-        await checkExternalLink(footer.getByRole('link', { name: `daiksud on ${name}`, exact: true }), href);
+        await checkExternalLink(footer.getByRole('link', { name: `${name} の daiksud`, exact: true }), href);
       }
     };
     const readArticle = async (title, href) => {
@@ -61,7 +61,7 @@ try {
       const article = main.getByRole('article', { name: title, exact: true });
       assert.ok(await article.isVisible(), 'POST-04 accessible article');
       await checkArticleStart(article, title, `cat ${decodeURIComponent(href.slice(1))}.md`);
-      assert.equal(await navigation.getByRole('link', { name: 'Posts', exact: true }).getAttribute('aria-current'), null,
+      assert.equal(await navigation.getByRole('link', { name: '記事一覧', exact: true }).getAttribute('aria-current'), null,
         'POST-01 index is not current page');
     };
     try {
@@ -80,24 +80,24 @@ try {
         await navigate(() => page.goto(new URL('/fixture-post', base).href));
         continue;
       }
-      const postsNavigation = navigation.getByRole('link', { name: 'Posts', exact: true });
+      const postsNavigation = navigation.getByRole('link', { name: '記事一覧', exact: true });
       await page.mouse.move(0, 0);
       const inactivePosts = await postsNavigation.screenshot({ animations: 'disabled' });
-      const about = page.getByRole('region', { name: 'About', exact: true });
+      const about = page.getByRole('region', { name: '自己紹介', exact: true });
       for (const domain of ['github.com', 'x.com', 'zenn.dev']) {
         await checkExternalLink(about.getByRole('link', { name: `${domain}/daiksud`, exact: true }), `https://${domain}/daiksud`);
       }
-      const commits = page.getByRole('region', { name: 'Recent Commits', exact: true });
-      for (const name of ['GitHub', 'View commit history on GitHub']) {
+      const commits = page.getByRole('region', { name: '最近のコミット', exact: true });
+      for (const name of ['GitHub', 'GitHubで変更履歴を見る']) {
         await checkExternalLink(commits.getByRole('link', { name, exact: true }), 'https://github.com/daiksudme/apex/commits/main/');
       }
-      const toc = page.getByRole('navigation', { name: 'On this page', exact: true });
-      const ls = page.getByRole('region', { name: 'Welcome', exact: true }).getByText('ls', { exact: true });
+      const toc = page.getByRole('navigation', { name: 'このページの内容', exact: true });
+      const ls = page.getByRole('region', { name: 'ようこそ', exact: true }).getByText('ls', { exact: true });
       assert.ok(await ls.isVisible(), 'NAV-03 table of contents is ls output');
       const commandBox = await ls.boundingBox();
       assert.ok(commandBox.y + commandBox.height <= (await toc.boundingBox()).y,
         'NAV-03 command precedes its output');
-      for (const [name, hash] of [['About', '#about'], ['Latest Posts', '#posts'], ['Tags', '#tags'], ['Recent Commits', '#commits']]) {
+      for (const [name, hash] of [['自己紹介', '#about'], ['最新の記事', '#posts'], ['タグ一覧', '#tags'], ['最近のコミット', '#commits']]) {
         const target = page.getByRole('region', { name, exact: true });
         assert.equal(await target.count(), 1, 'NAV-03 unique named destination');
         const link = toc.getByRole('link', { name, exact: true });
@@ -120,26 +120,26 @@ try {
         const destination = await target.boundingBox();
         assert.ok(destination.y >= 0 && destination.y < page.viewportSize().height, 'NAV-03 reader is near the destination');
       }
-      const skip = page.getByRole('link', { name: 'Skip to content', exact: true });
+      const skip = page.getByRole('link', { name: '本文へスキップ', exact: true });
       await skip.focus();
       await page.keyboard.press('Enter');
       assert.ok(await main.evaluate((element) => element === document.activeElement), 'NAV-03 skip to content');
       await checkHomeGeometry(page, width);
-      const aboutProfile = page.getByRole('region', { name: 'About', exact: true }).getByRole('link', { name: 'More about me' });
+      const aboutProfile = page.getByRole('region', { name: '自己紹介', exact: true }).getByRole('link', { name: 'プロフィールを見る' });
       await navigate(() => aboutProfile.click());
       assert.equal(new URL(page.url()).pathname, '/profile', 'NAV-02 About to Profile destination');
       const profileTitle = (await main.getByRole('heading', { level: 1 }).innerText()).trim();
       await readArticle(profileTitle, '/profile');
-      await navigate(() => navigation.getByRole('link', { name: 'Home', exact: true }).click());
+      await navigate(() => navigation.getByRole('link', { name: 'ホーム', exact: true }).click());
       assert.equal(new URL(page.url()).pathname, '/', 'NAV-01 Home destination');
-      await navigate(() => navigation.getByRole('link', { name: 'Profile', exact: true }).click());
+      await navigate(() => navigation.getByRole('link', { name: 'プロフィール', exact: true }).click());
       assert.equal(new URL(page.url()).pathname, '/profile', 'NAV-01 Profile destination');
       await readArticle(profileTitle, '/profile');
-      await navigate(() => navigation.getByRole('link', { name: 'Posts', exact: true }).click());
+      await navigate(() => navigation.getByRole('link', { name: '記事一覧', exact: true }).click());
       assert.equal(new URL(page.url()).pathname, '/posts', 'NAV-01 Posts destination');
-      assert.equal(await navigation.getByRole('link', { name: 'Posts', exact: true }).getAttribute('aria-current'), 'page');
+      assert.equal(await navigation.getByRole('link', { name: '記事一覧', exact: true }).getAttribute('aria-current'), 'page');
       const post = main.getByRole('listitem')
-        .filter({ has: page.getByRole('list', { name: 'Tags', exact: true }) })
+        .filter({ has: page.getByRole('list', { name: 'タグ一覧', exact: true }) })
         .first().getByRole('heading', { level: 2 }).getByRole('link');
       const postHref = await post.getAttribute('href');
       const postTitle = (await post.innerText()).trim();
@@ -150,7 +150,7 @@ try {
       await page.mouse.move(0, 0);
       assert.notDeepEqual(await postsNavigation.screenshot({ animations: 'disabled' }), inactivePosts,
         'POST-01 Posts has a visible selected state');
-      const tag = main.getByRole('list', { name: 'Tags', exact: true }).getByRole('link').first();
+      const tag = main.getByRole('list', { name: 'タグ一覧', exact: true }).getByRole('link').first();
       const tagHref = await tag.getAttribute('href');
       const tagName = (await tag.innerText()).trim();
       await navigate(() => tag.click());
@@ -163,10 +163,10 @@ try {
       assert.match(listedHref, /^\/[^/]+$/, 'TAG-01 root-level post route');
       await navigate(() => listedPost.click());
       await readArticle(listedTitle, listedHref);
-      assert.ok(await main.getByRole('list', { name: 'Tags', exact: true }).getByRole('link').count(), 'TAG-01 listed post tags');
-      await navigate(() => navigation.getByRole('link', { name: 'Tags', exact: true }).click());
+      assert.ok(await main.getByRole('list', { name: 'タグ一覧', exact: true }).getByRole('link').count(), 'TAG-01 listed post tags');
+      await navigate(() => navigation.getByRole('link', { name: 'タグ一覧', exact: true }).click());
       assert.equal(new URL(page.url()).pathname, '/tags', 'NAV-01 Tags destination');
-      assert.equal(await navigation.getByRole('link', { name: 'Tags', exact: true }).getAttribute('aria-current'), 'page');
+      assert.equal(await navigation.getByRole('link', { name: 'タグ一覧', exact: true }).getAttribute('aria-current'), 'page');
     } catch (error) {
       try {
         const output = process.env.ACCEPTANCE_ARTIFACT_DIR ?? 'test-results/browser';

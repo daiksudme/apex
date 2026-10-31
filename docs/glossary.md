@@ -1,35 +1,35 @@
 ---
 type: Reference
-title: Blog terminology
-description: Terms for post classification, subscription, and article navigation.
+title: ブログの用語
+description: 記事の分類、購読、記事内の移動に関する用語。
 ---
 
-## Post classification
+## 記事の分類
 
-| Term | Definition | Model boundary | Code name |
+| 用語 | 定義 | モデルの境界 | コード上の名前 |
 | --- | --- | --- | --- |
-| Tag definition | An identifier and display color available for posts. Definition order in YAML has no meaning | Blog post classification | TagDefinition |
-| Used tag | A tag definition referenced by at least one post | Blog post classification | deriveUsedTags |
-| Tag reference | A tag identifier specified by a post. An undefined identifier causes a build error | Blog post classification | posts.data.tags |
+| タグ定義 | 記事で利用できる識別子と表示色。YAML内の定義順に意味はない | ブログ記事の分類 | TagDefinition |
+| 使用中のタグ | 1件以上の記事から参照されているタグ定義 | ブログ記事の分類 | deriveUsedTags |
+| タグ参照 | 記事に指定されたタグの識別子。未定義の識別子はビルドエラーになる | ブログ記事の分類 | posts.data.tags |
 
-See [post tag definitions and references](behavior/tags.feature.md) for details.
+詳細は[記事のタグ定義と参照](behavior/tags.feature.md)を参照してください。
 
-## RSS subscription
+## RSS購読
 
-| Term | Definition | Model boundary | Code name |
+| 用語 | 定義 | モデルの境界 | コード上の名前 |
 | --- | --- | --- | --- |
-| RSS feed | Static subscription document containing site metadata and one item per listed post, including Profile | Blog subscription | `/rss.xml` |
-| Summary | Post description supplied to a feed reader, without the full article body | Blog subscription | `description` |
-| Feed identity | Stable identifier equal to the absolute production article URL; unchanged by summary or update-date edits | Blog subscription | `guid` |
-| Production origin | Selected `https://daiksud.me` origin used for absolute subscription URLs in every build environment | Site publishing | Astro `site` |
+| RSSフィード | サイトのメタデータと、プロフィールを含む一覧掲載記事ごとの項目を収録した静的な購読用ドキュメント | ブログの購読 | `/rss.xml` |
+| 要約 | フィードリーダーに渡す記事の説明。記事本文全体は含めない | ブログの購読 | `description` |
+| フィード内の識別子 | 本番の記事の絶対URLと同じ値を持つ、安定した識別子。要約や更新日を編集しても変わらない | ブログの購読 | `guid` |
+| 本番オリジン | すべてのビルド環境で購読用の絶対URLに使用する、設定済みの `https://daiksud.me` | サイトの公開 | Astroの `site` |
 
-See [RSS subscription and discovery](features/rss.feature.md) for details.
+詳細は[RSSの購読と検出](features/rss.feature.md)を参照してください。
 
-## Article navigation
+## 記事内の移動
 
-| Term | Definition | Model boundary | Code name |
+| 用語 | 定義 | モデルの境界 | コード上の名前 |
 | --- | --- | --- | --- |
-| Table of contents | Static list of article section links shown when at least two eligible headings exist | Article reading | `tocHeadings` |
-| Eligible heading | Body h2 or h3 heading; its label and ID come from the existing Markdown renderer | Article reading | `headings` |
+| 目次 | 対象となる見出しが2件以上ある場合に表示する、記事の節への静的なリンク一覧 | 記事の閲覧 | `tocHeadings` |
+| 対象となる見出し | 本文のh2またはh3見出し。表示名とIDは既存のMarkdownレンダラーが生成する | 記事の閲覧 | `headings` |
 
-See [article table of contents](features/table-of-contents.feature.md) for details.
+詳細は[記事の目次](features/table-of-contents.feature.md)を参照してください。

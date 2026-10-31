@@ -10,18 +10,18 @@ import { deriveUsedTags, orderTagsByPostCount } from '../../lib/tags';
 const content = await getBlogContent();
 const posts = sortPostsByPublishedAt(content.posts);
 const siteTags = orderTagsByPostCount(deriveUsedTags(posts, content.tagDefinitions), posts);
-const description = 'Posts about things I build, learn, and think about.';
+const description = 'つくったもの、学んだこと、考えたことを綴った記事の一覧です。';
 ---
 
-<SiteLayout title="Posts" description={description} siteTags={siteTags}>
+<SiteLayout title="記事一覧" description={description} siteTags={siteTags}>
   <div class="posts-index-page">
     <Pane
       class="posts-index-pane"
-      title="Posts"
+      title="記事一覧"
       headingId="posts-index-pane-heading"
       titleElement="h1"
     >
-      <span slot="meta" class="pane-label" lang="en">{posts.length} {posts.length === 1 ? 'post' : 'posts'}</span>
+      <span slot="meta" class="pane-label">{posts.length}件の記事</span>
       <header class="posts-index-intro">
         <div class="posts-index-commands" lang="en">
           <p class="command-line">

@@ -22,18 +22,18 @@ const tagGroups = siteTags.map((tag) => ({
   posts: sortedPosts.filter((post) => post.data.tags.includes(tag.slug)),
 }));
 
-const description = 'Browse posts by tag, with the latest posts for each tag.';
+const description = 'タグごとに新しい記事から探せます。';
 ---
 
-<SiteLayout title="Tags" description={description} siteTags={siteTags}>
+<SiteLayout title="タグ一覧" description={description} siteTags={siteTags}>
   <div class="tags-index-page">
     <Pane
       class="tags-index-pane"
-      title="Tags"
+      title="タグ一覧"
       headingId="tags-index-pane-heading"
       titleElement="h1"
     >
-      <span slot="meta" class="pane-label" lang="en">{tagGroups.length} {tagGroups.length === 1 ? 'tag' : 'tags'}</span>
+      <span slot="meta" class="pane-label">{tagGroups.length}個のタグ</span>
       <header class="tags-index-intro">
         <div class="tags-index-commands" lang="en">
           <p class="command-line">
@@ -54,13 +54,13 @@ const description = 'Browse posts by tag, with the latest posts for each tag.';
               <h2 class="tag-group-title" lang="en">
                 <a href={`#tag-${tag.slug}`}>#{tag.slug}</a>
               </h2>
-              <span class="tag-group-count" lang="en">
-                {tag.posts.length} {tag.posts.length === 1 ? 'post' : 'posts'}
+              <span class="tag-group-count">
+                {tag.posts.length}件の記事
               </span>
             </header>
 
             {tag.posts.length === 0 ? (
-              <p class="tag-group-empty" lang="en">No posts yet.</p>
+              <p class="tag-group-empty">記事はまだありません。</p>
             ) : (
               <ol class="tag-post-list">
                 {tag.posts.slice(0, 3).map((post) => (

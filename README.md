@@ -1,68 +1,70 @@
 ---
 type: Guide
-title: apex site build
-description: Overview of the Astro static site and how to check, test, and build it.
+title: apexサイトのビルド
+description: Astro製の静的サイトの概要と、チェック・テスト・ビルドの手順。
 ---
 
 ## apex
 
-This is a static site built with Astro. Its output directory is `dist/`. Cloudflare deployment settings are managed in [wrangler.jsonc](wrangler.jsonc).
+Astroで構築した静的サイトです。ビルドの出力先は `dist/` です。Cloudflareへのデプロイ設定は [wrangler.jsonc](wrangler.jsonc) で管理します。
 
-The production origin is <https://daiksud.me>, configured once through Astro's `site` setting. DNS and Cloudflare custom-domain setup are managed separately from this setting.
+サイトとドキュメントの主言語は日本語です。画面の案内、読み上げ用ラベル、ページ情報を日本語で揃え、ブランド名、コマンド、URL、設定キー、タグのslugは元の表記を維持します。
 
-### Home design terminology
+本番のオリジンは <https://daiksud.me> で、Astroの `site` 設定に集約しています。DNSとCloudflareのカスタムドメイン設定は、この設定とは別に管理します。
 
-Inspired by [tmux panes](https://github.com/tmux/tmux/wiki/Getting-Started#sessions-windows-and-panes) and [herdr panes](https://herdr.dev/docs/concepts/#pane), we call the divided content regions on Home **panes**. Use this term consistently in screen descriptions, design, CSS, and tests.
+### ホーム画面の設計用語
 
-| Name | Role | CSS class |
+[tmuxのペイン](https://github.com/tmux/tmux/wiki/Getting-Started#sessions-windows-and-panes)と[herdrのペイン](https://herdr.dev/docs/concepts/#pane)にならい、ホーム画面で区切られたコンテンツ領域を**ペイン**と呼びます。画面の説明、設計、CSS、テストでこの用語を統一して使います。
+
+| 名称 | 役割 | CSSクラス |
 | --- | --- | --- |
-| Sidebar pane | Navigation to the four site pages and Tags | `sidebar-pane` |
-| Welcome pane | Terminal-style introduction, site overview, and an on-page table of contents presented as ls command output | `welcome-pane` |
-| About pane | Avatar, name, location, short introduction, and a link to the detailed Profile | `about-pane` |
-| Posts pane | Latest posts; shows an empty state when no posts have been published | `posts-pane` |
-| Tags pane | Tags used in posts | `tags-pane` |
-| Commits pane | Link to the GitHub change history | `commits-pane` |
-| Footer pane | Closing prompt, GitHub / X / Zenn links, and copyright | `footer-pane` |
+| サイドバーペイン | サイト内の4ページへのナビゲーションとタグ | `sidebar-pane` |
+| ウェルカムペイン | ターミナル風の導入、サイトの概要、lsコマンドの出力を模したページ内目次 | `welcome-pane` |
+| 自己紹介ペイン | アバター、名前、所在地、短い自己紹介、詳しいプロフィールへのリンク | `about-pane` |
+| 記事ペイン | 最新記事。公開済みの記事がない場合は、その状態を表示 | `posts-pane` |
+| タグペイン | 記事で使用されているタグ | `tags-pane` |
+| コミットペイン | GitHubの変更履歴へのリンク | `commits-pane` |
+| フッターペイン | 締めのプロンプト、GitHub / X / Zennへのリンク、著作権表示 | `footer-pane` |
 
-The shared outer container is `pane`, and the shared inner elements are `pane-heading` / `pane-label` / `pane-link` / `pane-footnote`. Home consists of seven panes, all using `src/components/Pane.astro`. The Sidebar pane and Footer pane use `aside` / `footer` and occupy the site shell's `sidebar` / `footer` Grid Areas. The remaining five use `section` and are direct Grid Items of `dashboard`. The five panes in main display a shared header; only each pane's specific content is passed through its slot. The site Header is a top bar, distinct from the panes.
+共通の外側のコンテナは `pane`、内部の共通要素は `pane-heading` / `pane-label` / `pane-link` / `pane-footnote` です。ホーム画面は7つのペインで構成し、すべて `src/components/Pane.astro` を使います。サイドバーペインとフッターペインは `aside` / `footer` を使い、サイト共通レイアウトのGrid Areaである `sidebar` / `footer` に配置します。残りの5つは `section` を使い、`dashboard` 直下のGrid Itemとして配置します。メイン領域の5つのペインには共通のヘッダーを表示し、各ペイン固有の内容だけをスロットに渡します。サイト全体のヘッダーは上部バーであり、ペインとは区別します。
 
-The shared Navigation covers four pages: Home `/`, Posts `/posts`, Tags `/tags`, and Profile `/profile`. It appears in the Sidebar pane on desktop and in a site menu above the body on mobile. The header displays the brand and tagline. Welcome's on-page table of contents is presented as `ls` command output and links to About `#about`, Latest Posts `#posts`, Tags `#tags`, and Recent Commits `#commits`. The links display `#` to distinguish them from the current-page selection, and each destination can also receive keyboard focus. Shared GitHub / X / Zenn links appear in the Footer pane. See [site navigation and the Home table of contents](docs/features/navigation.feature.md) for detailed acceptance criteria.
+共通ナビゲーションの対象は、ホーム `/`、記事一覧 `/posts`、タグ一覧 `/tags`、プロフィール `/profile` の4ページです。デスクトップではサイドバーペインに、モバイルでは本文の上にあるサイトメニューに表示します。ヘッダーにはブランド名とタグラインを表示します。ウェルカムペインのページ内目次は `ls` コマンドの出力を模し、自己紹介 `#about`、最新記事 `#posts`、タグ `#tags`、最近のコミット `#commits` にリンクします。リンクには `#` を表示して現在のページの選択状態と区別し、リンク先にはキーボードフォーカスも移せます。共通のGitHub / X / Zennリンクはフッターペインに表示します。詳しい受入条件は[サイトナビゲーションとホーム画面の目次](docs/features/navigation.feature.md)を参照してください。
 
-These are design terms for the blog UI. They do not imply an actual terminal, session management, or pane splitting, movement, or resizing. Keep the site name `daiksud.me`, prompt `daiksud@kawasaki:~$`, and location `Kawasaki, Japan` unchanged.
+これらはブログUIの設計用語です。実際のターミナルやセッション管理、ペインの分割・移動・サイズ変更の機能を意味するものではありません。サイト名 `daiksud.me`、プロンプト `daiksud@kawasaki:~$`、所在地 `Kawasaki, Japan` はそのまま維持します。
 
-### Post pages
+### 記事ページ
 
-Place posts in `src/content/posts/<slug>.md`. Astro's Content Collection statically generates them at `/<slug>`. `/posts` lists all posts in descending order of `publishedAt`.
+記事は `src/content/posts/<slug>.md` に配置します。AstroのContent Collectionが `/<slug>` に静的ページを生成します。`/posts` にはすべての記事を `publishedAt` の降順で表示します。
 
-All individual posts use the shared post layout, omit the Post pane heading, and begin with the terminal line `cat <slug>.md`. The profile is generated at `/profile` from `profile.md` and displays `cat profile.md`. The profile follows the same date, tag, and listing rules as other posts. The Profile menu points to `/profile`; Home's short introduction appears in the About pane with a link to the detailed Profile.
+個別の記事はすべて共通の記事レイアウトを使います。記事ペインの見出しは表示せず、冒頭にターミナルのコマンド行 `cat <slug>.md` を表示します。プロフィールも `profile.md` から `/profile` に生成し、`cat profile.md` を表示します。プロフィールの日付、タグ、一覧への掲載には、ほかの記事と同じルールを適用します。プロフィールメニューのリンク先は `/profile` です。ホーム画面の短い自己紹介は自己紹介ペインに表示し、詳しいプロフィールへのリンクを添えます。
 
-To protect the existing index routes `/posts` and `/tags`, post names `posts` and `tags` cause a build error. No pages or redirects are generated at the old `/posts/<slug>` paths. See [individual post routes and shared presentation](docs/features/posts.feature.md) for detailed acceptance criteria.
+既存の一覧ページ `/posts` と `/tags` を保護するため、記事名が `posts` または `tags` の場合はビルドエラーにします。旧パス `/posts/<slug>` にはページもリダイレクトも生成しません。詳しい受入条件は[個別記事のルートと共通表示](docs/features/posts.feature.md)を参照してください。
 
-Frontmatter uses the following format:
+frontmatterは次の形式で記述します。
 
 ```yaml
 ---
-title: Post title
-description: Post summary
+title: 記事タイトル
+description: 記事の概要
 publishedAt: 2026-10-01
-updatedAt: 2026-10-02 # optional
+updatedAt: 2026-10-02 # 任意
 tags:
   - astro
   - development
 ---
 ```
 
-Use the Markdown filename directly as the `slug` rather than duplicating it in frontmatter. The layout renders the post title as `h1`, so do not use a `#` heading in the Markdown body. Start body headings at `##`.
+`slug` はfrontmatterに重複して記述せず、Markdownのファイル名をそのまま使います。記事タイトルはレイアウトが `h1` として表示するため、Markdown本文に `#` 見出しは使いません。本文の見出しは `##` から始めます。
 
-### RSS subscription
+### RSS購読
 
-The shared footer links to `/rss.xml`, and each page's HTML head advertises `https://daiksud.me/rss.xml` for feed discovery. The static feed contains summaries for the same posts as `/posts`, including Profile, newest publication date first. Article links and GUIDs use the production origin without trailing slashes, even in local and Preview builds. Editing a summary or update date preserves the original publication date and feed identity.
+共通フッターから `/rss.xml` にリンクし、各ページのHTMLのheadにもフィードを検出できるよう `https://daiksud.me/rss.xml` を記載します。静的フィードには、プロフィールを含む `/posts` と同じ記事の概要を、公開日の新しい順に掲載します。記事リンクとGUIDには、ローカルビルドやPreviewビルドでも本番のオリジンを使い、末尾のスラッシュを付けません。概要や更新日を編集しても、元の公開日とフィード上の識別情報は維持します。
 
-See [RSS subscription and discovery](docs/features/rss.feature.md) for acceptance criteria. The feed contains no full article HTML; readers follow its links to the original posts.
+受入条件は[RSSの購読と検出](docs/features/rss.feature.md)を参照してください。フィードには記事全文のHTMLを含めません。読者はフィードのリンクから元の記事を開きます。
 
-### Tag definitions
+### タグの定義
 
-Define available tags in the `catalog.tags` array in [src/content/tags.yaml](src/content/tags.yaml). Specify defined `slug` values in each post's frontmatter `tags`.
+使用できるタグは [src/content/tags.yaml](src/content/tags.yaml) の `catalog.tags` 配列に定義します。各記事のfrontmatterの `tags` には、定義済みの `slug` を指定します。
 
 ```yaml
 catalog:
@@ -73,25 +75,25 @@ catalog:
       tone: pink
 ```
 
-Both `slug` and `tone` are required. Defining the same `slug` more than once causes a build error. `tone` must be one of `blue` / `purple` / `green` / `pink` / `yellow` / `orange` / `cyan` / `muted`. Add a new tag to the definitions before using it in a post. If even one post uses an undefined tag, the build fails with an error identifying the post and tag.
+`slug` と `tone` はどちらも必須です。同じ `slug` を複数回定義するとビルドエラーになります。`tone` に指定できる値は `blue` / `purple` / `green` / `pink` / `yellow` / `orange` / `cyan` / `muted` です。新しいタグを記事で使う前に、タグ定義に追加してください。未定義のタグを使う記事が1つでもあれば、その記事とタグを示すエラーでビルドが失敗します。
 
-Home, the tag index, and the sidebar display only tags in use. Tags are ordered by descending number of posts referencing them, with ties broken by ascending `slug`. YAML array order does not affect display order.
+ホーム画面、タグ一覧、サイドバーには、使用中のタグだけを表示します。タグは参照する記事数の降順に並べ、記事数が同じ場合は `slug` の昇順に並べます。YAMLの配列での順序は表示順に影響しません。
 
-See [post tag definitions and references](docs/behavior/tags.feature.md) for detailed acceptance criteria and [blog terminology](docs/glossary.md) for definitions.
+詳しい受入条件は[記事のタグ定義と参照](docs/behavior/tags.feature.md)、用語の定義は[ブログの用語集](docs/glossary.md)を参照してください。
 
-### Japanese typography
+### 日本語の組版
 
-Japanese body text uses `word-break: auto-phrase`, preceded by `word-break: normal` as a fallback for unsupported browsers. Do not rely solely on automatic phrase detection; explicitly use `<wbr>` where an intended line-break opportunity exists.
+日本語の本文には `word-break: auto-phrase` を使い、未対応ブラウザ向けのフォールバックとして、その前に `word-break: normal` を指定します。自動的な文節の検出だけに頼らず、意図した位置で改行できるよう、必要に応じて `<wbr>` を明示します。
 
-Headings use `font-feature-settings: "palt"` to tighten character spacing and `text-wrap: balance`. Do not apply `balance` to body text. Normal body text uses the pane's available width directly; do not set a fixed `max-width` without a specific reason.
+見出しには、文字間を詰める `font-feature-settings: "palt"` と `text-wrap: balance` を使います。本文には `balance` を適用しません。通常の本文はペインの利用可能な幅をそのまま使い、明確な理由なしに固定の `max-width` を設定しません。
 
-Reference: https://developer.chrome.com/blog/css-i18n-features
+参考: https://developer.chrome.com/blog/css-i18n-features
 
-### Testing and building
+### テストとビルド
 
-Use Bun `1.4.4` for dependency installation, Astro development and builds, and tests. Versions are pinned in [mise.toml](mise.toml) and [package.json](package.json), with dependencies locked in [bun.lock](bun.lock). Astro commands explicitly select the Bun runtime. Type checking still uses `astro check` so it covers `.astro` files.
+依存関係のインストール、Astroの開発・ビルド、テストにはBun `1.4.4` を使います。バージョンは [mise.toml](mise.toml) と [package.json](package.json) で固定し、依存関係は [bun.lock](bun.lock) で固定しています。AstroのコマンドではBunランタイムを明示的に選択します。型チェックには引き続き `astro check` を使い、`.astro` ファイルも対象にします。
 
-Node.js `26.10.0` remains available for Wrangler. Keep [.node-version](.node-version), which Cloudflare Workers Builds reads, aligned with the Node.js pin in `mise.toml`. Run Wrangler with its Node.js shebang; do not force the Bun runtime for deployment commands. The deployment recorder separately uses the GitHub runner's preinstalled Node.js for its trusted, dependency-free URL helper.
+Wrangler用にNode.js `26.10.0` も使用します。Cloudflare Workers Buildsが読み取る [.node-version](.node-version) は、`mise.toml` で固定したNode.jsのバージョンと揃えてください。WranglerはNode.jsのshebangに従って実行し、デプロイコマンドにBunランタイムを強制しないでください。デプロイ記録用ワークフローはこれとは別に、GitHubランナーにプリインストールされたNode.jsを使って、信頼済みで外部依存のないURLヘルパーを実行します。
 
 ```sh
 mise trust mise.toml
@@ -102,15 +104,15 @@ mise exec -- bun run build
 mise exec -- bun run test:unit
 ```
 
-Start the local Astro development server with `mise exec -- bun run dev`. Use `bun run check` and `bun run test` to invoke this project's scripts: Bun's built-in `check` and `test` commands have their own behavior.
+ローカルのAstro開発サーバーは `mise exec -- bun run dev` で起動します。このプロジェクトのスクリプトを実行するときは `bun run check` と `bun run test` を使ってください。Bun組み込みの `check` と `test` は、それぞれ異なる動作をします。
 
-Tests protect public contracts with inputs and observable results. Unit tests cover dates, titles, post ordering, and content-backed tags. Fixture integration builds valid content and checks build-time diagnostics for duplicate tags, undefined tags in older posts, and route collisions. Its browser check observes readable Markdown, metadata, post/tag ordering, and navigation from isolated fixture content. Tests do not freeze source text, YAML shape, raw HTML/CSS, classes, generated identifiers, or internal invocation sequences. Acceptance runners, browser assertions, and smoke checks have no self-tests.
+テストは、入力と観測可能な結果を通じて公開インターフェースの契約を守ります。単体テストでは日付、タイトル、記事の並び順、コンテンツに基づくタグを検証します。フィクスチャを使う結合テストでは、有効なコンテンツをビルドし、タグの重複、古い記事にある未定義タグ、ルートの衝突に対するビルド時の診断を検証します。そのブラウザ検証では、隔離したフィクスチャコンテンツを使い、Markdownの読みやすさ、メタデータ、記事・タグの並び順、ナビゲーションを確認します。ソースの文面、YAMLの構造、生のHTML/CSS、クラス、生成された識別子、内部の呼び出し順序はテストで固定しません。受入テストの実行処理、ブラウザのアサーション、スモークチェック自体を対象にしたテストは設けません。
 
-### Browser acceptance
+### ブラウザでの受入テスト
 
-English reader scenarios live in [`docs/features`](docs/features). Author tag definitions and invalid-reference rules remain in [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md). `bun run test` runs the public unit and fixture integration suite with Bun's test runner. `test:unit` runs fast public-interface tests; `test:integration` runs [`tests/content.build.test.mjs`](tests/content.build.test.mjs), including its real fixture browser checks. Install Chromium before running `test`, `test:integration`, or acceptance. `test:ci` separately tests Preview selection and rejection from provider/deployment inputs and returned results.
+読者向けのシナリオは [`docs/features`](docs/features) に日本語で記載します。執筆者向けのタグ定義と不正な参照のルールは [`docs/behavior/tags.feature.md`](docs/behavior/tags.feature.md) に記載します。`bun run test` はBunのテストランナーで、公開インターフェースの単体テストとフィクスチャを使う結合テストを実行します。`test:unit` は公開インターフェースに対する高速なテスト、`test:integration` は [`tests/content.build.test.mjs`](tests/content.build.test.mjs) と、その中で実際にブラウザを使うフィクスチャ検証を実行します。`test`、`test:integration`、受入テストを実行する前にChromiumをインストールしてください。`test:ci` は別のテストで、プロバイダーとデプロイの情報を入力し、返される結果からPreviewの選択・拒否を検証します。
 
-Playwright is pinned in the lockfile. Install its matching Chromium shell before running acceptance:
+Playwrightのバージョンはロックファイルで固定しています。受入テストの前に、対応するChromium shellをインストールしてください。
 
 ```sh
 mise exec -- bun run test:ci
@@ -120,44 +122,44 @@ mise exec -- bun run test:acceptance
 mise exec -- bun run test:acceptance "$PREVIEW_URL"
 ```
 
-On Linux, use Playwright's `install --with-deps --only-shell chromium` when browser system dependencies are absent. The acceptance command builds local `dist` before validation, then runs fixture integration tests and local reader journeys at 1440, 1100, 961, 960, and 390 pixels. Supplying the recorder-matched `PREVIEW_URL` adds the same journeys against the deployed Preview. PR CI must supply that URL; main-push acceptance uses the local build.
+Linuxでブラウザに必要なシステム依存関係がない場合は、Playwrightの `install --with-deps --only-shell chromium` を使います。受入テストのコマンドは検証前にローカルの `dist` をビルドし、フィクスチャを使う結合テストと、画面幅1440・1100・961・960・390ピクセルでのローカルの読者操作を実行します。デプロイ記録と一致する `PREVIEW_URL` を指定すると、デプロイ済みPreviewに対しても同じ操作を検証します。PRのCIではこのURLの指定が必須です。mainへのpush時の受入テストではローカルビルドを使います。
 
-Acceptance runs once and fails directly on an execution error or failed expectation. Command logs are retained under `test-results/acceptance`; browser failures retain screenshots and traces in the corresponding local/Preview directory. Fixture content diagnostics use the `fixtures-populated` and `fixtures-empty` directories; site journeys use `local` and `preview`. The geometry helper is called by the reader journey; it has no separate server or browser command. Visible focus and selection compare the current rendered states without golden screenshots. See the [acceptance scenarios](docs/features/acceptance.feature.md).
+受入テストは1回だけ実行し、実行エラーや期待値との不一致があればそのまま失敗にします。コマンドログは `test-results/acceptance` 以下に保存します。ブラウザ検証が失敗した場合は、対応するローカルまたはPreviewのディレクトリにスクリーンショットとトレースを保存します。フィクスチャコンテンツの診断には `fixtures-populated` と `fixtures-empty`、サイトの操作シナリオには `local` と `preview` の各ディレクトリを使います。レイアウトの寸法を調べるヘルパーは読者の操作シナリオから呼び出し、専用のサーバーやブラウザコマンドは設けません。フォーカスと選択状態の見え方は、基準画像を使わず、その時点で描画した状態どうしを比較します。[受入シナリオ](docs/features/acceptance.feature.md)を参照してください。
 
-The initial smoke check is separate: [`test:smoke`](scripts/ci/smoke.mjs) requests only `/` on the matched Preview and requires HTTP 200 with a bounded request timeout. It does not follow redirects or inspect content.
+初期のスモークチェックは別に実行します。[`test:smoke`](scripts/ci/smoke.mjs) は一致するPreviewの `/` だけにリクエストし、制限時間内にHTTP 200が返ることを要求します。リダイレクトの追跡やコンテンツの検査は行いません。
 
-### Cloudflare Workers Builds settings
+### Cloudflare Workers Buildsの設定
 
-In the Worker's **Settings → Build**, set the build command to `bun run build`. Keep the existing production deploy and Preview commands and their Wrangler behavior; those commands run Wrangler under Node.js. A previously configured pnpm build command must be updated when switching to Bun.
+Workerの **Settings → Build** で、ビルドコマンドを `bun run build` に設定します。本番デプロイとPreviewの既存コマンド、およびWranglerの動作は維持します。これらのコマンドはNode.jsでWranglerを実行します。以前pnpmのビルドコマンドを設定していた場合は、Bunへの移行時に更新が必要です。
 
-Workers Builds selects the dependency installer from [bun.lock](bun.lock) and the Bun version from `packageManager` in [package.json](package.json). The build command is an external Cloudflare setting: changing repository files does not update it. Check both the build settings and the actual Preview build log when applying this migration. See Cloudflare's [build configuration](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/) and [build image/version selection](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/).
+Workers Buildsは [bun.lock](bun.lock) から依存関係のインストーラーを選び、[package.json](package.json) の `packageManager` からBunのバージョンを選びます。ビルドコマンドはCloudflare側の外部設定なので、リポジトリのファイルを変更しても更新されません。移行時には、ビルド設定と実際のPreviewビルドログの両方を確認してください。Cloudflareの[ビルド設定](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/)と[ビルドイメージ・バージョンの選択](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/)を参照してください。
 
-### Codex approval automation
+### Codexの承認自動化
 
-[The approval workflow](.github/workflows/approve-codex-review.yml) copies the [approved agents source revision](https://github.com/daiksud/agents/blob/2e0067890bc39f94a8ff9580bd58ba093a3a9428/.github/workflows/approve-codex-review.yml) (blob `67e6e65c5a13e9cf87eaa2240a52dc583d88fd9f`), not its moving `main` branch. When `chatgpt-codex-connector[bot]` creates or edits a Codex Review Summary comment on a PR, it fetches that Summary again and requires both Code Review and Security Review to show `Completed`. It approves with `gh pr review --approve` only when the same Codex account also has a thumbs-up reaction on the PR body; other users' reactions do not count.
+[承認ワークフロー](.github/workflows/approve-codex-review.yml)は、agentsの更新され続ける `main` ではなく、[承認済みのソースリビジョン](https://github.com/daiksud/agents/blob/2e0067890bc39f94a8ff9580bd58ba093a3a9428/.github/workflows/approve-codex-review.yml)（blob `67e6e65c5a13e9cf87eaa2240a52dc583d88fd9f`）をコピーしたものです。`chatgpt-codex-connector[bot]` がPRのCodex Review Summaryコメントを作成・編集すると、そのSummaryを再取得し、Code ReviewとSecurity Reviewの両方が `Completed` であることを確認します。同じCodexアカウントによる👍リアクションがPR本文に付いている場合だけ、`gh pr review --approve` で承認します。ほかのユーザーによるリアクションは対象にしません。
 
-If both reviews are complete but the thumbs-up is missing, it retries every 30 seconds, at most six times after the initial check (180 seconds of waiting). Each retry rereads the Summary and stops without approval if either review is incomplete. Exhausting the polling window exits normally; an API or approval error fails the run. Another Summary creation or edit is needed to trigger another check after the polling window ends.
+両方のレビューが完了していても👍がない場合は、初回の確認後、30秒ごとに最大6回再確認します（待機時間は180秒）。再確認のたびにSummaryを読み直し、どちらかのレビューが未完了なら承認せず終了します。待機時間の上限に達した場合は正常終了し、APIや承認処理でエラーが発生した場合は実行を失敗にします。待機時間が終わった後に再び確認するには、Summaryの新規作成または編集が必要です。
 
-As in that source revision, the workflow does not compare reviewed commits with HEAD, filter reactions by timestamp, or withdraw existing approvals. An older completed Summary and existing thumbs-up can therefore approve newer code; freshness is deliberately not guaranteed. The workflow does not check out PR code, wait for CI, or merge PRs. Required CI, Preview, CodeQL, and review protections remain separate and unchanged.
+コピー元のリビジョンと同様に、レビュー対象のコミットとHEADの比較、リアクションの時刻による絞り込み、既存の承認の取り消しは行いません。そのため、古い完了済みSummaryと既存の👍によって新しいコードが承認される可能性があります。レビューの鮮度は意図的に保証していません。このワークフローはPRのコードをチェックアウトせず、CIの完了待ちやPRのマージも行いません。必須CI、Preview、CodeQL、レビューの保護ルールは、それぞれ独立して維持します。
 
-### PR validation
+### PRの検証
 
-The [PR workflow](.github/workflows/ci-pr.yml) follows five jobs: `draft` → `commit-stage` → `ready` → `acceptance-stage` → `pass`. Every run first attempts Draft, validates the source and its matched Preview, marks the PR Ready, and runs local and Preview acceptance. The final required `pass` job reports whether the preceding stages succeeded. It performs no additional validation or PR state changes. Opening, updating, reopening, and editing a PR trigger the workflow.
+[PRワークフロー](.github/workflows/ci-pr.yml)は、`draft` → `commit-stage` → `ready` → `acceptance-stage` → `pass` の5つのジョブで進みます。各実行では、最初にPRをDraftに変更する処理を試み、ソースとそれに対応するPreviewを検証した後、PRをReadyに変更してローカルとPreviewの受入テストを実行します。最後の必須ジョブ `pass` は、それまでのステージが成功したかを報告します。追加の検証やPRの状態変更は行いません。PRの作成、更新、再オープン、編集でワークフローが実行されます。
 
-Draft and Ready use `gh pr ready --undo` and `gh pr ready` with write permissions scoped to those jobs. No HEAD freshness checks or fork/Dependabot-specific exceptions are applied. If a state change is denied, dependent jobs do not run and `pass` fails. A failed commit-stage leaves the PR Draft; failed acceptance leaves it Ready with a failed `pass` check. The workflow never returns a failed PR to Draft as recovery.
+DraftとReadyへの変更には `gh pr ready --undo` と `gh pr ready` を使い、書き込み権限はそれらのジョブだけに付与します。HEADが最新かの確認や、fork・Dependabot専用の例外処理は行いません。状態変更が拒否されると、依存するジョブは実行されず、`pass` は失敗します。commit-stageが失敗した場合、PRはDraftのままです。受入テストが失敗した場合、PRはReadyのままで `pass` が失敗します。失敗したPRを復旧のためにDraftへ戻す処理はありません。
 
-The [main-push workflow](.github/workflows/ci-push.yml) continues to run `commit-stage` → `acceptance-stage` → `pass` without PR operations. Both workflows reuse the [commit-stage](.github/actions/commit-stage/action.yml) and [acceptance-stage](.github/actions/acceptance-stage/action.yml) composites. On PRs, commit-stage retains read access to Checks and Deployments so it can find the matched Preview URL, which acceptance-stage consumes. See the [lifecycle scenarios](docs/features/pr-validation.feature.md).
+[mainへのpush用ワークフロー](.github/workflows/ci-push.yml)は、PRを操作せず、引き続き `commit-stage` → `acceptance-stage` → `pass` を実行します。両方のワークフローで、[commit-stage](.github/actions/commit-stage/action.yml)と[acceptance-stage](.github/actions/acceptance-stage/action.yml)の複合アクションを再利用します。PRでは、対応するPreview URLを検索できるようcommit-stageにChecksとDeploymentsの読み取り権限を付与し、そのURLをacceptance-stageに渡します。[ライフサイクルのシナリオ](docs/features/pr-validation.feature.md)を参照してください。
 
-Ready enables an explicit user or coding-agent AI review request once current source validation succeeds; GitHub may automatically request CODEOWNERS review as a side effect. The workflow itself does not request AI review. Ready is not permission to merge: required `pass`, Preview deployment, CodeQL, up-to-date checks, approvals, and resolved threads remain enforced independently.
+Readyになると、現在のソースの検証が成功した状態で、ユーザーまたはコーディングエージェントがAIレビューを明示的に依頼できます。Readyへの変更に伴い、GitHubがCODEOWNERSへ自動的にレビューを依頼する場合があります。ワークフロー自体はAIレビューを依頼しません。Readyはマージの許可を意味しません。必須の `pass`、Previewデプロイ、CodeQL、最新状態のチェック、承認、スレッドの解決は、それぞれ独立した条件として引き続き適用されます。
 
-To restart all state transitions after failed validation, use **Re-run all jobs** or push a new commit; rerunning only failed jobs is not a complete lifecycle restart. PR-scoped concurrency cancels superseded runs, but cancellation is not atomic with Draft/Ready mutations and cannot guarantee a terminal state. There is no custom run-history, retry, or state-assertion engine. Candidate jobs remain read-only, check out without retained credentials, and invoke the shared validation composites; mutation jobs execute only `gh` commands without checking out candidate code.
+検証失敗後に状態遷移を最初からやり直す場合は、**Re-run all jobs** を使うか、新しいコミットをpushしてください。失敗したジョブだけの再実行では、ライフサイクル全体はやり直されません。PR単位のconcurrency設定で古い実行をキャンセルしますが、キャンセルとDraft/Readyの変更はアトミックではなく、最終状態を保証できません。独自の実行履歴管理、リトライ、状態検証の仕組みは設けません。候補コードを検証するジョブは読み取り専用とし、認証情報を保持せずにチェックアウトして共通の検証用複合アクションを呼び出します。状態を変更するジョブは、候補コードをチェックアウトせず、`gh` コマンドだけを実行します。
 
-### Recording Cloudflare deployments
+### Cloudflareデプロイの記録
 
-When Cloudflare Workers Builds' `Workers Builds: apex` Check succeeds, the [synchronization workflow](.github/workflows/record-cloudflare-deployment.yml) records a GitHub Deployment and a `success` Status for that Check's SHA. If the Check Suite's branch is `main`, it records `production`; for any other nonempty branch, it records `preview`. Cloudflare Workers Builds performs the actual deployment.
+Cloudflare Workers Buildsの `Workers Builds: apex` Checkが成功すると、[同期ワークフロー](.github/workflows/record-cloudflare-deployment.yml)が、そのCheckのSHAに対してGitHub Deploymentと `success` Statusを記録します。Check Suiteのブランチが `main` なら `production`、それ以外の空でないブランチ名なら `preview` として記録します。実際のデプロイはCloudflare Workers Buildsが行います。
 
-The recorder and PR Preview matcher share [one alias helper](scripts/ci/preview-url.mjs), following the [Workers SDK branch-alias rules](https://github.com/cloudflare/workers-sdk/blob/08d694cc8ed69ffe264405a342f1ae0f233d7792/packages/deploy-helpers/src/deploy/helpers/preview-alias.ts). It normalizes punctuation and case, and truncates long aliases with the provider's original-branch hash suffix. Branches without a valid leading-letter alias fail clearly. The recorder loads only this helper from the trusted default-branch workflow commit, without installing dependencies or checking out PR candidate code.
+デプロイの記録処理とPRのPreview照合処理は、[共通のエイリアスヘルパー](scripts/ci/preview-url.mjs)を使い、[Workers SDKのブランチエイリアス規則](https://github.com/cloudflare/workers-sdk/blob/08d694cc8ed69ffe264405a342f1ae0f233d7792/packages/deploy-helpers/src/deploy/helpers/preview-alias.ts)に従います。記号と大文字・小文字を正規化し、長いエイリアスはプロバイダーと同じ方法で元のブランチ名から生成したハッシュを末尾に付けて短縮します。英字から始まる有効なエイリアスを作れないブランチでは、明確なエラーで失敗します。記録処理では、信頼済みのデフォルトブランチ上のワークフローコミットからこのヘルパーだけを読み込みます。依存関係のインストールやPRの候補コードのチェックアウトは行いません。
 
-If synchronization fails, inspect the execution logs of the GitHub Actions workflow named “Record Cloudflare deployment” to determine whether the failure occurred while fetching the Check Suite, creating the Deployment, or creating its Status. The initial version records only successful Checks and does not automatically repair duplicates from reruns or incomplete Deployments left by partial failures.
+同期が失敗した場合は、GitHub Actionsの「Record Cloudflare deployment」ワークフローの実行ログを確認し、Check Suiteの取得、Deploymentの作成、Statusの作成のどこで失敗したかを調べます。初期版は成功したCheckだけを記録し、再実行による重複や、途中の失敗で残った不完全なDeploymentを自動修復しません。
 
-The `default` Ruleset for `main` requires a successful Deployment to `preview` before merging. To roll back only this condition, remove `preview` from Required deployments in GitHub Settings → Rules → Rulesets → `default`, while keeping all other rules intact.
+`main` に対する `default` Rulesetでは、マージ前に `preview` へのDeploymentが成功していることを要求します。この条件だけを戻す場合は、GitHubの Settings → Rules → Rulesets → `default` にあるRequired deploymentsから `preview` を削除し、ほかのルールはすべて維持してください。

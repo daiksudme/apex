@@ -9,16 +9,16 @@ const siteTags = orderTagsByPostCount(deriveUsedTags(posts, tagDefinitions), pos
 ---
 
 <SiteLayout
-  title="Page not found"
-  description="This page could not be found. Return to Home or browse all posts."
+  title="ページが見つかりません"
+  description="このページは見つかりませんでした。ホームに戻るか、記事一覧からお探しください。"
   siteTags={siteTags}
 >
   <Pane as="section" class="not-found-pane" ariaLabelledBy="not-found-title">
-    <h1 id="not-found-title">404 — Page not found</h1>
-    <p>The page you are looking for does not exist or has moved.</p>
-    <nav aria-label="Page recovery">
-      <a href="/">Home</a>
-      <a href="/posts">All posts</a>
+    <h1 id="not-found-title">404 — ページが見つかりません</h1>
+    <p>お探しのページは存在しないか、移動した可能性があります。</p>
+    <nav aria-label="ページの移動先">
+      <a href="/">ホーム</a>
+      <a href="/posts">記事一覧</a>
     </nav>
   </Pane>
 </SiteLayout>

@@ -1,49 +1,49 @@
 ---
 type: Feature
-title: Site navigation and the Home table of contents
-description: Acceptance criteria for distinguishing page navigation, navigation within Home, and external links.
+title: サイトのナビゲーションとホームの目次
+description: ページ間の移動、ホーム内の移動、外部リンクを区別するための受入条件。
 ---
 
-## Feature: Readers navigate to the intended page and Home section
+## Feature: 読者が目的のページやホーム内の節に移動する
 
-Readers can distinguish navigation between site pages, the table of contents within Home, and external link destinations.
+読者は、サイトのページ間の移動、ホーム内の目次、外部リンクの移動先を区別できます。
 
-### Rule: Shared navigation identifies the four site pages
+### Rule: 共通ナビゲーションでサイトの4ページを示す
 
-#### Scenario: NAV-01 Choose pages and external links
+#### Scenario: NAV-01 ページと外部リンクを選ぶ
 
-- Given: the reader is viewing any page on the site
-- Then: Home, Posts, Tags, and Profile link to `/`, `/posts`, `/tags`, and `/profile`, respectively
-- And: they appear in the sidebar on desktop and in the site menu above the body on mobile
-- And: the header does not duplicate the same navigation
-- And: shared GitHub, X, and Zenn links are available from the footer
-- And: external links in the introduction and the link to the change history are preserved
+- Given: 読者がサイト内のいずれかのページを表示している
+- Then: ホーム、記事一覧、タグ一覧、プロフィールがそれぞれ `/`、`/posts`、`/tags`、`/profile` にリンクしている
+- And: デスクトップではサイドバーに、モバイルでは本文の上にあるサイトメニューに表示する
+- And: ヘッダーには同じナビゲーションを重複して表示しない
+- And: 共通のGitHub、X、Zennリンクをフッターから利用できる
+- And: 自己紹介内の外部リンクと変更履歴へのリンクを維持する
 
-### Rule: Home's short introduction is read in About, and the detailed introduction in Profile
+### Rule: ホームの短い紹介は「自己紹介」で、詳しい紹介は「プロフィール」で読む
 
-#### Scenario: NAV-02 Navigate from the short introduction to the details
+#### Scenario: NAV-02 短い紹介から詳しい内容へ移動する
 
-- Given: the reader is viewing Home
-- Then: the short introduction is labeled About and retains the existing amount of introductory text
-- And: About links to the detailed article at `/profile`
-- And: the detailed Profile retains its existing body and shared post presentation
+- Given: 読者がホームを表示している
+- Then: 短い紹介には「自己紹介」というラベルを付け、既存の紹介文の分量を維持する
+- And: 自己紹介から `/profile` の詳しい記事にリンクする
+- And: 詳しいプロフィールでは既存の本文と共通の記事表示を維持する
 
-### Rule: On this page links to headings within Home
+### Rule: 「このページの内容」からホーム内の見出しにリンクする
 
-#### Scenario: NAV-03 Use the table of contents with a keyboard
+#### Scenario: NAV-03 キーボードで目次を使う
 
-- Given: Home's Welcome contains an ls command and an on-page table of contents presented as its output
-- Then: About, Latest Posts, Tags, and Recent Commits reference `#about`, `#posts`, `#tags`, and `#commits`, respectively
-- And: each destination is unique, brings the reader near the corresponding heading, and can receive focus
-- And: the table of contents displays `#` to distinguish its links from the global navigation's selection state
-- And: links can be operated with Tab and Enter, with visible focus and the existing skip-to-content link available
+- Given: ホームの「ようこそ」にlsコマンドと、その出力として表現したページ内目次がある
+- Then: 自己紹介、最新の記事、タグ一覧、最近のコミットがそれぞれ `#about`、`#posts`、`#tags`、`#commits` を参照する
+- And: 各リンク先は一意で、対応する見出しの近くへ移動でき、フォーカスを受け取れる
+- And: 目次のリンクには `#` を表示し、サイト全体のナビゲーションの選択状態と区別する
+- And: TabとEnterでリンクを操作でき、フォーカスが見え、既存の本文へのスキップリンクも使える
 
-### Scenario: NAV-04 Read Home at desktop and mobile widths
+### Scenario: NAV-04 デスクトップ幅とモバイル幅でホームを読む
 
-- Given: Home has Welcome, About, Latest Posts, Tags, and Recent Commits panes
-- When: the reader uses widths 1440, 1100, 961, 960, and 390 pixels
-- Then: desktop pane pairs have matching row edges
-- And: mobile panes retain their reading order without overlap or horizontal overflow
-- And: pane content is not clipped
+- Given: ホームには「ようこそ」「自己紹介」「最新の記事」「タグ一覧」「最近のコミット」のペインがある
+- When: 読者が1440、1100、961、960、390ピクセルの幅で表示する
+- Then: デスクトップでは対になるペインの行の上下端が揃う
+- And: モバイルでは重なりや横方向のはみ出しがなく、ペインの読む順序を維持する
+- And: ペインの内容が切れない
 
-Browser verification traces NAV-01 through NAV-04 in [reader.browser.mjs](../../tests/acceptance/reader.browser.mjs). It uses local generated content and the deployed Preview; failures retain a screenshot and Chromium trace.
+[reader.browser.mjs](../../tests/acceptance/reader.browser.mjs) のブラウザー検証でNAV-01〜NAV-04を確認します。ローカルで生成したコンテンツとデプロイ済みのPreviewを使用し、失敗時はスクリーンショットとChromiumのトレースを保存します。

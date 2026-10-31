@@ -11,6 +11,7 @@ export async function GET(context: APIContext) {
     description: site.description,
     site: context.site!,
     trailingSlash: false,
+    customData: '<language>ja</language>',
     items: sortPostsByPublishedAt(posts).map((post) => ({
       title: post.data.title,
       description: post.data.description,

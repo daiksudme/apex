@@ -1,43 +1,35 @@
 ---
 type: Feature
-title: Site-branded not-found page
-description: Readers can recover from a missing page while the server returns HTTP 404.
+title: サイト共通デザインの404ページ
+description: サーバーがHTTP 404を返しながら、読者が存在しないページから別のページへ移動できる。
 ---
 
-## Feature: Site-branded not-found page
+## Feature: サイト共通デザインの404ページ
 
-The static `404.html` uses the shared site layout and the existing Cloudflare
-`404-page` handling. It is not an article and is not added to posts, tags, RSS
-items, or the main navigation.
+静的な `404.html` では、共通のサイトレイアウトと既存のCloudflareの `404-page` 処理を使用します。記事として扱わず、記事一覧、タグ、RSS項目、メインナビゲーションには追加しません。
 
 ```gherkin
-Scenario: NOTFOUND-01 Open a missing page
-  Given I request a nonexistent top-level or deeply nested page
-  Then the response status is HTTP 404
-  And the requested URL is not redirected
-  And the page explains that the page could not be found
-  And the existing shared navigation and hosted noindex policy remain intact
+Scenario: NOTFOUND-01 存在しないページを開く
+  Given 存在しないトップレベルのページ、または深い階層のページを要求する
+  Then 応答のステータスはHTTP 404である
+  And 要求したURLはリダイレクトされない
+  And ページが見つからなかったことを画面で説明する
+  And 既存の共通ナビゲーションとホスティング環境のnoindexポリシーを維持する
 
-Scenario: NOTFOUND-02 Recover without JavaScript
-  Given JavaScript is disabled
-  And I open a deeply nested missing URL at mobile or desktop width
-  Then the shared styles load and the page fits the viewport
-  And Home and All posts are available with visible keyboard focus
-  When I activate either recovery link
-  Then its existing destination opens on the same host in the same tab
+Scenario: NOTFOUND-02 JavaScriptなしで別のページへ移動する
+  Given JavaScriptが無効になっている
+  And 深い階層にある存在しないURLをモバイル幅またはデスクトップ幅で開く
+  Then 共通スタイルが読み込まれ、ページがビューポート内に収まる
+  And 「ホーム」と「記事一覧」を利用でき、キーボードのフォーカスが見える
+  When いずれかの移動用リンクを選択する
+  Then 既存のリンク先が同じホストの同じタブで開く
 
-Scenario: NOTFOUND-03 Reject a conflicting article slug
-  Given an article is named 404.md
-  When I build the site
-  Then the build fails with an actionable route-conflict error
+Scenario: NOTFOUND-03 競合する記事slugを拒否する
+  Given 記事のファイル名が404.mdである
+  When サイトをビルドする
+  Then 対処方法が分かるルート競合エラーでビルドが失敗する
 ```
 
-Coverage: `tests/acceptance/not-found.browser.mjs` runs through the existing reader
-acceptance entry point against local fixture builds and the matched deployed
-Preview. The route-collision fixture in `tests/content.build.test.mjs` covers the
-reserved slug. Existing post, tag, and feed checks protect their collection rules.
+検証範囲: `tests/acceptance/not-found.browser.mjs` は、既存の読者向け受入テストの入口から、ローカルのフィクスチャビルドと照合済みのデプロイされたPreviewに対して実行します。`tests/content.build.test.mjs` のルート競合フィクスチャで予約済みslugを検証します。既存の記事・タグ・フィードの検証で、各コレクションのルールを保護します。
 
-The local acceptance server serves the generated error document with HTTP 404;
-this does not by itself establish Cloudflare behavior. Preview checks request
-actually missing URLs and verify the response status, body, headers, and links.
-DNS/custom-domain activation and release operations are outside this feature.
+ローカルの受入テストサーバーは、生成したエラードキュメントをHTTP 404で返します。ただし、この検証だけではCloudflareの動作を確認したことにはなりません。Previewの検証では、実際に存在しないURLを要求し、応答ステータス、本文、ヘッダー、リンクを確認します。DNSやカスタムドメインの有効化、リリース操作はこの機能の範囲外です。

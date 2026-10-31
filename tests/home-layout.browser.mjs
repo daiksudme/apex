@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 export async function checkHomeGeometry(page, width) {
   await page.evaluate(() => document.fonts.ready);
   if (width === 1440 || width === 390) {
-    const menu = await page.getByRole('complementary', { name: 'Site menu', exact: true }).boundingBox();
+    const menu = await page.getByRole('complementary', { name: 'サイトメニュー', exact: true }).boundingBox();
     const main = await page.getByRole('main').boundingBox();
     assert.ok(width === 1440 ? menu.x + menu.width <= main.x + 1 : menu.y + menu.height <= main.y + 1,
       'NAV-01 menu is beside desktop content and above mobile content');
   }
-  const names = ['Welcome', 'About', 'Latest Posts', 'Tags', 'Recent Commits'];
+  const names = ['ようこそ', '自己紹介', '最新の記事', 'タグ一覧', '最近のコミット'];
   const boxes = {};
   for (const name of names) {
     const region = page.getByRole('region', { name, exact: true });
@@ -20,7 +20,7 @@ export async function checkHomeGeometry(page, width) {
     assert.ok(await region.evaluate((element) => element.scrollHeight <= element.clientHeight + 1), `${name} content is not clipped`);
   }
   if (width > 960) {
-    for (const [left, right] of [['Welcome', 'About'], ['Latest Posts', 'Tags']]) {
+    for (const [left, right] of [['ようこそ', '自己紹介'], ['最新の記事', 'タグ一覧']]) {
       assert.ok(Math.abs(boxes[left].top - boxes[right].top) <= 1 && Math.abs(boxes[left].bottom - boxes[right].bottom) <= 1,
         `${left}/${right} row edges at ${width}px`);
     }

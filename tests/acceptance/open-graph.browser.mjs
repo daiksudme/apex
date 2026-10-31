@@ -10,7 +10,7 @@ export async function checkSharedPreview(page, base) {
   }, await response.text());
   assert.deepEqual(metadata.urls, ['https://daiksud.me/profile'], 'OG-01 production URL excludes query, fragment and serving origin');
   assert.deepEqual(metadata.images, ['https://daiksud.me/og-image.png'], 'OG-02 shared production image URL');
-  assert.deepEqual(metadata.alternatives, ['daiksud.me with a blue terminal cursor and the words Build. Learn. Write. Repeat. on a dark background.'], 'OG-02 descriptive image alternative');
+  assert.deepEqual(metadata.alternatives, ['暗い背景に青いターミナルカーソルと daiksud.me、Build. Learn. Write. Repeat. の文字を配置した画像。'], 'OG-02 descriptive image alternative');
   const image = await page.request.get(new URL('/og-image.png', base).href);
   assert.equal(image.status(), 200, 'OG-02 shared image is served');
   if (new URL(base).protocol === 'https:') {

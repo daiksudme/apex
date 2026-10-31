@@ -1,6 +1,6 @@
 const timeZone = 'Asia/Tokyo';
 
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
+const dateFormatter = new Intl.DateTimeFormat('ja-JP', {
   dateStyle: 'long',
   timeZone,
 });

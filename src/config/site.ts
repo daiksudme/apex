@@ -1,7 +1,7 @@
 export const site = {
   name: 'daiksud.me',
-  description: 'A blog about experiments with technology, personal projects, and what I learn and think along the way.',
-  tagline: 'Build. Learn. Write. Repeat.',
+  description: '技術の実験や個人プロジェクト、そこから学んだこと・考えたことを綴るブログです。',
+  tagline: 'つくる。学ぶ。書く。繰り返す。',
   repositoryUrl: 'https://github.com/daiksudme/apex',
   commitsUrl: 'https://github.com/daiksudme/apex/commits/main/',
 } as const;
@@ -10,7 +10,7 @@ export const profile = {
   name: 'daiksud',
   host: 'kawasaki',
   location: 'Kawasaki, Japan',
-  role: 'Developer / Builder / Writer',
+  role: 'ソフトウェア開発・ものづくり・執筆',
   githubUrl: 'https://github.com/daiksud',
   githubLabel: 'github.com/daiksud',
   xUrl: 'https://x.com/daiksud',
@@ -18,13 +18,13 @@ export const profile = {
   zennUrl: 'https://zenn.dev/daiksud',
   zennLabel: 'zenn.dev/daiksud',
   avatarUrl: 'https://avatars.githubusercontent.com/u/155234749?v=4&s=320',
-  bio: 'I’m exploring technology and creativity to build a better tomorrow.',
+  bio: 'よりよい明日をつくるために、技術と創造性の可能性を探っています。',
 } as const;
 
-// Global navigation uses canonical site routes.
+// 共通ナビゲーションには各ページの正規のパスを使う。
 export const navigation = [
-  { label: 'Home', href: '/', icon: 'home' },
-  { label: 'Posts', href: '/posts', icon: 'posts' },
-  { label: 'Tags', href: '/tags', icon: 'tags' },
-  { label: 'Profile', href: '/profile', icon: 'profile' },
+  { label: 'ホーム', href: '/', icon: 'home' },
+  { label: '記事一覧', href: '/posts', icon: 'posts' },
+  { label: 'タグ一覧', href: '/tags', icon: 'tags' },
+  { label: 'プロフィール', href: '/profile', icon: 'profile' },
 ] as const;
