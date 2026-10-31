@@ -28,7 +28,7 @@ const isActiveNavigationItem = (href: string) =>
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="ja">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -38,42 +38,42 @@ const isActiveNavigationItem = (href: string) =>
     <meta property="og:type" content={type} />
     <meta property="og:url" content={new URL(pathname, Astro.site)} />
     <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="ja_JP" />
     <meta property="og:image" content={new URL('/og-image.png', Astro.site)} />
-    <meta property="og:image:alt" content="daiksud.me with a blue terminal cursor and the words Build. Learn. Write. Repeat. on a dark background." />
+    <meta property="og:image:alt" content="暗い背景に青いターミナルカーソルと daiksud.me、Build. Learn. Write. Repeat. の文字を配置した画像。" />
     <meta name="theme-color" content="#1a1b26" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title={site.name} href={new URL('/rss.xml', Astro.site)} />
     <title>{pageTitle}</title>
   </head>
   <body>
-    <a class="skip-link" href="#main-content">Skip to content</a>
+    <a class="skip-link" href="#main-content">本文へスキップ</a>
     <header class="site-header">
-      <a class="brand" href="/" aria-label={`${site.name} home`}>
+      <a class="brand" href="/" aria-label={`${site.name} のホーム`}>
         {site.name}<span class="cursor" aria-hidden="true"></span>
       </a>
-      <p class="header-tagline" lang="en">{site.tagline}</p>
+      <p class="header-tagline">{site.tagline}</p>
     </header>
 
-    <Pane as="aside" class="sidebar-pane" ariaLabel="Site menu">
-      <nav class="sidebar-nav" aria-label="Page navigation">
+    <Pane as="aside" class="sidebar-pane" ariaLabel="サイトメニュー">
+      <nav class="sidebar-nav" aria-label="ページナビゲーション">
         {navigation.map((item) => (
           <a
             href={item.href}
-            lang="en"
             class:list={{ 'is-active': isActiveNavigationItem(item.href) }}
             aria-current={isCurrentNavigationItem(item.href) ? 'page' : undefined}
           ><Icon name={item.icon} /><span>{item.label}</span></a>
         ))}
       </nav>
-      <nav class="sidebar-tags" aria-label="Tags">
-        <p class="eyebrow" lang="en"><span aria-hidden="true">// </span>Tags</p>
+      <nav class="sidebar-tags" aria-label="タグ一覧">
+        <p class="eyebrow"><span aria-hidden="true">// </span>タグ一覧</p>
         <ul lang="en">
           {siteTags.map((tag) => (
             <li><a href={`/tags#tag-${tag.slug}`} data-tone={tag.tone}><span class="tag-dot" aria-hidden="true"></span>#{tag.slug}</a></li>
           ))}
         </ul>
       </nav>
-      <p class="sidebar-note" lang="en">A personal blog about technology, creativity, and a better tomorrow.</p>
+      <p class="sidebar-note">技術と創造性、よりよい明日について綴る個人ブログ。</p>
     </Pane>
 
     <main id="main-content" tabindex="-1">
@@ -81,12 +81,12 @@ const isActiveNavigationItem = (href: string) =>
     </main>
 
     <Pane as="footer" class="footer-pane">
-      <p class="footer-command" lang="en"><TerminalPrompt /> <span>echo <span class="string">&quot;Thank you for visiting!&quot;</span></span></p>
+      <p class="footer-command"><TerminalPrompt /> <span>echo <span class="string">&quot;訪問ありがとうございます！&quot;</span></span></p>
       <div class="footer-meta">
-        <div class="footer-links" lang="en">
-          <a href={profile.githubUrl} target="_blank" rel="noopener" aria-label="daiksud on GitHub"><BrandLogo name="github" size={20} /><span>GitHub</span></a>
-          <a href={profile.xUrl} target="_blank" rel="noopener" aria-label="daiksud on X"><BrandLogo name="x" size={20} /><span>X</span></a>
-          <a href={profile.zennUrl} target="_blank" rel="noopener" aria-label="daiksud on Zenn"><BrandLogo name="zenn" size={20} /><span>Zenn</span></a>
+        <div class="footer-links">
+          <a href={profile.githubUrl} target="_blank" rel="noopener" aria-label="GitHub の daiksud"><BrandLogo name="github" size={20} /><span lang="en">GitHub</span></a>
+          <a href={profile.xUrl} target="_blank" rel="noopener" aria-label="X の daiksud"><BrandLogo name="x" size={20} /><span lang="en">X</span></a>
+          <a href={profile.zennUrl} target="_blank" rel="noopener" aria-label="Zenn の daiksud"><BrandLogo name="zenn" size={20} /><span lang="en">Zenn</span></a>
           <a href="/rss.xml">RSS</a>
         </div>
         <p>&copy; {year} {site.name}</p>
