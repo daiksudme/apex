@@ -112,6 +112,14 @@ jobs:
               lines = item.get("body", "").splitlines()
               return bool(lines) and lines[0].strip().lower() == "@codex review" and item.get("created_at") == item.get("updated_at")
 
+          def setup_advisory(item):
+              # Ignore only this observed, unedited informational notice. Unknown or
+              # augmented Codex messages must still withhold approval, not disappear.
+              return (item.get("body") == (
+                  "To use Codex here, [create an environment for this repo]"
+                  "(https://chatgpt.com/codex/cloud/settings/environments)."
+              ) and item.get("created_at") == item.get("updated_at"))
+
           def receipt_kind(item):
               body = item.get("body", "")
               if not body.startswith(RECEIPT + "\n"):
@@ -148,9 +156,9 @@ jobs:
               previous = timestamp(requests[-2].get("created_at")) if len(requests) > 1 else timestamp(summary.get("created_at"))
               require(previous != start, "review cycle boundaries have ambiguous timestamps")
               if previous < start:
-                  prior = [c for c in trusted if previous < timestamp(c.get("created_at")) < start]
+                  prior = [c for c in trusted if previous < timestamp(c.get("created_at")) < start and not setup_advisory(c)]
                   require(sorted(receipt_kind(c) or "unknown" for c in prior) == ["code", "security"], "overlapping or unidentifiable review requests")
-              current = [c for c in trusted if timestamp(c.get("created_at")) > start]
+              current = [c for c in trusted if timestamp(c.get("created_at")) > start and not setup_advisory(c)]
               require(sorted(receipt_kind(c) or "unknown" for c in current) == ["code", "security"], "missing, duplicate or contradictory completion receipts")
               for receipt in current:
                   kind = receipt_kind(receipt)
