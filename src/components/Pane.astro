@@ -42,7 +42,7 @@ const Title = titleElement;
   {...rest}
 >
   {title && headingId && (
-    <header class="pane-heading" lang="en">
+    <header class="pane-heading">
       <Title id={headingId} class="pane-title"><span class="chevron" aria-hidden="true">›</span>{title}</Title>
       <slot name="meta" />
     </header>
