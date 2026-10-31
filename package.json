@@ -13,7 +13,7 @@
     "check": "bun run --bun astro check",
     "build": "bun run --bun astro build",
     "test": "bun test ./src ./tests/content.build.test.mjs",
-    "test:ci": "bun test ./tests/ci/preview.test.mjs",
+    "test:ci": "bun test ./tests/ci/preview.test.mjs && python3 -B -m unittest discover -s tests/ci -p 'test_*.py'",
     "test:smoke": "bun scripts/ci/smoke.mjs",
     "test:unit": "bun test ./src",
     "test:integration": "bun test ./tests/content.build.test.mjs",
